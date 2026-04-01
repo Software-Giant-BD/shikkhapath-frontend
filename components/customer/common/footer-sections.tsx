@@ -9,16 +9,16 @@ export function FinalCtaSection() {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-5 md:grid-cols-2">
           <CtaCard
-            title="Become a Client"
-            description="We are committed to maintain highest standard of quality work. Tell us about your project. We can build the project together."
-            actionLabel="Contact Us"
-            href="#contact"
+            title="Submit A Story Tip"
+            description="Share verified campus events, policy updates, or public-interest leads with our newsroom team."
+            actionLabel="Send Tip"
+            href="/contact-us"
           />
           <CtaCard
-            title="Join Our Team"
-            description="Work with passionate people who are experts in their field. We love what we do and how we serve the community."
-            actionLabel="Join the Team"
-            href="#contact"
+            title="Join Contributor Network"
+            description="Writers, student reporters, and subject experts can contribute analysis and on-ground stories."
+            actionLabel="Apply Now"
+            href="/careers"
           />
         </div>
       </div>
@@ -43,7 +43,7 @@ function CtaCard({
       <p className="mt-3 text-slate-700">{description}</p>
       <a
         href={href}
-        className="mt-5 inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#1f556a] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#174a5d]"
+        className="mt-5 inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#c79a1d] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#b38716]"
       >
         {actionLabel}
         <ArrowRight className="size-4" />
@@ -54,23 +54,23 @@ function CtaCard({
 
 export function SiteFooter() {
   return (
-    <footer id="contact" className="relative overflow-hidden bg-[#163a4f] py-12 text-slate-200">
+    <footer id="contact" className="relative overflow-hidden bg-[#1f1f1f] py-12 text-slate-200">
       <div className="pointer-events-none absolute inset-0 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-size-[26px_26px]" />
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-lg font-semibold text-white">American Structural Engineering</p>
-            <p className="text-sm text-slate-300">Consulting, inspection, and infrastructure delivery support.</p>
+            <p className="text-lg font-semibold text-white">Shikkhapath News</p>
+            <p className="text-sm text-slate-300">Trusted reporting on education, campus life, policy, and careers.</p>
           </div>
           <Link
             href="/contact-us"
-            className="inline-flex h-10 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-[#163a4f] transition-all hover:bg-slate-100 shadow-lg hover:-translate-y-0.5"
+            className="inline-flex h-10 items-center justify-center rounded-full bg-[#c79a1d] px-6 text-sm font-bold text-white transition-all hover:bg-[#b38716] shadow-lg hover:-translate-y-0.5"
           >
-            Contact Us
+            Contact Editorial Desk
           </Link>
         </div>
         <Separator className="my-6 bg-white/15" />
-        <p className="text-sm text-slate-400">© 2026 ASE. Reimagined with a modern, accessible front-end architecture.</p>
+        <p className="text-sm text-slate-400">© 2026 Shikkhapath News. All rights reserved.</p>
       </div>
     </footer>
   )
