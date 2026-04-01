@@ -23,6 +23,7 @@ const navLinks = [
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCompactDesktopHeader, setIsCompactDesktopHeader] = useState(false);
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -53,30 +54,69 @@ export function SiteHeader() {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const onScroll = () => {
+      setIsCompactDesktopHeader(window.scrollY > 72);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-white">
-        <div className="hidden border-b border-[#e0b22f] md:block">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-end gap-5 px-4 py-2.5 text-sm text-slate-700 sm:px-6 lg:px-8">
-            <p>বুধবার, ১ এপ্রিল ২০২৬</p>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
-              aria-label="Search"
+        <div
+          className={`hidden border-[#e0b22f] transition-all duration-200 md:block ${
+            isCompactDesktopHeader ? "max-h-0 overflow-hidden border-b-0 opacity-0" : "max-h-28 border-b opacity-100"
+          }`}
+        >
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
+            <Link
+              href="/"
+              className="inline-flex items-center transition-opacity hover:opacity-90"
             >
-              <Search className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
-              aria-label="Toggle theme"
-            >
-              <Moon className="h-5 w-5" />
-            </button>
+              <Image
+                src="/shikkhapath-logo.svg"
+                alt="Shikkhapath News Portal"
+                width={780}
+                height={130}
+                priority
+                className="h-10 w-auto"
+              />
+            </Link>
+
+            <div className="flex items-center gap-5 text-sm text-slate-700">
+              <p>বুধবার, ১ এপ্রিল ২০২৬</p>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
+                aria-label="Toggle theme"
+              >
+                <Moon className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[#d5a726] hover:text-[#b38716]"
+              >
+                <Globe className="h-4 w-4" /> Eng
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="border-b border-[#e0b22f]">
+        <div className="border-b border-[#e0b22f] md:hidden">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <button
               onClick={toggleMenu}
@@ -92,48 +132,58 @@ export function SiteHeader() {
               )}
             </button>
 
-          <Link
-            href="/"
-            className="inline-flex items-center transition-opacity hover:opacity-90 md:mx-auto"
-          >
-            <Image
-              src="/shikkhapath-logo.svg"
-              alt="Shikkhapath News Portal"
-              width={780}
-              height={130}
-              priority
-              className="h-10 w-auto sm:h-12"
-            />
-          </Link>
-
-          <button
-            type="button"
-            className="hidden items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[#d5a726] hover:text-[#b38716] md:inline-flex"
-          >
-            <Globe className="h-4 w-4" /> Eng
-          </button>
-        </div>
+            <Link
+              href="/"
+              className="inline-flex items-center transition-opacity hover:opacity-90"
+            >
+              <Image
+                src="/shikkhapath-logo.svg"
+                alt="Shikkhapath News Portal"
+                width={780}
+                height={130}
+                priority
+                className="h-10 w-auto"
+              />
+            </Link>
+          </div>
         </div>
 
         <div className="hidden border-b border-[#e0b22f] md:block">
-          <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-1 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
+          <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+            {isCompactDesktopHeader ? (
+              <Link
+                href="/"
+                className="inline-flex shrink-0 items-center transition-opacity hover:opacity-90"
+              >
+                <Image
+                  src="/shikkhapath-logo.svg"
+                  alt="Shikkhapath News Portal"
+                  width={780}
+                  height={130}
+                  className="h-8 w-auto"
+                />
+              </Link>
+            ) : null}
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`inline-flex shrink-0 items-center gap-1 px-2 py-1 text-[22px] leading-none font-semibold transition-colors ${
-                    isActive ? "text-[#b38716]" : "text-slate-900 hover:text-[#b38716]"
-                  }`}
-                >
-                  {link.label}
-                  {link.hasDropdown ? <ChevronDown className="h-4 w-4" /> : null}
-                </Link>
-              );
-            })}
-          </nav>
+            <nav className="flex min-w-0 flex-1 items-center justify-between gap-1 overflow-x-auto">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`inline-flex shrink-0 items-center gap-1 px-2 py-1 text-[22px] leading-none font-semibold transition-colors ${
+                      isActive ? "text-[#b38716]" : "text-slate-900 hover:text-[#b38716]"
+                    }`}
+                  >
+                    {link.label}
+                    {link.hasDropdown ? <ChevronDown className="h-4 w-4" /> : null}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </div>
       </header>
 
