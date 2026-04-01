@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: "my-next-app",
+    name: "shikkhapath-news",
     script: "npm",
     args: "start",
     env: {
