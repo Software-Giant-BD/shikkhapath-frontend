@@ -86,7 +86,7 @@ export default function Home() {
   return (
     <div className="ase-page">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <main className="mx-auto w-full max-w-screen-2xl px-3 py-6 sm:px-4 lg:px-5 lg:py-8">
         <script
           type="application/ld+json"
           // JSON-LD helps search engines understand the site as a news publisher.

@@ -6,7 +6,7 @@ import Link from "next/link"
 export function FinalCtaSection() {
   return (
     <section id="careers" className="py-20 sm:py-24">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
         <div className="grid gap-5 md:grid-cols-2">
           <CtaCard
             title="Submit A Story Tip"
@@ -56,7 +56,7 @@ export function SiteFooter() {
   return (
     <footer id="contact" className="relative overflow-hidden bg-[#1f1f1f] py-12 text-slate-200">
       <div className="pointer-events-none absolute inset-0 opacity-20 bg-[linear-gradient(to_right,rgba(255,255,255,0.35)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.35)_1px,transparent_1px)] bg-size-[26px_26px]" />
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
         <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-lg font-semibold text-white">Shikkhapath News</p>

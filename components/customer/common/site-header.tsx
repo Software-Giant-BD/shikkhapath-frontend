@@ -73,7 +73,7 @@ export function SiteHeader() {
             isCompactDesktopHeader ? "max-h-0 overflow-hidden border-b-0 opacity-0" : "max-h-28 border-b opacity-100"
           }`}
         >
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-3 py-2.5 sm:px-4 lg:px-5">
             <Link
               href="/"
               className="inline-flex items-center transition-opacity hover:opacity-90"
@@ -115,7 +115,7 @@ export function SiteHeader() {
         </div>
 
         <div className="border-b border-[#e0b22f] md:hidden">
-          <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-3 py-4 sm:px-4 lg:px-5">
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center rounded-md border border-slate-300 p-2 text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#b38716] focus:outline-none md:hidden"
@@ -147,7 +147,7 @@ export function SiteHeader() {
         </div>
 
         <div className="hidden border-b border-[#e0b22f] md:block">
-          <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center gap-4 px-3 py-3 sm:px-4 lg:px-5">
             {isCompactDesktopHeader ? (
               <Link
                 href="/"
