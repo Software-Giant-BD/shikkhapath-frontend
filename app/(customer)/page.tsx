@@ -1,76 +1,26 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import Image from "next/image"
 
 import { SiteFooter } from "@/components/customer/common/footer-sections"
 import { SiteHeader } from "@/components/customer/common/site-header"
-
-const featuredStory = {
-  title: "Education Budget 2026 Prioritizes Public University Research and Student Aid",
-  excerpt:
-    "The latest budget framework introduces a larger grant pool for public universities, expanded digital classrooms, and performance-based scholarships for rural learners.",
-  category: "Top Story",
-  publishedAt: "April 1, 2026",
-  readTime: "6 min read",
-}
-
-const topHeadlines = [
-  {
-    title: "National curriculum board confirms competency-based exams from next session",
-    category: "Education",
-    readTime: "4 min",
-  },
-  {
-    title: "Dhaka campus innovation fair draws record participation from 42 universities",
-    category: "Campus",
-    readTime: "3 min",
-  },
-  {
-    title: "Career readiness programs now mandatory in final-year undergraduate courses",
-    category: "Career",
-    readTime: "5 min",
-  },
-]
-
-const latestNews = [
-  "Public libraries begin free evening coding sessions for college students",
-  "Higher Education Council launches national internship placement tracker",
-  "Teachers' federation requests fast-track recruitment for science faculties",
-  "New data shows 18% rise in women enrollment in engineering departments",
-  "Regional campus transport support expanded for low-income students",
-]
-
-const categoryBlocks = [
-  {
-    name: "National",
-    story: "University autonomy bill reaches final review in parliament",
-    summary: "Policy analysts expect stronger governance and transparent research funding.",
-  },
-  {
-    name: "Campus",
-    story: "Student journalists network launches verification desk for local reports",
-    summary: "The initiative aims to improve fact-checking skills and responsible reporting.",
-  },
-  {
-    name: "International",
-    story: "South Asian education summit outlines cross-border scholarship roadmap",
-    summary: "Delegates highlight mobility, shared credits, and digital credential standards.",
-  },
-]
+import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
+import { HeroSection } from "@/components/customer/home/hero-section"
+import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
+import { TabSectionBlock } from "@/components/customer/home/tab-section-block"
+import { NewsletterSection } from "@/components/customer/home/newsletter-section"
 
 export const metadata: Metadata = {
-  title: "Shikkhapath News | Education, Campus & National Headlines",
+  title: "শিক্ষাপথ | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ",
   description:
-    "Modern Bangla-first news portal homepage with breaking updates, featured stories, category coverage, and student-focused reporting.",
-  alternates: {
-    canonical: "/",
-  },
+    "শিক্ষাপথ — শিক্ষা, ক্যাম্পাস, কর্মসংস্থান, জাতীয় ও আন্তর্জাতিক সর্বশেষ সংবাদ পড়ুন।",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Shikkhapath News",
-    description:
-      "Follow trusted coverage on education, campus, career, and national developments.",
+    title: "শিক্ষাপথ",
+    description: "বিশ্বস্ত শিক্ষা ও ক্যাম্পাস সংবাদ পোর্টাল।",
     type: "website",
     url: "/",
-    siteName: "Shikkhapath News",
+    siteName: "শিক্ষাপথ",
   },
 }
 
@@ -78,150 +28,202 @@ export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsMediaOrganization",
-    name: "Shikkhapath News",
+    name: "শিক্ষাপথ",
     url: "https://shikkhapath.news",
-    publishingPrinciples: "https://shikkhapath.news/editorial-policy",
   }
 
   return (
-    <div className="ase-page">
+    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <SiteHeader />
-      <main className="mx-auto w-full max-w-screen-2xl px-3 py-6 sm:px-4 lg:px-5 lg:py-8">
-        <script
-          type="application/ld+json"
-          // JSON-LD helps search engines understand the site as a news publisher.
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      <BreakingTicker />
+
+      <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
+        {/* Banner ad slot */}
+        <div className="my-3 flex h-20 items-center justify-center overflow-hidden rounded bg-[#e8e8e8]">
+          <span className="text-sm text-slate-400">[ বিজ্ঞাপন — ৯৭০×৯০ ]</span>
+        </div>
+
+        <HeroSection />
+
+        {/* শিক্ষাঙ্গন section */}
+        <NewsSectionBlock
+          title="শিক্ষাঙ্গন"
+          href="/news?category=education"
+          featured={{
+            image: "https://picsum.photos/seed/edu1/600/380",
+            category: "শিক্ষাঙ্গন",
+            title: "বিশ্ববিদ্যালয়গুলোতে নতুন শিক্ষাবর্ষে ভর্তির সংখ্যা বাড়ছে",
+            excerpt: "এবার ভর্তি পরীক্ষায় অংশ নিচ্ছেন রেকর্ড সংখ্যক শিক্ষার্থী, জানাল শিক্ষা মন্ত্রণালয়।",
+          }}
+          sideItems={[
+            { image: "https://picsum.photos/seed/edu2/300/200", title: "ঢাকা বিশ্ববিদ্যালয়ে আন্তর্জাতিক সম্মেলন অনুষ্ঠিত", time: "২ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/edu3/300/200", title: "শিক্ষার্থীদের জন্য বিশেষ বৃত্তি ঘোষণা দিল সরকার", time: "৩ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/edu4/300/200", title: "নতুন কারিকুলামে পাঠ্যক্রম পরিবর্তনের উদ্যোগ", time: "৫ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/edu5/300/200", title: "কলেজে ভর্তি প্রক্রিয়া ডিজিটালে রূপান্তর হচ্ছে", time: "৭ ঘণ্টা আগে" },
+          ]}
         />
 
-        <section className="rounded-2xl border border-slate-200/70 bg-white/85 p-3 shadow-sm backdrop-blur sm:p-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <span className="inline-flex w-fit rounded-full bg-red-600 px-3 py-1 text-xs font-semibold tracking-wide text-white uppercase">
-              Breaking
-            </span>
-            <p className="text-sm text-slate-700 sm:text-base">
-              Admission guidance portal opens for HSC graduates; application deadline extended to April 15.
-            </p>
+        {/* ভর্তি পরীক্ষা section */}
+        <NewsSectionBlock
+          title="ভর্তি পরীক্ষা"
+          href="/news?category=admission"
+          featured={{
+            image: "https://picsum.photos/seed/adm1/600/380",
+            category: "ভর্তি পরীক্ষা",
+            title: "মেডিকেল ভর্তি পরীক্ষার সময়সূচি প্রকাশ, পরীক্ষা ১৫ মে",
+            excerpt: "স্বাস্থ্য শিক্ষা অধিদপ্তর জানিয়েছে এবার দেশের সকল সরকারি মেডিকেল কলেজে একযোগে ভর্তি পরীক্ষা হবে।",
+          }}
+          sideItems={[
+            { image: "https://picsum.photos/seed/adm2/300/200", title: "বুয়েটে ভর্তি পরীক্ষার আবেদন শুরু ১০ এপ্রিল থেকে", time: "১ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/adm3/300/200", title: "জাতীয় বিশ্ববিদ্যালয়ে অনার্স ভর্তির বিজ্ঞপ্তি", time: "৪ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/adm4/300/200", title: "ইঞ্জিনিয়ারিং ভর্তি পরীক্ষায় এবার কেন্দ্রীয় প্রশ্নপত্র", time: "৬ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/adm5/300/200", title: "কৃষি বিশ্ববিদ্যালয়ে ভর্তির নতুন নির্দেশিকা জারি", time: "৮ ঘণ্টা আগে" },
+          ]}
+        />
+
+        {/* ভিডিও section */}
+        <section className="mt-5">
+          <div className="mb-2 flex items-center justify-between border-b-2 border-[#c79a1d] pb-1">
+            <h2 className="text-base font-bold text-slate-900 uppercase tracking-wide">ভিডিও</h2>
+            <Link href="/news?category=video" className="text-xs font-semibold text-[#b38716] hover:underline">আরও দেখুন »</Link>
           </div>
-        </section>
-
-        <section className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-          <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg shadow-slate-200/65">
-            <div className="h-64 bg-[linear-gradient(125deg,#15445d_0%,#2d7389_58%,#e2af44_100%)] sm:h-80" />
-            <div className="space-y-4 p-5 sm:p-7">
-              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                <span className="rounded-full bg-slate-900 px-2.5 py-1 text-white">{featuredStory.category}</span>
-                <span>{featuredStory.publishedAt}</span>
-                <span>{featuredStory.readTime}</span>
-              </div>
-              <h1 className="text-3xl leading-tight font-bold text-slate-900 sm:text-4xl">
-                <Link href="/news/education-budget-2026" className="hover:text-[#b38716]">
-                  {featuredStory.title}
-                </Link>
-              </h1>
-              <p className="max-w-3xl text-slate-700 sm:text-lg">{featuredStory.excerpt}</p>
-            </div>
-          </article>
-
-          <aside className="space-y-4">
-            {topHeadlines.map((headline) => (
-              <article
-                key={headline.title}
-                className="rounded-2xl border border-slate-200 bg-white/90 p-4 transition-colors hover:border-[#d4a727]"
-              >
-                <p className="text-xs font-semibold tracking-wide text-[#b38716] uppercase">{headline.category}</p>
-                <h2 className="mt-2 text-lg leading-tight font-semibold text-slate-900">
-                  <Link href="/news" className="hover:text-[#b38716]">
-                    {headline.title}
-                  </Link>
-                </h2>
-                <p className="mt-2 text-sm text-slate-500">{headline.readTime} read</p>
-              </article>
-            ))}
-          </aside>
-        </section>
-
-        <section className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 sm:p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-900">Latest News</h2>
-              <Link href="/news" className="text-sm font-semibold text-[#b38716] hover:underline">
-                View all
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+            {[
+              { seed: "vid1", title: "শিক্ষার্থীদের প্রতিক্রিয়া: নতুন পাঠ্যক্রম নিয়ে মতামত" },
+              { seed: "vid2", title: "ঢাকা বিশ্ববিদ্যালয়ের প্রতিষ্ঠাবার্ষিকীর অনুষ্ঠান সরাসরি" },
+              { seed: "vid3", title: "বৃত্তি পাওয়া শিক্ষার্থীদের সাফল্যের গল্প" },
+              { seed: "vid4", title: "শিক্ষামন্ত্রীর সাথে একান্ত সাক্ষাৎকার" },
+            ].map((v) => (
+              <Link key={v.seed} href="/news?category=video" className="group block overflow-hidden rounded bg-white shadow-sm">
+                <div className="relative">
+                  <Image src={`https://picsum.photos/seed/${v.seed}/400/230`} alt={v.title} width={400} height={230} className="w-full object-cover aspect-video" />
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white">▶</span>
+                  </span>
+                </div>
+                <p className="p-2 text-sm font-semibold leading-tight text-slate-900 group-hover:text-[#b38716]">{v.title}</p>
               </Link>
-            </div>
-            <ul className="mt-4 divide-y divide-slate-200/90">
-              {latestNews.map((item, index) => (
-                <li key={item} className="py-3">
-                  <Link href="/news" className="group flex items-start gap-3">
-                    <span className="mt-1 text-xs font-semibold text-slate-400">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="text-sm leading-relaxed text-slate-800 transition-colors group-hover:text-[#b38716] sm:text-base">
-                      {item}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <article className="rounded-3xl border border-slate-200 bg-[linear-gradient(165deg,#1f1f1f,#363636_65%,#b38716)] p-5 text-white shadow-xl shadow-slate-300/50 sm:p-6">
-            <p className="text-xs font-semibold tracking-[0.15em] text-amber-200 uppercase">Editor&apos;s Note</p>
-            <h2 className="mt-3 text-2xl leading-tight font-bold sm:text-3xl">
-              Building an informed student generation needs credible education journalism.
-            </h2>
-            <p className="mt-4 text-sm leading-relaxed text-slate-100 sm:text-base">
-              Shikkhapath focuses on verified campus reporting, policy analysis, and practical opportunities so learners can
-              make better academic and career decisions.
-            </p>
-            <Link
-              href="/about"
-                className="mt-6 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#7f5f0e] transition-colors hover:bg-slate-100"
-            >
-              Read Editorial Policy
-            </Link>
-          </article>
-        </section>
-
-        <section className="mt-8 grid gap-4 md:grid-cols-3">
-          {categoryBlocks.map((block) => (
-            <article key={block.name} className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
-              <p className="text-xs font-semibold tracking-[0.14em] text-[#b38716] uppercase">{block.name}</p>
-              <h3 className="mt-2 text-xl leading-tight font-bold text-slate-900">
-                <Link href="/news" className="hover:text-[#b38716]">
-                  {block.story}
-                </Link>
-              </h3>
-              <p className="mt-3 text-sm text-slate-700">{block.summary}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="mt-8 rounded-3xl border border-[#d6ab30] bg-[linear-gradient(180deg,#fff8e7_0%,#fffdf7_100%)] p-6 sm:p-8">
-          <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <p className="text-xs font-semibold tracking-[0.15em] text-[#b38716] uppercase">Daily Brief</p>
-              <h2 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">Get morning headlines in your inbox</h2>
-              <p className="mt-2 text-slate-700">A concise digest of top education, campus, and career stories every day at 8:00 AM.</p>
-            </div>
-            <form className="flex w-full max-w-sm flex-col gap-3 sm:flex-row" action="#" method="post">
-              <label htmlFor="newsletter-email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="newsletter-email"
-                name="email"
-                type="email"
-                required
-                placeholder="name@email.com"
-                className="h-11 flex-1 rounded-full border border-slate-300 bg-white px-4 text-sm outline-none ring-0 transition focus:border-[#c79a1d]"
-              />
-              <button
-                type="submit"
-                className="h-11 rounded-full bg-[#c79a1d] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#b38716]"
-              >
-                Subscribe
-              </button>
-            </form>
+            ))}
           </div>
         </section>
+
+        {/* জাতীয় section */}
+        <NewsSectionBlock
+          title="জাতীয়"
+          href="/news?category=national"
+          featured={{
+            image: "https://picsum.photos/seed/nat1/600/380",
+            category: "জাতীয়",
+            title: "সংসদে উচ্চশিক্ষা স্বায়ত্তশাসন বিল উত্থাপন, আলোচনা চলছে",
+            excerpt: "উচ্চশিক্ষা প্রতিষ্ঠানগুলোকে আরও স্বাধীনতা দিতে নতুন বিল সংসদে পেশ করা হয়েছে।",
+          }}
+          sideItems={[
+            { image: "https://picsum.photos/seed/nat2/300/200", title: "প্রাথমিক শিক্ষায় সরকারের বাজেট বরাদ্দ দ্বিগুণ", time: "২ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/nat3/300/200", title: "নতুন শিক্ষানীতি প্রণয়নে বিশেষজ্ঞ কমিটি গঠন", time: "৩ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/nat4/300/200", title: "মাদ্রাসা শিক্ষায় আধুনিক পদ্ধতি চালুর ঘোষণা", time: "৫ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/nat5/300/200", title: "দেশব্যাপী শিক্ষক নিবন্ধন পরীক্ষার তারিখ নির্ধারণ", time: "৬ ঘণ্টা আগে" },
+          ]}
+        />
+
+        {/* খেলাধুলা + অর্থনীতি side-by-side */}
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <NewsSectionBlock
+            title="খেলাধুলা"
+            href="/news?category=sports"
+            compact
+            featured={{
+              image: "https://picsum.photos/seed/spt1/600/380",
+              category: "খেলাধুলা",
+              title: "আন্তঃবিশ্ববিদ্যালয় ক্রিকেট টুর্নামেন্টে বুয়েট চ্যাম্পিয়ন",
+              excerpt: "রুদ্ধশ্বাস ফাইনালে বুয়েট দল ঢাকা বিশ্ববিদ্যালয়কে হারিয়ে শিরোপা জয় করেছে।",
+            }}
+            sideItems={[
+              { image: "https://picsum.photos/seed/spt2/300/200", title: "বিশ্ববিদ্যালয় ফুটবলে নতুন মৌসুম শুরু", time: "১ ঘণ্টা আগে" },
+              { image: "https://picsum.photos/seed/spt3/300/200", title: "ক্যাম্পাস গেমসে সেরা অ্যাথলেটের পুরস্কার ঘোষণা", time: "৩ ঘণ্টা আগে" },
+            ]}
+          />
+          <NewsSectionBlock
+            title="অর্থনীতি"
+            href="/news?category=economy"
+            compact
+            featured={{
+              image: "https://picsum.photos/seed/eco1/600/380",
+              category: "অর্থনীতি",
+              title: "শিক্ষা খাতে বিনিয়োগ বাড়ানোর পরামর্শ বিশেষজ্ঞদের",
+              excerpt: "অর্থনীতিবিদরা বলছেন মানসম্পন্ন শিক্ষায় বিনিয়োগ বৃদ্ধি দীর্ঘমেয়াদে দেশের উন্নয়নে সহায়ক।",
+            }}
+            sideItems={[
+              { image: "https://picsum.photos/seed/eco2/300/200", title: "শিক্ষার্থীদের স্টার্টআপ ঋণ পাওয়ার সুযোগ বাড়ছে", time: "২ ঘণ্টা আগে" },
+              { image: "https://picsum.photos/seed/eco3/300/200", title: "দক্ষ জনশক্তি তৈরিতে বাজেটে বরাদ্দ বৃদ্ধি", time: "৪ ঘণ্টা আগে" },
+            ]}
+          />
+        </div>
+
+        {/* Ad banner */}
+        <div className="my-4 flex h-16 items-center justify-center overflow-hidden rounded bg-[#e8e8e8]">
+          <span className="text-sm text-slate-400">[ বিজ্ঞাপন — ৯৭০×৬০ ]</span>
+        </div>
+
+        {/* Tab section: শিক্ষার খবর / ট্যাবলয়েড / মুক্তমত */}
+        <TabSectionBlock />
+
+        {/* কর্মজীবন section */}
+        <NewsSectionBlock
+          title="কর্মজীবন"
+          href="/news?category=career"
+          featured={{
+            image: "https://picsum.photos/seed/car1/600/380",
+            category: "কর্মজীবন",
+            title: "সরকারি চাকরিতে আবেদনের বয়সসীমা বাড়ানোর দাবি",
+            excerpt: "বেকার তরুণদের দাবির মুখে সরকারি চাকরিতে আবেদনের বয়সসীমা পুনর্বিবেচনার আলোচনা শুরু।",
+          }}
+          sideItems={[
+            { image: "https://picsum.photos/seed/car2/300/200", title: "বিসিএস প্রস্তুতিতে নতুন সিলেবাস প্রকাশ", time: "৩ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/car3/300/200", title: "কর্পোরেট চাকরিতে ফ্রেশারদের সুযোগ বাড়ছে", time: "৫ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/car4/300/200", title: "ফ্রিল্যান্সিং খাতে তরুণদের আয় রেকর্ড পরিমাণে বেড়েছে", time: "৬ ঘণ্টা আগে" },
+            { image: "https://picsum.photos/seed/car5/300/200", title: "ইন্টার্নশিপ ট্র্যাকার পোর্টাল চালু করলো উচ্চশিক্ষা পরিষদ", time: "৮ ঘণ্টা আগে" },
+          ]}
+        />
+
+        {/* মাধ্যম ও বিজ্ঞান + আন্তর্জাতিক side-by-side */}
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <NewsSectionBlock
+            title="বিজ্ঞান ও প্রযুক্তি"
+            href="/news?category=science"
+            compact
+            featured={{
+              image: "https://picsum.photos/seed/sci1/600/380",
+              category: "বিজ্ঞান",
+              title: "দেশীয় বিজ্ঞানীদের গবেষণায় নতুন সাফল্য",
+              excerpt: "বুয়েটের গবেষকরা নতুন ধরনের পানি পরিশোধন প্রযুক্তি উদ্ভাবন করেছেন।",
+            }}
+            sideItems={[
+              { image: "https://picsum.photos/seed/sci2/300/200", title: "AI ব্যবহার করে শিক্ষা পদ্ধতির পরিবর্তন আসছে", time: "২ ঘণ্টা আগে" },
+              { image: "https://picsum.photos/seed/sci3/300/200", title: "রোবোটিক্স প্রতিযোগিতায় বাংলাদেশ দলের সাফল্য", time: "৪ ঘণ্টা আগে" },
+            ]}
+          />
+          <NewsSectionBlock
+            title="আন্তর্জাতিক"
+            href="/news?category=international"
+            compact
+            featured={{
+              image: "https://picsum.photos/seed/int1/600/380",
+              category: "আন্তর্জাতিক",
+              title: "দক্ষিণ এশিয়ার শিক্ষা সম্মেলনে বাংলাদেশের প্রতিনিধি",
+              excerpt: "আন্তর্জাতিক বৃত্তি ও যৌথ ডিগ্রি কার্যক্রম নিয়ে গুরুত্বপূর্ণ আলোচনা হয়েছে সম্মেলনে।",
+            }}
+            sideItems={[
+              { image: "https://picsum.photos/seed/int2/300/200", title: "বিদেশে উচ্চশিক্ষায় বাংলাদেশি শিক্ষার্থীর সংখ্যা বাড়ছে", time: "১ ঘণ্টা আগে" },
+              { image: "https://picsum.photos/seed/int3/300/200", title: "ফুলব্রাইট বৃত্তিতে ১০ জন বাংলাদেশি নির্বাচিত", time: "৫ ঘণ্টা আগে" },
+            ]}
+          />
+        </div>
+
+        <NewsletterSection />
       </main>
       <SiteFooter />
     </div>

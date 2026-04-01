@@ -6,5 +6,13 @@ module.exports = {
       bodySizeLimit: '30mb',
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+    ],
+  },
 }
 

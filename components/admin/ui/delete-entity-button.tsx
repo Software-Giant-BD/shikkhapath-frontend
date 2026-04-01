@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { ConfirmDialog } from "@/components/admin/ui/confirm-dialog";
-import { deletePortfolio } from "@/lib/api/portfolios";
-import { deleteProject } from "@/lib/api/projects";
-import { deleteService } from "@/lib/api/services";
+
 
 type EntityType = "portfolio" | "project" | "service";
 
@@ -30,9 +28,7 @@ const ENTITY_FALLBACK_NAMES: Record<EntityType, string> = {
 };
 
 const DELETE_HANDLERS = {
-  portfolio: deletePortfolio,
-  project: deleteProject,
-  service: deleteService,
+ 
 };
 
 export function DeleteEntityButton({ id, title, entity }: DeleteEntityButtonProps) {
