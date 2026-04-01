@@ -13,11 +13,9 @@ const navLinks = [
   { label: "শিক্ষা প্রশাসন", href: "/news?category=administration", hasDropdown: true },
   { label: "ভর্তি পরীক্ষা", href: "/news?category=admission", hasDropdown: true },
   { label: "কর্মসংস্থান", href: "/news?category=career", hasDropdown: true },
-  { label: "স্কলারশিপ", href: "/news?category=scholarship" },
   { label: "খেলাধুলা", href: "/news?category=sports" },
   { label: "অর্থনীতি", href: "/news?category=economy" },
   { label: "জাতীয়", href: "/news?category=national", hasDropdown: true },
-  { label: "ভিডিও স্টোরি", href: "/news?category=video" },
   { label: "আরও", href: "/news", hasDropdown: true },
 ];
 
