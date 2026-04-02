@@ -34,8 +34,6 @@ const menuConfig: MenuSection[] = [
     items: [
       { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
       { title: "Members", icon: UserCircle, href: "/admin/members/list" },
-      { title: "Contact Messages", icon: MessageSquare, href: "/admin/contact-messages" },
-      { title: "Career Applications", icon: Briefcase, href: "/admin/career-applications" },
     ],
   },
 ];
@@ -102,7 +100,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <path d="M22 22H2" />
               </svg>
             </div>
-            ASE
+            Shkkhapath
           </Link>
           <button
             onClick={onClose}

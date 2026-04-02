@@ -40,13 +40,7 @@ type ActivityItem = {
 };
 
 const mockKpis: KpiCard[] = [
-  {
-    label: "Total Projects",
-    value: 36,
-    deltaLabel: "vs last month",
-    delta: 12,
-    icon: FolderKanban,
-  },
+ 
   {
     label: "Total Services",
     value: 18,
@@ -54,20 +48,7 @@ const mockKpis: KpiCard[] = [
     delta: 6,
     icon: Wrench,
   },
-  {
-    label: "New Contact Messages",
-    value: 14,
-    deltaLabel: "today",
-    delta: -8,
-    icon: Mail,
-  },
-  {
-    label: "New Career Applications",
-    value: 9,
-    deltaLabel: "today",
-    delta: 22,
-    icon: Briefcase,
-  },
+ 
   {
     label: "Team Members",
     value: 11,
@@ -278,63 +259,6 @@ export default async function Home() {
             </Card>
           );
         })}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
-        <div className="space-y-6 xl:col-span-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <ActivityList
-              title="Recent Contact Messages"
-              viewHref="/admin/contact-messages"
-              items={recentMessages}
-            />
-            <ActivityList
-              title="Recent Career Applications"
-              viewHref="/admin/career-applications"
-              items={recentApplications}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-6 xl:col-span-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Message Status Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatusBars items={messageStatus} />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Application Status Breakdown</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StatusBars items={careerStatus} />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Operational Alerts</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800">
-                <CircleAlert className="mt-0.5 h-4 w-4" />
-                <p>3 contact messages are waiting for review for more than 24 hours.</p>
-              </div>
-              <div className="flex items-start gap-2 rounded-lg border border-sky-100 bg-sky-50 px-3 py-2 text-sky-800">
-                <Clock3 className="mt-0.5 h-4 w-4" />
-                <p>2 new career applications arrived in the last 2 hours.</p>
-              </div>
-              <div className="flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-emerald-800">
-                <CircleCheck className="mt-0.5 h-4 w-4" />
-                <p>Weekly content publishing target reached (75%).</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
