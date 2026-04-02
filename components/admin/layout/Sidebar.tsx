@@ -5,14 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
-  BoxSelect,
   UserCircle,
   ChevronDown,
   ChevronRight,
-  PackageOpen,
-  AlignEndHorizontal,
-  MessageSquare,
-  Briefcase,
   X,
 } from "lucide-react";
 
@@ -100,7 +95,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <path d="M22 22H2" />
               </svg>
             </div>
-            Shkkhapath
+            Shikkhapath
           </Link>
           <button
             onClick={onClose}

@@ -12,7 +12,7 @@ import { Button } from "@/components/admin/ui/button";
 import { Plus, List } from "lucide-react";
 import Link from "next/link";
 
-export default function AddProductPage() {
+export default function AddMemberPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
       <PageHeader
@@ -39,7 +39,7 @@ export default function AddProductPage() {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>Name</Label>
-            <Input type="text" placeholder="e.g. Wireless Mouse" />
+            <Input type="text" placeholder="e.g. Nusrat Jahan" />
           </div>
 
           <div className="space-y-2">
@@ -55,7 +55,7 @@ export default function AddProductPage() {
           <div className="pt-4 flex justify-end">
             <Button>
               <Plus size={18} className="mr-2" />
-              Save User
+              Save Member
             </Button>
           </div>
         </CardContent>

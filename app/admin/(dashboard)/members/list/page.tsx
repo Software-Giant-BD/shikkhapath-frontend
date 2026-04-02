@@ -1,15 +1,13 @@
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import { Button } from "@/components/admin/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-export default function ProductsListPage() {
+export default function MembersListPage() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       <PageHeader
@@ -45,34 +43,31 @@ export default function ProductsListPage() {
                 {[
                   {
                     id: 101,
-                    name: "Wireless Mouse",
-                    email: "wireless@gmail.com",
-                    mobile: "0161377742",
-                    address: "Dharat, Gharinda, Tangail",
+                    name: "Md. Rahim Uddin",
+                    email: "rahim.uddin@example.com",
+                    mobile: "01710000001",
+                    address: "Dhanmondi, Dhaka",
                   },
                   {
                     id: 102,
-                    name: "Mechanical Keyboard",
-                    email: "wireless@gmail.com",
-
-                    mobile: "0161377742",
-                    address: "Dharat, Gharinda, Tangail",
+                    name: "Nusrat Jahan",
+                    email: "nusrat.jahan@example.com",
+                    mobile: "01710000002",
+                    address: "Kotwali, Chattogram",
                   },
                   {
                     id: 103,
-                    name: "Running Sneakers",
-                    email: "wireless@gmail.com",
-
-                    mobile: "0161377742",
-                    address: "Dharat, Gharinda, Tangail",
+                    name: "Siam Ahmed",
+                    email: "siam.ahmed@example.com",
+                    mobile: "01710000003",
+                    address: "Sadar, Rajshahi",
                   },
                   {
                     id: 104,
-                    name: "Desk Lamp",
-                    email: "wireless@gmail.com",
-
-                    mobile: "0161377742",
-                    address: "Dharat, Gharinda, Tangail",
+                    name: "Maliha Noor",
+                    email: "maliha.noor@example.com",
+                    mobile: "01710000004",
+                    address: "Shibganj, Bogura",
                   },
                 ].map((row, idx) => (
                   <tr
