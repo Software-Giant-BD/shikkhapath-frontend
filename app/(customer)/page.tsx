@@ -4,6 +4,8 @@ import { SiteFooter } from "@/components/customer/common/footer-sections"
 import { SiteHeader } from "@/components/customer/common/site-header"
 import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
 import { HeroSection } from "@/components/customer/home/hero-section"
+import { AdBanner } from "@/components/customer/home/ad-banner"
+import { type NewsSectionKey } from "@/components/customer/home/home-content.data"
 import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
 import { TabSectionBlock } from "@/components/customer/home/tab-section-block"
 import { NewsletterSection } from "@/components/customer/home/newsletter-section"
@@ -24,6 +26,12 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
+  const primarySections: NewsSectionKey[] = ["education", "admission", "national"]
+  const compactSectionRows: [NewsSectionKey, NewsSectionKey][] = [
+    ["sports", "economy"],
+    ["science", "international"],
+  ]
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsMediaOrganization",
@@ -41,47 +49,36 @@ export default function Home() {
       <BreakingTicker />
 
       <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
-        {/* Banner ad slot */}
-        <div className="my-3 flex h-20 items-center justify-center overflow-hidden rounded bg-[#e8e8e8]">
-          <span className="text-sm text-slate-400">[ বিজ্ঞাপন — ৯৭০×৯০ ]</span>
-        </div>
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="my-3" heightClass="h-20" />
 
         <HeroSection />
 
-        {/* শিক্ষাঙ্গন section */}
-        <NewsSectionBlock section="education" />
+        {primarySections.map((section) => (
+          <NewsSectionBlock key={section} section={section} />
+        ))}
 
-        {/* ভর্তি পরীক্ষা section */}
-        <NewsSectionBlock section="admission" />
-
-        {/* ভিডিও section */}
         <VideoSectionBlock />
+        {compactSectionRows.slice(0, 1).map((row, index) => (
+          <div key={`compact-top-${index}`} className="mt-5 grid gap-4 md:grid-cols-2">
+            {row.map((section) => (
+              <NewsSectionBlock key={section} section={section} compact />
+            ))}
+          </div>
+        ))}
 
-        {/* জাতীয় section */}
-        <NewsSectionBlock section="national" />
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" />
 
-        {/* খেলাধুলা + অর্থনীতি side-by-side */}
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <NewsSectionBlock section="sports" compact />
-          <NewsSectionBlock section="economy" compact />
-        </div>
-
-        {/* Ad banner */}
-        <div className="my-4 flex h-16 items-center justify-center overflow-hidden rounded bg-[#e8e8e8]">
-          <span className="text-sm text-slate-400">[ বিজ্ঞাপন — ৯৭০×৬০ ]</span>
-        </div>
-
-        {/* Tab section: শিক্ষার খবর / ট্যাবলয়েড / মুক্তমত */}
         <TabSectionBlock />
 
-        {/* কর্মজীবন section */}
         <NewsSectionBlock section="career" />
 
-        {/* মাধ্যম ও বিজ্ঞান + আন্তর্জাতিক side-by-side */}
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <NewsSectionBlock section="science" compact />
-          <NewsSectionBlock section="international" compact />
-        </div>
+        {compactSectionRows.slice(1).map((row, index) => (
+          <div key={`compact-bottom-${index}`} className="mt-5 grid gap-4 md:grid-cols-2">
+            {row.map((section) => (
+              <NewsSectionBlock key={section} section={section} compact />
+            ))}
+          </div>
+        ))}
 
         <NewsletterSection />
       </main>
