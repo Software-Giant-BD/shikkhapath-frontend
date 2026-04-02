@@ -12,6 +12,7 @@ import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
+import { createCategoryAction, updateCategoryAction } from "@/lib/api/category-actions";
 
 export type CategoryFormValues = {
   title: string;
@@ -132,18 +133,14 @@ export function CategoryForm({ mode, initialValues, categoryId }: CategoryFormPr
           payload.append("og_image", ogImageFile);
         }
 
-        const endpoint = mode === "add" ? "/api/admin/categories" : `/api/admin/categories/${categoryId}`;
-        const method = mode === "add" ? "POST" : "PUT";
-
         try {
-          const response = await fetch(endpoint, {
-            method,
-            body: payload,
-          });
-          const data = await response.json().catch(() => null);
+          const result =
+            mode === "add"
+              ? await createCategoryAction(payload)
+              : await updateCategoryAction(categoryId as string, payload);
 
-          if (!response.ok) {
-            setSubmitError(data?.message || "Request failed. Please try again.");
+          if (!result.ok) {
+            setSubmitError(result.message || "Request failed. Please try again.");
             return;
           }
 
