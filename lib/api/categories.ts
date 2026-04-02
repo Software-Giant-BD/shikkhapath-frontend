@@ -1,0 +1,167 @@
+import "server-only";
+
+import { fetchApi } from "./common";
+
+export type CategoryStatus = "published" | "draft";
+
+export type CategoryApiModel = {
+  id: string;
+  title: string;
+  slug: string;
+  parent_id: string;
+  status: CategoryStatus;
+  sort_order: string;
+  description: string;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  show_in_menu: boolean;
+  featured: boolean;
+  og_image_url?: string;
+};
+
+function asObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+}
+
+function asString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return fallback;
+}
+
+function asBoolean(value: unknown, fallback = false): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes"].includes(normalized)) return true;
+    if (["0", "false", "no"].includes(normalized)) return false;
+  }
+  return fallback;
+}
+
+function normalizeStatus(value: unknown): CategoryStatus {
+  return asString(value, "draft").toLowerCase() === "published" ? "published" : "draft";
+}
+
+function normalizeCategory(value: unknown): CategoryApiModel {
+  const item = asObject(value);
+
+  return {
+    id: asString(item.id),
+    title: asString(item.title),
+    slug: asString(item.slug),
+    parent_id: asString(item.parent_id ?? item.parentId),
+    status: normalizeStatus(item.status),
+    sort_order: asString(item.sort_order ?? item.sortOrder ?? "0"),
+    description: asString(item.description),
+    meta_title: asString(item.meta_title ?? item.metaTitle),
+    meta_description: asString(item.meta_description ?? item.metaDescription),
+    meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
+    show_in_menu: asBoolean(item.show_in_menu ?? item.showInMenu, true),
+    featured: asBoolean(item.featured, false),
+    og_image_url: asString(item.og_image_url ?? item.ogImageUrl) || undefined,
+  };
+}
+
+function extractList(payload: unknown): unknown[] {
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  const data = asObject(payload);
+  if (Array.isArray(data.resources)) {
+    return data.resources;
+  }
+
+  const resources = asObject(data.resources);
+
+  const candidates = [
+    resources.categories,
+    resources.items,
+    resources.data,
+    resources,
+    data.categories,
+    data.data,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+}
+
+function extractOne(payload: unknown): unknown | null {
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    const root = payload as Record<string, unknown>;
+    if (root.id !== undefined) {
+      return root;
+    }
+  }
+
+  const data = asObject(payload);
+
+  if (Array.isArray(data.resources) && data.resources.length > 0) {
+    const first = data.resources[0];
+    if (first && typeof first === "object" && !Array.isArray(first)) {
+      return first;
+    }
+  }
+
+  const resources = asObject(data.resources);
+
+  const candidates = [resources.category, resources.item, data.category, data.data, resources.data, resources];
+
+  for (const candidate of candidates) {
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+export async function getCategories(): Promise<CategoryApiModel[]> {
+  try {
+    const response = await fetchApi("/admin/categories");
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error((payload as any)?.message || "Failed to load categories.");
+    }
+
+    return extractList(payload).map(normalizeCategory);
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+}
+
+export async function getCategoryById(catId: string): Promise<CategoryApiModel | null> {
+  try {
+    const response = await fetchApi(`/admin/categories/${catId}`);
+    const payload = await response.json().catch(() => null);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error((payload as any)?.message || "Failed to load category.");
+    }
+
+    const item = extractOne(payload);
+    if (!item) {
+      return null;
+    }
+
+    return normalizeCategory(item);
+  } catch (error) {
+    console.error(`Failed to fetch category ${catId}:`, error);
+    return null;
+  }
+}

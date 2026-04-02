@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   UserCircle,
+  Tags,
   ChevronDown,
   ChevronRight,
   X,
@@ -29,6 +30,14 @@ const menuConfig: MenuSection[] = [
     items: [
       { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
       { title: "Members", icon: UserCircle, href: "/admin/members/list" },
+      {
+        title: "Categories",
+        icon: Tags,
+        subItems: [
+          { title: "Category List", href: "/admin/categories/list" },
+          { title: "Add Category", href: "/admin/categories/add" },
+        ],
+      },
     ],
   },
 ];
