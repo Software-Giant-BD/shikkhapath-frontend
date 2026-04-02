@@ -79,7 +79,7 @@ export function SiteHeader() {
               className="inline-flex items-center transition-opacity hover:opacity-90"
             >
               <Image
-                src="/shikkhapath-logo.svg"
+                src="/shikkhapath-logo.png"
                 alt="Shikkhapath News Portal"
                 width={780}
                 height={130}
@@ -135,7 +135,7 @@ export function SiteHeader() {
               className="inline-flex items-center transition-opacity hover:opacity-90"
             >
               <Image
-                src="/shikkhapath-logo.svg"
+                src="/shikkhapath-logo.png"
                 alt="Shikkhapath News Portal"
                 width={780}
                 height={130}
@@ -154,7 +154,7 @@ export function SiteHeader() {
                 className="inline-flex shrink-0 items-center transition-opacity hover:opacity-90"
               >
                 <Image
-                  src="/shikkhapath-logo.svg"
+                  src="/shikkhapath-logo.png"
                   alt="Shikkhapath News Portal"
                   width={780}
                   height={130}
@@ -209,7 +209,7 @@ export function SiteHeader() {
                 className="inline-flex items-center transition-opacity hover:opacity-90"
               >
                 <Image
-                  src="/shikkhapath-logo.svg"
+                  src="/shikkhapath-logo.png"
                   alt="Shikkhapath News Portal"
                   width={780}
                   height={130}
