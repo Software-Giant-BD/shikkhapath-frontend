@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   UserCircle,
+  Users,
   Tags,
   ChevronDown,
   ChevronRight,
@@ -36,6 +37,14 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "Category List", href: "/admin/categories/list" },
           { title: "Add Category", href: "/admin/categories/add" },
+        ],
+      },
+      {
+        title: "User Manage",
+        icon: Users,
+        subItems: [
+          { title: "Roles", href: "/admin/roles/list" },
+          { title: "Users", href: "/admin/users/list" },
         ],
       },
     ],
@@ -123,11 +132,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <ul className="space-y-1">
                 {section.items.map((item, itemIdx) => {
                   const hasSubItems = !!item.subItems;
-                  const isExpanded = !!expandedMenus[item.title];
                   const isActive =
                     item.href === pathname ||
                     (hasSubItems &&
                       item.subItems?.some((sub) => sub.href === pathname));
+                  const isExpanded = !!expandedMenus[item.title] || isActive;
                   const Icon = item.icon;
 
                   return (
