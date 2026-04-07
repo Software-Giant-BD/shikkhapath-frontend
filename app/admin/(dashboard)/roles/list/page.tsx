@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import { getRoles } from "@/lib/api/roles";
 
-function formatStatus(status: "active" | "inactive") {
-  return status === "active" ? "Active" : "Inactive";
+function formatStatus(isActive: boolean) {
+  return isActive ? "Active" : "Inactive";
 }
 
 export default async function RolesListPage() {
@@ -36,7 +36,7 @@ export default async function RolesListPage() {
                 <tr>
                   <th className="px-6 py-4 font-semibold">ID</th>
                   <th className="px-6 py-4 font-semibold">Role Name</th>
-                  <th className="px-6 py-4 font-semibold">Permissions</th>
+                  <th className="px-6 py-4 font-semibold">Description</th>
                   <th className="px-6 py-4 font-semibold">Assigned Users</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold text-right">Action</th>
@@ -47,9 +47,9 @@ export default async function RolesListPage() {
                   <tr key={role.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="px-6 py-4 text-slate-600">#{role.id}</td>
                     <td className="px-6 py-4 font-medium text-slate-800">{role.name}</td>
-                    <td className="px-6 py-4 text-slate-600">{role.permission_ids.length}</td>
-                    <td className="px-6 py-4 text-slate-600">{role.users_count}</td>
-                    <td className="px-6 py-4 text-slate-600">{formatStatus(role.status)}</td>
+                    <td className="px-6 py-4 text-slate-600">{role.description || "-"}</td>
+                    <td className="px-6 py-4 text-slate-600">{role.assigned_user_count}</td>
+                    <td className="px-6 py-4 text-slate-600">{formatStatus(role.is_active)}</td>
                     <td className="px-6 py-4 text-right">
                       <Link href={`/admin/roles/${role.id}/edit`}>
                         <Button variant="secondary" size="sm">

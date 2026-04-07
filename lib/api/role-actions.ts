@@ -22,7 +22,7 @@ function getMessage(payload: unknown, fallback: string): string {
 
 export async function createRoleAction(payload: FormData): Promise<RoleActionResult> {
   try {
-    const response = await fetchApi("/roles", {
+    const response = await fetchApi("/admin/roles", {
       method: "POST",
       body: payload,
     });
@@ -50,10 +50,8 @@ export async function createRoleAction(payload: FormData): Promise<RoleActionRes
 
 export async function updateRoleAction(roleId: string, payload: FormData): Promise<RoleActionResult> {
   try {
-    payload.set("_method", "put");
-
-    const response = await fetchApi(`/roles/${roleId}`, {
-      method: "POST",
+    const response = await fetchApi(`/admin/roles/${roleId}`, {
+      method: "PUT",
       body: payload,
     });
     const data = await response.json().catch(() => null);

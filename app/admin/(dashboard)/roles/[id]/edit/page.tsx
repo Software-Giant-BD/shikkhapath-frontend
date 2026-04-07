@@ -43,7 +43,8 @@ export default async function EditRolePage({
         roleId={id}
         initialValues={{
           name: role.name,
-          permission_ids_csv: role.permission_ids.join(", "),
+          is_active: role.is_active ? "1" : "0",
+          description: role.description,
         }}
       />
     </div>

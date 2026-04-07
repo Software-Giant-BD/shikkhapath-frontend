@@ -5,9 +5,9 @@ import { fetchApi } from "./common";
 export type RoleApiModel = {
   id: string;
   name: string;
-  permission_ids: string[];
-  users_count: number;
-  status: "active" | "inactive";
+  is_active: boolean;
+  description: string;
+  assigned_user_count: number;
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -20,19 +20,16 @@ function asString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
-function asStringArray(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map((item) => asString(item)).filter(Boolean);
-  }
-
+function asBoolean(value: unknown, fallback = true): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return value === 1;
   if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
+    const normalized = value.trim().toLowerCase();
+    if (["1", "true", "yes", "active"].includes(normalized)) return true;
+    if (["0", "false", "no", "inactive"].includes(normalized)) return false;
   }
 
-  return [];
+  return fallback;
 }
 
 function asNumber(value: unknown, fallback = 0): number {
@@ -41,23 +38,18 @@ function asNumber(value: unknown, fallback = 0): number {
   return parsed;
 }
 
-function normalizeStatus(value: unknown): "active" | "inactive" {
-  return asString(value, "active").toLowerCase() === "inactive" ? "inactive" : "active";
-}
-
 function normalizeRole(value: unknown): RoleApiModel {
   const item = asObject(value);
-
-  const permissionIds = asStringArray(
-    item.permission_ids ?? item.permissionIds ?? item.permissions,
-  );
 
   return {
     id: asString(item.id),
     name: asString(item.name),
-    permission_ids: permissionIds,
-    users_count: asNumber(item.users_count ?? item.usersCount ?? item.total_users, 0),
-    status: normalizeStatus(item.status),
+    is_active: asBoolean(item.is_active ?? item.isActive ?? item.status, true),
+    description: asString(item.description),
+    assigned_user_count: asNumber(
+      item.assigned_user_count ?? item.assignedUsersCount ?? item.users_count,
+      0,
+    ),
   };
 }
 
@@ -100,7 +92,7 @@ function extractOne(payload: unknown): unknown | null {
 
 export async function getRoles(): Promise<RoleApiModel[]> {
   try {
-    const response = await fetchApi("/roles");
+    const response = await fetchApi("/admin/roles");
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -116,7 +108,7 @@ export async function getRoles(): Promise<RoleApiModel[]> {
 
 export async function getRoleById(roleId: string): Promise<RoleApiModel | null> {
   try {
-    const response = await fetchApi(`/roles/${roleId}`);
+    const response = await fetchApi(`/admin/roles/${roleId}`);
     const payload = await response.json().catch(() => null);
 
     if (response.status === 404) {
