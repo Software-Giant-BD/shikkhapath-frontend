@@ -3,9 +3,8 @@ import { Plus, Pencil } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
-import { Input } from "@/components/admin/ui/input";
 import { PageHeader } from "@/components/admin/ui/page-header";
-import { Select } from "@/components/admin/ui/select";
+import { UsersListFilters } from "@/components/admin/users/UsersListFilters";
 import { getRoles } from "@/lib/api/roles";
 import { getUsersList } from "@/lib/api/users";
 
@@ -72,37 +71,11 @@ export default async function UsersListPage({
 
       <Card>
         <CardContent className="p-0">
-          <form method="GET" className="grid gap-3 border-b border-slate-100 p-4 md:grid-cols-12 md:p-6">
-            <div className="md:col-span-5">
-              <Input
-                name="search"
-                defaultValue={searchValue}
-                placeholder="Search by name, email or phone"
-              />
-            </div>
-
-            <div className="md:col-span-4">
-              <Select name="role_id" defaultValue={roleIdValue}>
-                <option value="">All Roles</option>
-                {roles.map((role) => (
-                  <option key={role.id} value={role.id}>
-                    {role.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="flex gap-2 md:col-span-3">
-              <Button type="submit" className="w-full">
-                Search
-              </Button>
-              <Link href="/admin/users/list" className="w-full">
-                <Button type="button" variant="secondary" className="w-full">
-                  Reset
-                </Button>
-              </Link>
-            </div>
-          </form>
+          <UsersListFilters
+            roles={roles.map((role) => ({ id: role.id, name: role.name }))}
+            initialSearch={searchValue}
+            initialRoleId={roleIdValue}
+          />
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-270 text-left text-sm">
