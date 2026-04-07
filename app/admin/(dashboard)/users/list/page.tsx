@@ -3,28 +3,57 @@ import { Plus, Pencil } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
+import { Input } from "@/components/admin/ui/input";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { Select } from "@/components/admin/ui/select";
+import { getRoles } from "@/lib/api/roles";
 import { getUsersList } from "@/lib/api/users";
 
 function formatBoolean(value: boolean, trueLabel: string, falseLabel: string) {
   return value ? trueLabel : falseLabel;
 }
 
-type SearchParams = Promise<{ page?: string }>;
+type SearchParams = Promise<{ page?: string; search?: string; role_id?: string }>;
 
 export default async function UsersListPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const { page } = await searchParams;
+  const { page, search, role_id } = await searchParams;
   const currentPage = Math.max(1, Number(page) || 1);
-  const { items: users, pagination } = await getUsersList({ page: currentPage, per_page: 20 });
+  const searchValue = search?.trim() || "";
+  const roleIdValue = role_id?.trim() || "";
+
+  const [usersResult, roles] = await Promise.all([
+    getUsersList({
+      page: currentPage,
+      per_page: 20,
+      search: searchValue || undefined,
+      role_id: roleIdValue || undefined,
+    }),
+    getRoles(),
+  ]);
+
+  const { items: users, pagination } = usersResult;
 
   const startItem = pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.perPage + 1;
   const endItem = Math.min(pagination.currentPage * pagination.perPage, pagination.total);
   const pageLinks = Array.from({ length: pagination.lastPage }, (_, idx) => idx + 1);
-  const getPageHref = (pageNumber: number) => `/admin/users/list?page=${pageNumber}`;
+  const getPageHref = (pageNumber: number) => {
+    const query = new URLSearchParams();
+    query.set("page", String(pageNumber));
+
+    if (searchValue) {
+      query.set("search", searchValue);
+    }
+
+    if (roleIdValue) {
+      query.set("role_id", roleIdValue);
+    }
+
+    return `/admin/users/list?${query.toString()}`;
+  };
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
@@ -43,6 +72,38 @@ export default async function UsersListPage({
 
       <Card>
         <CardContent className="p-0">
+          <form method="GET" className="grid gap-3 border-b border-slate-100 p-4 md:grid-cols-12 md:p-6">
+            <div className="md:col-span-5">
+              <Input
+                name="search"
+                defaultValue={searchValue}
+                placeholder="Search by name, email or phone"
+              />
+            </div>
+
+            <div className="md:col-span-4">
+              <Select name="role_id" defaultValue={roleIdValue}>
+                <option value="">All Roles</option>
+                {roles.map((role) => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="flex gap-2 md:col-span-3">
+              <Button type="submit" className="w-full">
+                Search
+              </Button>
+              <Link href="/admin/users/list" className="w-full">
+                <Button type="button" variant="secondary" className="w-full">
+                  Reset
+                </Button>
+              </Link>
+            </div>
+          </form>
+
           <div className="overflow-x-auto">
             <table className="w-full min-w-270 text-left text-sm">
               <thead className="bg-slate-50 text-slate-500 shadow-[0_1px_0_rgba(0,0,0,0.05)]">

@@ -16,6 +16,8 @@ export type UserApiModel = {
 export type GetUsersParams = {
   page?: number;
   per_page?: number;
+  search?: string;
+  role_id?: string;
 };
 
 export type UsersListResult = {
@@ -111,6 +113,14 @@ export async function getUsersList(params?: GetUsersParams): Promise<UsersListRe
 
     if (params?.per_page !== undefined) {
       query.set("per_page", String(params.per_page));
+    }
+
+    if (params?.search?.trim()) {
+      query.set("search", params.search.trim());
+    }
+
+    if (params?.role_id?.trim()) {
+      query.set("role_id", params.role_id.trim());
     }
 
     const path = query.toString() ? `/admin/users?${query.toString()}` : "/admin/users";
