@@ -8,6 +8,7 @@ import {
   UserCircle,
   Users,
   Tags,
+  Newspaper,
   ChevronDown,
   ChevronRight,
   X,
@@ -45,6 +46,14 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "Roles", href: "/admin/roles/list" },
           { title: "Users", href: "/admin/users/list" },
+        ],
+      },
+      {
+        title: "News",
+        icon: Newspaper,
+        subItems: [
+          { title: "News List", href: "/admin/news/list" },
+          { title: "Add News", href: "/admin/news/add" },
         ],
       },
     ],
