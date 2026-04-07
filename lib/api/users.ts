@@ -2,12 +2,15 @@ import "server-only";
 
 import { fetchApi } from "./common";
 
-export type RoleApiModel = {
+export type UserApiModel = {
   id: string;
   name: string;
+  email: string;
+  phone: string;
   is_active: boolean;
-  description: string;
-  assigned_user_count: number;
+  role_id: string;
+  role_name: string;
+  can_manage_news: boolean;
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -20,7 +23,7 @@ function asString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
-function asBoolean(value: unknown, fallback = true): boolean {
+function asBoolean(value: unknown, fallback = false): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "number") return value === 1;
   if (typeof value === "string") {
@@ -32,24 +35,19 @@ function asBoolean(value: unknown, fallback = true): boolean {
   return fallback;
 }
 
-function asNumber(value: unknown, fallback = 0): number {
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return parsed;
-}
-
-function normalizeRole(value: unknown): RoleApiModel {
+function normalizeUser(value: unknown): UserApiModel {
   const item = asObject(value);
+  const role = asObject(item.role);
 
   return {
     id: asString(item.id),
     name: asString(item.name),
-    is_active: asBoolean(item.is_active ?? item.isActive ?? item.status, true),
-    description: asString(item.description),
-    assigned_user_count: asNumber(
-      item.assigned_user_count ?? item.assignedUsersCount ?? item.users_count,
-      0,
-    ),
+    email: asString(item.email),
+    phone: asString(item.phone),
+    is_active: asBoolean(item.is_active, true),
+    role_id: asString(item.role_id ?? role.id),
+    role_name: asString(item.role_name ?? role.name),
+    can_manage_news: asBoolean(item.can_manage_news, false),
   };
 }
 
@@ -60,7 +58,7 @@ function extractList(payload: unknown): unknown[] {
   if (Array.isArray(root.resources)) return root.resources;
 
   const resources = asObject(root.resources);
-  const candidates = [root.data, root.roles, resources.roles, resources.data, resources.items, resources];
+  const candidates = [root.data, root.users, resources.users, resources.data, resources.items, resources];
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
@@ -79,7 +77,7 @@ function extractOne(payload: unknown): unknown | null {
 
   const root = asObject(payload);
   const resources = asObject(root.resources);
-  const candidates = [root.role, root.data, resources.role, resources.data, resources.item, resources];
+  const candidates = [root.user, root.data, resources.user, resources.data, resources.item, resources];
 
   for (const candidate of candidates) {
     if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
@@ -90,25 +88,25 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getRoles(): Promise<RoleApiModel[]> {
+export async function getUsers(): Promise<UserApiModel[]> {
   try {
-    const response = await fetchApi("/admin/roles?per_page=20&page=1");
+    const response = await fetchApi("/admin/users");
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load roles.");
+      throw new Error((payload as any)?.message || "Failed to load users.");
     }
 
-    return extractList(payload).map(normalizeRole);
+    return extractList(payload).map(normalizeUser);
   } catch (error) {
-    console.error("Failed to fetch roles:", error);
+    console.error("Failed to fetch users:", error);
     return [];
   }
 }
 
-export async function getRoleById(roleId: string): Promise<RoleApiModel | null> {
+export async function getUserById(userId: string): Promise<UserApiModel | null> {
   try {
-    const response = await fetchApi(`/admin/roles/${roleId}`);
+    const response = await fetchApi(`/admin/users/${userId}`);
     const payload = await response.json().catch(() => null);
 
     if (response.status === 404) {
@@ -116,13 +114,13 @@ export async function getRoleById(roleId: string): Promise<RoleApiModel | null> 
     }
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load role details.");
+      throw new Error((payload as any)?.message || "Failed to load user details.");
     }
 
     const item = extractOne(payload);
-    return item ? normalizeRole(item) : null;
+    return item ? normalizeUser(item) : null;
   } catch (error) {
-    console.error(`Failed to fetch role ${roleId}:`, error);
+    console.error(`Failed to fetch user ${userId}:`, error);
     return null;
   }
 }
