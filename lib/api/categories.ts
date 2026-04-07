@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchApi } from "./common";
+import { extractPagination, fetchApi, type BasePagination } from "./common";
 
 export type CategoryStatus = "published" | "draft";
 
@@ -18,6 +18,16 @@ export type CategoryApiModel = {
   show_in_menu: boolean;
   featured: boolean;
   og_image_url?: string;
+};
+
+export type GetCategoriesParams = {
+  page?: number;
+  per_page?: number;
+};
+
+export type CategoriesListResult = {
+  items: CategoryApiModel[];
+  pagination: BasePagination;
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -125,20 +135,51 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getCategories(): Promise<CategoryApiModel[]> {
+export async function getCategoriesList(params?: GetCategoriesParams): Promise<CategoriesListResult> {
+  const fallbackPage = params?.page ?? 1;
+  const fallbackPerPage = params?.per_page ?? 20;
+
   try {
-    const response = await fetchApi("/admin/categories");
+    const query = new URLSearchParams();
+
+    if (params?.page !== undefined) {
+      query.set("page", String(params.page));
+    }
+
+    if (params?.per_page !== undefined) {
+      query.set("per_page", String(params.per_page));
+    }
+
+    const path = query.toString() ? `/admin/categories?${query.toString()}` : "/admin/categories";
+
+    const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
       throw new Error((payload as any)?.message || "Failed to load categories.");
     }
 
-    return extractList(payload).map(normalizeCategory);
+    return {
+      items: extractList(payload).map(normalizeCategory),
+      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+    };
   } catch (error) {
     console.error("Failed to fetch categories:", error);
-    return [];
+    return {
+      items: [],
+      pagination: {
+        currentPage: fallbackPage,
+        lastPage: fallbackPage,
+        perPage: fallbackPerPage,
+        total: 0,
+      },
+    };
   }
+}
+
+export async function getCategories(params?: GetCategoriesParams): Promise<CategoryApiModel[]> {
+  const { items } = await getCategoriesList(params);
+  return items;
 }
 
 export async function getCategoryById(catId: string): Promise<CategoryApiModel | null> {

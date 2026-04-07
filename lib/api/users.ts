@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchApi } from "./common";
+import { extractPagination, fetchApi, type BasePagination } from "./common";
 
 export type UserApiModel = {
   id: string;
@@ -11,6 +11,16 @@ export type UserApiModel = {
   role_id: string;
   role_name: string;
   can_manage_news: boolean;
+};
+
+export type GetUsersParams = {
+  page?: number;
+  per_page?: number;
+};
+
+export type UsersListResult = {
+  items: UserApiModel[];
+  pagination: BasePagination;
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -88,20 +98,51 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getUsers(): Promise<UserApiModel[]> {
+export async function getUsersList(params?: GetUsersParams): Promise<UsersListResult> {
+  const fallbackPage = params?.page ?? 1;
+  const fallbackPerPage = params?.per_page ?? 20;
+
   try {
-    const response = await fetchApi("/admin/users");
+    const query = new URLSearchParams();
+
+    if (params?.page !== undefined) {
+      query.set("page", String(params.page));
+    }
+
+    if (params?.per_page !== undefined) {
+      query.set("per_page", String(params.per_page));
+    }
+
+    const path = query.toString() ? `/admin/users?${query.toString()}` : "/admin/users";
+
+    const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
       throw new Error((payload as any)?.message || "Failed to load users.");
     }
 
-    return extractList(payload).map(normalizeUser);
+    return {
+      items: extractList(payload).map(normalizeUser),
+      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+    };
   } catch (error) {
     console.error("Failed to fetch users:", error);
-    return [];
+    return {
+      items: [],
+      pagination: {
+        currentPage: fallbackPage,
+        lastPage: fallbackPage,
+        perPage: fallbackPerPage,
+        total: 0,
+      },
+    };
   }
+}
+
+export async function getUsers(params?: GetUsersParams): Promise<UserApiModel[]> {
+  const { items } = await getUsersList(params);
+  return items;
 }
 
 export async function getUserById(userId: string): Promise<UserApiModel | null> {
