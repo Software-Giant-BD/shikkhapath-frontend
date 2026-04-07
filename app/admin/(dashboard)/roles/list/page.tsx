@@ -11,7 +11,7 @@ function formatStatus(isActive: boolean) {
 }
 
 export default async function RolesListPage() {
-  const roles = await getRoles();
+  const roles = await getRoles({ page: 1, per_page: 20 });
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">

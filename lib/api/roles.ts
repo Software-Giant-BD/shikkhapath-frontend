@@ -10,6 +10,11 @@ export type RoleApiModel = {
   assigned_user_count: number;
 };
 
+export type GetRolesParams = {
+  page?: number;
+  per_page?: number;
+};
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
@@ -90,9 +95,21 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getRoles(): Promise<RoleApiModel[]> {
+export async function getRoles(params?: GetRolesParams): Promise<RoleApiModel[]> {
   try {
-    const response = await fetchApi("/admin/roles?per_page=20&page=1");
+    const query = new URLSearchParams();
+
+    if (params?.page !== undefined) {
+      query.set("page", String(params.page));
+    }
+
+    if (params?.per_page !== undefined) {
+      query.set("per_page", String(params.per_page));
+    }
+
+    const path = query.toString() ? `/admin/roles?${query.toString()}` : "/admin/roles";
+
+    const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
