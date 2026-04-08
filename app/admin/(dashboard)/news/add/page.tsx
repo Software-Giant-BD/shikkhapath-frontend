@@ -9,13 +9,17 @@ export default function AddNewsPage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Add News"
+        title=""
         breadcrumbs={[
           { label: "Home", href: "/admin" },
           { label: "News", href: "/admin/news/list" },
           { label: "Add" },
         ]}
-        action={(
+      />
+
+      <NewsForm
+        headerTitle="Add News"
+        headerAction={(
           <Link href="/admin/news/list">
             <Button variant="secondary">
               <List size={16} />
@@ -24,8 +28,6 @@ export default function AddNewsPage() {
           </Link>
         )}
       />
-
-      <NewsForm />
     </div>
   );
 }

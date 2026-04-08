@@ -37,6 +37,11 @@ type NewsFormValues = {
   canonical_url: string;
 };
 
+type NewsFormProps = {
+  headerTitle?: string;
+  headerAction?: React.ReactNode;
+};
+
 const defaultValues: NewsFormValues = {
   title: "",
   slug: "",
@@ -70,7 +75,7 @@ function slugify(value: string) {
     .replace(/-+/g, "-");
 }
 
-export function NewsForm() {
+export function NewsForm({ headerTitle, headerAction }: NewsFormProps) {
   const [form, setForm] = useState<NewsFormValues>(defaultValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
@@ -102,8 +107,16 @@ export function NewsForm() {
       }}
     >
       <Card>
-        <CardHeader>
-          <CardTitle>Headline & Story</CardTitle>
+        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            {headerTitle ? (
+              <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+            ) : (
+              <CardTitle>Headline & Story</CardTitle>
+            )}
+          </div>
+
+          {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
