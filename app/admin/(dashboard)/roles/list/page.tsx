@@ -31,20 +31,23 @@ export default async function RolesListPage({
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Roles"
+        title=""
         breadcrumbs={[{ label: "Home", href: "/admin" }, { label: "Roles" }]}
-        action={(
-          <Link href="/admin/roles/add">
-            <Button>
-              <Plus size={16} />
-              Add Role
-            </Button>
-          </Link>
-        )}
       />
 
       <Card>
         <CardContent className="p-0">
+          <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">
+            <h1 className="text-2xl font-bold text-slate-800">Roles</h1>
+
+            <Link href="/admin/roles/add">
+              <Button>
+                <Plus size={16} />
+                Add Role
+              </Button>
+            </Link>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full min-w-215 text-left text-sm">
               <thead className="bg-slate-50 text-slate-500 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
