@@ -27,6 +27,9 @@ type UserFormProps = {
   userId?: string;
   initialValues?: Partial<UserFormValues>;
   roleOptions: { id: string; name: string }[];
+  showDetailsHeader?: boolean;
+  headerTitle?: string;
+  headerAction?: React.ReactNode;
 };
 
 const defaultValues: UserFormValues = {
@@ -39,7 +42,15 @@ const defaultValues: UserFormValues = {
   can_manage_news: "0",
 };
 
-export function UserForm({ mode, userId, initialValues, roleOptions }: UserFormProps) {
+export function UserForm({
+  mode,
+  userId,
+  initialValues,
+  roleOptions,
+  showDetailsHeader = true,
+  headerTitle,
+  headerAction,
+}: UserFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<UserFormValues>({
     ...defaultValues,
@@ -49,6 +60,7 @@ export function UserForm({ mode, userId, initialValues, roleOptions }: UserFormP
   const [submitError, setSubmitError] = useState("");
 
   const submitText = mode === "add" ? "Save User" : "Update User";
+  const shouldShowHeader = Boolean(headerTitle || headerAction || showDetailsHeader);
 
   return (
     <form
@@ -97,9 +109,19 @@ export function UserForm({ mode, userId, initialValues, roleOptions }: UserFormP
       }}
     >
       <Card>
-        <CardHeader>
-          <CardTitle>User Details</CardTitle>
-        </CardHeader>
+        {shouldShowHeader ? (
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              {headerTitle ? (
+                <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+              ) : showDetailsHeader ? (
+                <CardTitle>User Details</CardTitle>
+              ) : null}
+            </div>
+
+            {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+          </CardHeader>
+        ) : null}
         <CardContent className="space-y-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
