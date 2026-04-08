@@ -2,12 +2,16 @@
 
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Image as ImageIcon, Upload, Video, X } from "lucide-react";
+import { ChevronRight, FolderOpen, Image as ImageIcon, Upload, Video, X } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
-import type { MediaItem, MediaType } from "@/lib/admin/media-library";
-import { addMediaFiles, getMediaItems } from "@/lib/admin/media-library";
+import type { MediaFolder, MediaItem, MediaType } from "@/lib/admin/media-library";
+import {
+  addMediaFiles,
+  getMediaFolders,
+  getMediaItems,
+} from "@/lib/admin/media-library";
 import { cn } from "@/lib/utils";
 
 type MediaPickerDialogProps = {
@@ -24,8 +28,10 @@ function formatSize(bytes: number) {
 }
 
 export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: MediaPickerDialogProps) {
+  const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [items, setItems] = useState<MediaItem[]>([]);
   const [query, setQuery] = useState("");
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -35,7 +41,9 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
       return;
     }
 
+    setFolders(getMediaFolders());
     setItems(getMediaItems());
+    setCurrentFolderId(null);
     setError("");
   }, [isOpen]);
 
@@ -58,6 +66,10 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     const lowerQuery = query.trim().toLowerCase();
 
     return items.filter((item) => {
+      if (item.folder_id !== currentFolderId) {
+        return false;
+      }
+
       if (item.type !== mediaType) {
         return false;
       }
@@ -68,7 +80,45 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
       return item.name.toLowerCase().includes(lowerQuery);
     });
-  }, [items, mediaType, query]);
+  }, [currentFolderId, items, mediaType, query]);
+
+  const visibleFolders = useMemo(() => {
+    const lowerQuery = query.trim().toLowerCase();
+
+    return folders.filter((folder) => {
+      if (folder.parent_id !== currentFolderId) {
+        return false;
+      }
+
+      if (!lowerQuery) {
+        return true;
+      }
+
+      return folder.name.toLowerCase().includes(lowerQuery);
+    });
+  }, [currentFolderId, folders, query]);
+
+  const breadcrumbs = useMemo(() => {
+    if (!currentFolderId) {
+      return [{ id: null as string | null, name: "Home" }];
+    }
+
+    const byId = new Map(folders.map((folder) => [folder.id, folder]));
+    const chain: MediaFolder[] = [];
+
+    let activeId: string | null = currentFolderId;
+    while (activeId) {
+      const currentFolder = byId.get(activeId);
+      if (!currentFolder) {
+        break;
+      }
+
+      chain.push(currentFolder);
+      activeId = currentFolder.parent_id;
+    }
+
+    return [{ id: null as string | null, name: "Home" }, ...chain.reverse()];
+  }, [currentFolderId, folders]);
 
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files || []);
@@ -80,7 +130,10 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     setError("");
 
     try {
-      const nextItems = await addMediaFiles(selected);
+      const nextItems = await addMediaFiles(selected, {
+        folder_id: currentFolderId,
+        media_type: mediaType,
+      });
       setItems(nextItems);
     } catch {
       setError("Failed to upload files.");
@@ -128,7 +181,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search by file name"
+            placeholder="Search folder or file"
             className="max-w-sm"
           />
 
@@ -154,9 +207,48 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
         {error ? <p className="mb-3 text-sm font-medium text-rose-600">{error}</p> : null}
 
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+          {breadcrumbs.map((crumb, index) => (
+            <button
+              key={crumb.id ?? "root"}
+              type="button"
+              onClick={() => setCurrentFolderId(crumb.id)}
+              className={cn(
+                "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
+                index === breadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
+              )}
+            >
+              {index === 0 ? <FolderOpen size={14} /> : null}
+              {crumb.name}
+              {index < breadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
+            </button>
+          ))}
+        </div>
+
+        <div className="mb-4 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Folders</p>
+          {visibleFolders.length === 0 ? (
+            <p className="text-sm text-slate-500">No folder found in this location.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {visibleFolders.map((folder) => (
+                <button
+                  key={folder.id}
+                  type="button"
+                  onClick={() => setCurrentFolderId(folder.id)}
+                  className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm font-medium text-slate-700 hover:border-indigo-300"
+                >
+                  <FolderOpen size={16} className="text-amber-500" />
+                  <span className="truncate">{folder.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
         {filteredItems.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 p-10 text-center">
-            <p className="text-sm text-slate-500">No {mediaType} found. Upload new files from here or use Media Center page.</p>
+            <p className="text-sm text-slate-500">No {mediaType} found in this folder.</p>
           </div>
         ) : (
           <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto pr-1 md:grid-cols-3 lg:grid-cols-4">
