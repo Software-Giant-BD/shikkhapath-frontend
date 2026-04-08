@@ -8,6 +8,7 @@ import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
+import { RichTextEditor } from "@/components/admin/news/RichTextEditor";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
 
@@ -162,13 +163,10 @@ export function NewsForm() {
 
           <div className="space-y-2">
             <Label htmlFor="content">News Content</Label>
-            <Textarea
-              id="content"
-              rows={12}
+            <RichTextEditor
               value={form.content}
               placeholder="Write the full story body in paragraph format"
-              onChange={(event) => setForm((prev) => ({ ...prev, content: event.target.value }))}
-              required
+              onChange={(content) => setForm((prev) => ({ ...prev, content }))}
             />
           </div>
         </CardContent>
