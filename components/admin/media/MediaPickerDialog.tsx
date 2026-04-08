@@ -35,6 +35,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
   const [error, setError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isVideoType = mediaType === "video";
 
   useEffect(() => {
     if (!isOpen) {
@@ -46,6 +47,12 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     setCurrentFolderId(null);
     setError("");
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isVideoType) {
+      setCurrentFolderId(null);
+    }
+  }, [isVideoType]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -66,7 +73,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     const lowerQuery = query.trim().toLowerCase();
 
     return items.filter((item) => {
-      if (item.folder_id !== currentFolderId) {
+      if (!isVideoType && item.folder_id !== currentFolderId) {
         return false;
       }
 
@@ -80,7 +87,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
       return item.name.toLowerCase().includes(lowerQuery);
     });
-  }, [currentFolderId, items, mediaType, query]);
+  }, [currentFolderId, isVideoType, items, mediaType, query]);
 
   const visibleFolders = useMemo(() => {
     const lowerQuery = query.trim().toLowerCase();
@@ -131,7 +138,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
     try {
       const nextItems = await addMediaFiles(selected, {
-        folder_id: currentFolderId,
+        folder_id: isVideoType ? null : currentFolderId,
         media_type: mediaType,
       });
       setItems(nextItems);
@@ -181,7 +188,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search folder or file"
+            placeholder={isVideoType ? "Search video" : "Search folder or file"}
             className="max-w-sm"
           />
 
@@ -207,48 +214,52 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
         {error ? <p className="mb-3 text-sm font-medium text-rose-600">{error}</p> : null}
 
-        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-          {breadcrumbs.map((crumb, index) => (
-            <button
-              key={crumb.id ?? "root"}
-              type="button"
-              onClick={() => setCurrentFolderId(crumb.id)}
-              className={cn(
-                "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
-                index === breadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
-              )}
-            >
-              {index === 0 ? <FolderOpen size={14} /> : null}
-              {crumb.name}
-              {index < breadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
-            </button>
-          ))}
-        </div>
-
-        <div className="mb-4 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Folders</p>
-          {visibleFolders.length === 0 ? (
-            <p className="text-sm text-slate-500">No folder found in this location.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {visibleFolders.map((folder) => (
+        {!isVideoType ? (
+          <>
+            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+              {breadcrumbs.map((crumb, index) => (
                 <button
-                  key={folder.id}
+                  key={crumb.id ?? "root"}
                   type="button"
-                  onClick={() => setCurrentFolderId(folder.id)}
-                  className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm font-medium text-slate-700 hover:border-indigo-300"
+                  onClick={() => setCurrentFolderId(crumb.id)}
+                  className={cn(
+                    "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
+                    index === breadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
+                  )}
                 >
-                  <FolderOpen size={16} className="text-amber-500" />
-                  <span className="truncate">{folder.name}</span>
+                  {index === 0 ? <FolderOpen size={14} /> : null}
+                  {crumb.name}
+                  {index < breadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
                 </button>
               ))}
             </div>
-          )}
-        </div>
+
+            <div className="mb-4 space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Folders</p>
+              {visibleFolders.length === 0 ? (
+                <p className="text-sm text-slate-500">No folder found in this location.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {visibleFolders.map((folder) => (
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => setCurrentFolderId(folder.id)}
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-left text-sm font-medium text-slate-700 hover:border-indigo-300"
+                    >
+                      <FolderOpen size={16} className="text-amber-500" />
+                      <span className="truncate">{folder.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        ) : null}
 
         {filteredItems.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 p-10 text-center">
-            <p className="text-sm text-slate-500">No {mediaType} found in this folder.</p>
+            <p className="text-sm text-slate-500">No {mediaType} found.</p>
           </div>
         ) : (
           <div className="grid max-h-[60vh] grid-cols-2 gap-4 overflow-y-auto pr-1 md:grid-cols-3 lg:grid-cols-4">

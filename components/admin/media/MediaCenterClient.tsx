@@ -4,10 +4,8 @@ import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronRight,
-  Film,
   FolderOpen,
   FolderPlus,
-  Image as ImageIcon,
   Trash2,
   Upload,
   X,
@@ -16,7 +14,11 @@ import {
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
-import type { MediaFolder, MediaItem, MediaType } from "@/lib/admin/media-library";
+import type {
+  MediaFolder,
+  MediaItem,
+  MediaType,
+} from "@/lib/admin/media-library";
 import {
   addMediaFiles,
   createMediaFolder,
@@ -34,7 +36,9 @@ function formatSize(bytes: number) {
 
 export function MediaCenterClient() {
   const [items, setItems] = useState<MediaItem[]>(() => getMediaItems());
-  const [folders, setFolders] = useState<MediaFolder[]>(() => getMediaFolders());
+  const [folders, setFolders] = useState<MediaFolder[]>(() =>
+    getMediaFolders(),
+  );
   const [tab, setTab] = useState<MediaType>("image");
   const [query, setQuery] = useState("");
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
@@ -43,11 +47,19 @@ export function MediaCenterClient() {
   const [newFolderName, setNewFolderName] = useState("");
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const isVideoTab = tab === "video";
 
   useEffect(() => {
     setItems(getMediaItems());
     setFolders(getMediaFolders());
   }, []);
+
+  useEffect(() => {
+    if (isVideoTab) {
+      setCurrentFolderId(null);
+      setIsCreateFolderOpen(false);
+    }
+  }, [isVideoTab]);
 
   const breadcrumbs = useMemo(() => {
     if (!currentFolderId) {
@@ -91,7 +103,7 @@ export function MediaCenterClient() {
     const lowerQuery = query.trim().toLowerCase();
 
     return items.filter((item) => {
-      if (item.folder_id !== currentFolderId) {
+      if (!isVideoTab && item.folder_id !== currentFolderId) {
         return false;
       }
 
@@ -105,7 +117,7 @@ export function MediaCenterClient() {
 
       return item.name.toLowerCase().includes(lowerQuery);
     });
-  }, [currentFolderId, items, query, tab]);
+  }, [currentFolderId, isVideoTab, items, query, tab]);
 
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files || []);
@@ -118,7 +130,7 @@ export function MediaCenterClient() {
 
     try {
       const nextItems = await addMediaFiles(selected, {
-        folder_id: currentFolderId,
+        folder_id: isVideoTab ? null : currentFolderId,
         media_type: tab,
       });
       setItems(nextItems);
@@ -144,7 +156,11 @@ export function MediaCenterClient() {
       setIsCreateFolderOpen(false);
       setError("");
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Failed to create folder.");
+      setError(
+        createError instanceof Error
+          ? createError.message
+          : "Failed to create folder.",
+      );
     }
   };
 
@@ -153,37 +169,47 @@ export function MediaCenterClient() {
       <Card>
         <CardContent className="space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              {(["image", "video"] as MediaType[]).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setTab(value)}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition",
-                    tab === value
-                      ? "border-indigo-200 bg-indigo-50 text-indigo-700"
-                      : "border-slate-200 text-slate-600 hover:border-slate-300",
-                  )}
-                >
-                  {value === "image" ? <ImageIcon size={16} /> : <Film size={16} />}
-                  {value === "image" ? "Images" : "Videos"}
-                </button>
-              ))}
+            <div className="flex flex-wrap items-center gap-10">
+              <h4 className="text-3xl font-bold text-slate-900">Media Center</h4>
+              <div className="flex items-center gap-4">
+                {(["image", "video"] as MediaType[]).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setTab(value)}
+                    className={cn(
+                      "border-b-2 pb-1 text-xl font-medium transition-colors",
+                      tab === value
+                        ? "border-blue-500 text-blue-600"
+                        : "border-transparent text-slate-800 hover:text-slate-900",
+                    )}
+                  >
+                    {value === "image" ? "Images" : "Videos"}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search folder or file"
+                placeholder={
+                  isVideoTab ? "Search video" : "Search folder or file"
+                }
                 className="w-56"
               />
 
-              <Button type="button" variant="secondary" onClick={() => setIsCreateFolderOpen(true)}>
-                <FolderPlus size={14} />
-                New Folder
-              </Button>
+              {!isVideoTab ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsCreateFolderOpen(true)}
+                >
+                  <FolderPlus size={14} />
+                  New Folder
+                </Button>
+              ) : null}
 
               <input
                 ref={fileInputRef}
@@ -200,53 +226,68 @@ export function MediaCenterClient() {
                 disabled={isUploading}
               >
                 <Upload size={14} />
-                {isUploading ? "Uploading..." : tab === "image" ? "Upload Image" : "Upload Video"}
+                {isUploading
+                  ? "Uploading..."
+                  : tab === "image"
+                    ? "Upload Image"
+                    : "Upload Video"}
               </Button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
-            {breadcrumbs.map((crumb, index) => (
-              <button
-                key={crumb.id ?? "root"}
-                type="button"
-                onClick={() => setCurrentFolderId(crumb.id)}
-                className={cn(
-                  "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
-                  index === breadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
-                )}
-              >
-                {index === 0 ? <FolderOpen size={15} /> : null}
-                {crumb.name}
-                {index < breadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
-              </button>
-            ))}
-          </div>
+          {!isVideoTab ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm">
+              {breadcrumbs.map((crumb, index) => (
+                <button
+                  key={crumb.id ?? "root"}
+                  type="button"
+                  onClick={() => setCurrentFolderId(crumb.id)}
+                  className={cn(
+                    "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
+                    index === breadcrumbs.length - 1
+                      ? "font-semibold text-slate-800"
+                      : "",
+                  )}
+                >
+                  {index === 0 ? <FolderOpen size={15} /> : null}
+                  {crumb.name}
+                  {index < breadcrumbs.length - 1 ? (
+                    <ChevronRight size={14} />
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
-          {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+          {error ? (
+            <p className="text-sm font-medium text-rose-600">{error}</p>
+          ) : null}
 
-          <div className="space-y-3">
-
-            {visibleFolders.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
-                No folder found in this location.
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-                {visibleFolders.map((folder) => (
-                  <button
-                    key={folder.id}
-                    type="button"
-                    onClick={() => setCurrentFolderId(folder.id)}
-                    className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-4 text-left transition hover:border-indigo-300"
-                  >
-                    <FolderOpen size={18} className="text-amber-500" />
-                    <span className="truncate text-sm font-medium text-slate-700">{folder.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {!isVideoTab ? (
+            <div className="space-y-3">
+              {visibleFolders.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                  No folder found in this location.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+                  {visibleFolders.map((folder) => (
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => setCurrentFolderId(folder.id)}
+                      className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-4 text-left transition hover:border-indigo-300"
+                    >
+                      <FolderOpen size={18} className="text-amber-500" />
+                      <span className="truncate text-sm font-medium text-slate-700">
+                        {folder.name}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
 
           <div className="space-y-3">
             <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
@@ -255,27 +296,47 @@ export function MediaCenterClient() {
 
             {filteredItems.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center text-sm text-slate-500">
-                No {tab} found in this folder.
+                {isVideoTab
+                  ? "No video found."
+                  : "No image found in this folder."}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {filteredItems.map((item) => (
-                  <div key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                  <div
+                    key={item.id}
+                    className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                  >
                     <div className="aspect-video bg-slate-100">
                       {item.type === "image" ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
+                        <img
+                          src={item.url}
+                          alt={item.name}
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
-                        <video src={item.url} className="h-full w-full object-cover" controls={false} />
+                        <video
+                          src={item.url}
+                          className="h-full w-full object-cover"
+                          controls={false}
+                        />
                       )}
                     </div>
 
                     <div className="space-y-1 p-3">
-                      <p className="truncate text-xs font-semibold text-slate-800" title={item.name}>
+                      <p
+                        className="truncate text-xs font-semibold text-slate-800"
+                        title={item.name}
+                      >
                         {item.name}
                       </p>
-                      <p className="text-[11px] text-slate-500">{formatSize(item.size)}</p>
-                      <p className="text-[11px] text-slate-500">{new Date(item.created_at).toLocaleString()}</p>
+                      <p className="text-[11px] text-slate-500">
+                        {formatSize(item.size)}
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {new Date(item.created_at).toLocaleString()}
+                      </p>
 
                       <button
                         type="button"
@@ -305,7 +366,9 @@ export function MediaCenterClient() {
 
           <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-800">Create New Folder</h3>
+              <h3 className="text-lg font-semibold text-slate-800">
+                Create New Folder
+              </h3>
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
@@ -324,7 +387,11 @@ export function MediaCenterClient() {
               />
 
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="secondary" onClick={() => setIsCreateFolderOpen(false)}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsCreateFolderOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="button" onClick={onCreateFolder}>
