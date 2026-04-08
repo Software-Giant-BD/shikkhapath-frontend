@@ -226,7 +226,6 @@ export function MediaCenterClient() {
           {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-700">Folders</h4>
 
             {visibleFolders.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
