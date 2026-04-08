@@ -62,6 +62,18 @@ const menuConfig: MenuSection[] = [
   },
 ];
 
+function getExpandedMenuForPath(pathname: string) {
+  for (const section of menuConfig) {
+    for (const item of section.items) {
+      if (item.subItems?.some((sub) => sub.href === pathname)) {
+        return item.title;
+      }
+    }
+  }
+
+  return null;
+}
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,19 +81,18 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>(
-    {},
+  const [expandedMenuTitle, setExpandedMenuTitle] = useState<string | null>(
+    getExpandedMenuForPath(pathname),
   );
 
   const toggleMenu = (title: string) => {
-    setExpandedMenus((prev) => ({
-      ...prev,
-      [title]: !prev[title],
-    }));
+    setExpandedMenuTitle((prev) => (prev === title ? null : title));
   };
 
   // Close sidebar on mobile when route changes
   useEffect(() => {
+    setExpandedMenuTitle(getExpandedMenuForPath(pathname));
+
     if (window.innerWidth < 768) {
       onClose();
     }
@@ -147,7 +158,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     item.href === pathname ||
                     (hasSubItems &&
                       item.subItems?.some((sub) => sub.href === pathname));
-                  const isExpanded = !!expandedMenus[item.title] || isActive;
+                  const isExpanded = expandedMenuTitle === item.title || isActive;
                   const Icon = item.icon;
 
                   return (
