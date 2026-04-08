@@ -23,6 +23,9 @@ type RoleFormProps = {
   mode: "add" | "edit";
   roleId?: string;
   initialValues?: Partial<RoleFormValues>;
+  showDetailsHeader?: boolean;
+  headerTitle?: string;
+  headerAction?: React.ReactNode;
 };
 
 const defaultValues: RoleFormValues = {
@@ -31,7 +34,14 @@ const defaultValues: RoleFormValues = {
   description: "",
 };
 
-export function RoleForm({ mode, roleId, initialValues }: RoleFormProps) {
+export function RoleForm({
+  mode,
+  roleId,
+  initialValues,
+  showDetailsHeader = true,
+  headerTitle,
+  headerAction,
+}: RoleFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<RoleFormValues>({
     ...defaultValues,
@@ -41,6 +51,7 @@ export function RoleForm({ mode, roleId, initialValues }: RoleFormProps) {
   const [submitError, setSubmitError] = useState("");
 
   const submitText = mode === "add" ? "Save Role" : "Update Role";
+  const shouldShowHeader = Boolean(headerTitle || headerAction || showDetailsHeader);
 
   return (
     <form
@@ -82,9 +93,19 @@ export function RoleForm({ mode, roleId, initialValues }: RoleFormProps) {
       }}
     >
       <Card>
-        <CardHeader>
-          <CardTitle>Role Details</CardTitle>
-        </CardHeader>
+        {shouldShowHeader ? (
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              {headerTitle ? (
+                <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+              ) : showDetailsHeader ? (
+                <CardTitle>Role Details</CardTitle>
+              ) : null}
+            </div>
+
+            {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+          </CardHeader>
+        ) : null}
         <CardContent className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="name">Role Name</Label>

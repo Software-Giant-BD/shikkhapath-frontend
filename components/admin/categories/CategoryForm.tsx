@@ -36,6 +36,9 @@ type CategoryFormProps = {
   mode: "add" | "edit";
   initialValues?: CategoryFormInitialValues;
   categoryId?: string;
+  showDetailsHeader?: boolean;
+  headerTitle?: string;
+  headerAction?: React.ReactNode;
 };
 
 function slugify(value: string) {
@@ -68,7 +71,14 @@ const parentOptions = [
   { value: "national", label: "National" },
 ];
 
-export function CategoryForm({ mode, initialValues, categoryId }: CategoryFormProps) {
+export function CategoryForm({
+  mode,
+  initialValues,
+  categoryId,
+  showDetailsHeader = true,
+  headerTitle,
+  headerAction,
+}: CategoryFormProps) {
   const router = useRouter();
   const [form, setForm] = useState<CategoryFormValues>({
     ...defaultValues,
@@ -80,6 +90,7 @@ export function CategoryForm({ mode, initialValues, categoryId }: CategoryFormPr
   const [submitError, setSubmitError] = useState("");
 
   const submitText = mode === "add" ? "Save Category" : "Update Category";
+  const shouldShowHeader = Boolean(headerTitle || headerAction || showDetailsHeader);
 
   const keywordsPreview = useMemo(() => {
     return form.meta_keywords
@@ -154,9 +165,19 @@ export function CategoryForm({ mode, initialValues, categoryId }: CategoryFormPr
       }}
     >
       <Card>
-        <CardHeader>
-          <CardTitle>Category Details</CardTitle>
-        </CardHeader>
+        {shouldShowHeader ? (
+          <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              {headerTitle ? (
+                <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+              ) : showDetailsHeader ? (
+                <CardTitle>Category Details</CardTitle>
+              ) : null}
+            </div>
+
+            {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+          </CardHeader>
+        ) : null}
         <CardContent className="space-y-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">

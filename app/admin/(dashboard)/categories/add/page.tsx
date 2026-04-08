@@ -9,13 +9,19 @@ export default function AddCategoryPage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Add Category"
+        title=""
         breadcrumbs={[
           { label: "Home", href: "/admin" },
           { label: "Categories", href: "/admin/categories/list" },
           { label: "Add" },
         ]}
-        action={(
+      />
+
+      <CategoryForm
+        mode="add"
+        showDetailsHeader={false}
+        headerTitle="Add Category"
+        headerAction={(
           <Link href="/admin/categories/list">
             <Button variant="secondary">
               <List size={16} />
@@ -24,8 +30,6 @@ export default function AddCategoryPage() {
           </Link>
         )}
       />
-
-      <CategoryForm mode="add" />
     </div>
   );
 }

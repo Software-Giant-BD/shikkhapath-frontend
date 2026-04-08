@@ -9,13 +9,19 @@ export default function AddRolePage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Add Role"
+        title=""
         breadcrumbs={[
           { label: "Home", href: "/admin" },
           { label: "Roles", href: "/admin/roles/list" },
           { label: "Add" },
         ]}
-        action={(
+      />
+
+      <RoleForm
+        mode="add"
+        showDetailsHeader={false}
+        headerTitle="Add Role"
+        headerAction={(
           <Link href="/admin/roles/list">
             <Button variant="secondary">
               <List size={16} />
@@ -24,8 +30,6 @@ export default function AddRolePage() {
           </Link>
         )}
       />
-
-      <RoleForm mode="add" />
     </div>
   );
 }
