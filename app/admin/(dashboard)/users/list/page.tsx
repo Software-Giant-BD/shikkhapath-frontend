@@ -5,34 +5,28 @@ import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import { UsersListFilters } from "@/components/admin/users/UsersListFilters";
-import { getRoles } from "@/lib/api/roles";
 import { getUsersList } from "@/lib/api/users";
 
 function formatBoolean(value: boolean, trueLabel: string, falseLabel: string) {
   return value ? trueLabel : falseLabel;
 }
 
-type SearchParams = Promise<{ page?: string; search?: string; role_id?: string }>;
+type SearchParams = Promise<{ page?: string; search?: string }>;
 
 export default async function UsersListPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
-  const { page, search, role_id } = await searchParams;
+  const { page, search } = await searchParams;
   const currentPage = Math.max(1, Number(page) || 1);
   const searchValue = search?.trim() || "";
-  const roleIdValue = role_id?.trim() || "";
 
-  const [usersResult, roles] = await Promise.all([
-    getUsersList({
-      page: currentPage,
-      per_page: 20,
-      search: searchValue || undefined,
-      role_id: roleIdValue || undefined,
-    }),
-    getRoles(),
-  ]);
+  const usersResult = await getUsersList({
+    page: currentPage,
+    per_page: 20,
+    search: searchValue || undefined,
+  });
 
   const { items: users, pagination } = usersResult;
 
@@ -47,34 +41,29 @@ export default async function UsersListPage({
       query.set("search", searchValue);
     }
 
-    if (roleIdValue) {
-      query.set("role_id", roleIdValue);
-    }
-
     return `/admin/users/list?${query.toString()}`;
   };
 
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Users"
+        title=""
         breadcrumbs={[{ label: "Home", href: "/admin" }, { label: "Users" }]}
-        action={(
-          <Link href="/admin/users/add">
-            <Button>
-              <Plus size={16} />
-              Add User
-            </Button>
-          </Link>
-        )}
       />
 
       <Card>
         <CardContent className="p-0">
           <UsersListFilters
-            roles={roles.map((role) => ({ id: role.id, name: role.name }))}
             initialSearch={searchValue}
-            initialRoleId={roleIdValue}
+            title="Users"
+            action={(
+              <Link href="/admin/users/add">
+                <Button>
+                  <Plus size={16} />
+                  Add User
+                </Button>
+              </Link>
+            )}
           />
 
           <div className="overflow-x-auto">

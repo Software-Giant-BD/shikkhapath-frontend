@@ -1,22 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
-import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
-import { Select } from "@/components/admin/ui/select";
-
-type RoleOption = {
-  id: string;
-  name: string;
-};
 
 type UsersListFiltersProps = {
-  roles: RoleOption[];
   initialSearch: string;
-  initialRoleId: string;
+  title: string;
+  action?: React.ReactNode;
 };
 
 function normalizeSearchForQuery(value: string): string {
@@ -28,23 +21,18 @@ function normalizeSearchForQuery(value: string): string {
   return "";
 }
 
-export function UsersListFilters({ roles, initialSearch, initialRoleId }: UsersListFiltersProps) {
+export function UsersListFilters({ initialSearch, title, action }: UsersListFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const isFirstRender = useRef(true);
 
   const [search, setSearch] = useState(initialSearch);
-  const [roleId, setRoleId] = useState(initialRoleId);
 
   useEffect(() => {
     setSearch(initialSearch);
   }, [initialSearch]);
 
-  useEffect(() => {
-    setRoleId(initialRoleId);
-  }, [initialRoleId]);
-
-  const navigateWithFilters = (searchValue: string, roleValue: string) => {
+  const navigateWithFilters = useCallback((searchValue: string) => {
     const query = new URLSearchParams();
     const normalizedSearch = normalizeSearchForQuery(searchValue);
 
@@ -54,12 +42,8 @@ export function UsersListFilters({ roles, initialSearch, initialRoleId }: UsersL
       query.set("search", normalizedSearch);
     }
 
-    if (roleValue) {
-      query.set("role_id", roleValue);
-    }
-
     router.replace(`${pathname}?${query.toString()}`, { scroll: false });
-  };
+  }, [pathname, router]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -73,51 +57,31 @@ export function UsersListFilters({ roles, initialSearch, initialRoleId }: UsersL
     }
 
     const timeoutId = setTimeout(() => {
-      navigateWithFilters(search, roleId);
+      navigateWithFilters(search);
     }, 350);
 
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [search, roleId]);
+  }, [navigateWithFilters, search]);
 
   return (
-    <div className="flex flex-col gap-2 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-end md:p-6">
-      <div className="relative w-full md:w-64">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <Input
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search..."
-          className="h-10 pl-9"
-        />
+    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">
+      <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="relative w-full md:w-64">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search..."
+            className="h-10 pl-9"
+          />
+        </div>
+
+        {action ? <div className="shrink-0">{action}</div> : null}
       </div>
-
-      <Select
-        value={roleId}
-        onChange={(event) => setRoleId(event.target.value)}
-        className="h-10 w-full md:w-44"
-      >
-        <option value="">All Roles</option>
-        {roles.map((role) => (
-          <option key={role.id} value={role.id}>
-            {role.name}
-          </option>
-        ))}
-      </Select>
-
-      <Button
-        type="button"
-        variant="secondary"
-        className="h-10"
-        onClick={() => {
-          setSearch("");
-          setRoleId("");
-          router.replace(`${pathname}?page=1`, { scroll: false });
-        }}
-      >
-        Reset
-      </Button>
     </div>
   );
 }
