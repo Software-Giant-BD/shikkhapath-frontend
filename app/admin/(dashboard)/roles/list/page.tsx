@@ -29,7 +29,7 @@ export default async function RolesListPage({
   const getPageHref = (pageNumber: number) => `/admin/roles/list?page=${pageNumber}`;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
         title="Roles"
         breadcrumbs={[{ label: "Home", href: "/admin" }, { label: "Roles" }]}

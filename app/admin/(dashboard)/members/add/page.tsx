@@ -14,7 +14,7 @@ import Link from "next/link";
 
 export default function AddMemberPage() {
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
         title="Add New Member"
         breadcrumbs={[
