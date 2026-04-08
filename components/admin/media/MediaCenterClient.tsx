@@ -290,9 +290,9 @@ export function MediaCenterClient() {
           ) : null}
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <div className="flex items-center rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
               {tab === "image" ? "Image Gallery" : "Video Gallery"}
-            </h4>
+            </div>
 
             {filteredItems.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-200 p-12 text-center text-sm text-slate-500">
