@@ -9,6 +9,7 @@ import {
   Users,
   Tags,
   Newspaper,
+  FolderOpen,
   ChevronDown,
   ChevronRight,
   X,
@@ -56,6 +57,7 @@ const menuConfig: MenuSection[] = [
           { title: "Add News", href: "/admin/news/add" },
         ],
       },
+      { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
   },
 ];

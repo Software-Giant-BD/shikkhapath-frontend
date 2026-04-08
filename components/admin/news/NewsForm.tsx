@@ -8,6 +8,7 @@ import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
+import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { RichTextEditor } from "@/components/admin/news/RichTextEditor";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
@@ -74,6 +75,7 @@ export function NewsForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
 
   const tagPreview = useMemo(() => {
     return form.tags
@@ -180,13 +182,23 @@ export function NewsForm() {
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="feature_image_url">Feature Image URL</Label>
-              <Input
-                id="feature_image_url"
-                type="url"
-                value={form.feature_image_url}
-                placeholder="https://..."
-                onChange={(event) => setForm((prev) => ({ ...prev, feature_image_url: event.target.value }))}
-              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Input
+                  id="feature_image_url"
+                  type="url"
+                  value={form.feature_image_url}
+                  placeholder="https://..."
+                  onChange={(event) => setForm((prev) => ({ ...prev, feature_image_url: event.target.value }))}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setIsMediaPickerOpen(true)}
+                >
+                  Select from Media Center
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -412,6 +424,16 @@ export function NewsForm() {
           {isSubmitting ? "Saving..." : "Save News"}
         </Button>
       </div>
+
+      <MediaPickerDialog
+        isOpen={isMediaPickerOpen}
+        mediaType="image"
+        onClose={() => setIsMediaPickerOpen(false)}
+        onSelect={(item) => {
+          setForm((prev) => ({ ...prev, feature_image_url: item.url }));
+          setIsMediaPickerOpen(false);
+        }}
+      />
     </form>
   );
 }

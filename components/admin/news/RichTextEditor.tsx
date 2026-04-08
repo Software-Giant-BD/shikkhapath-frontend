@@ -37,6 +37,7 @@ import { Color } from "@tiptap/extension-color";
 import Placeholder from "@tiptap/extension-placeholder";
 import { mergeAttributes, Node } from "@tiptap/core";
 
+import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
@@ -140,6 +141,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState("");
   const [isSavingMedia, setIsSavingMedia] = useState(false);
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const editor = useEditor({
@@ -177,6 +179,18 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
       onChange(currentEditor.getHTML());
     },
   });
+
+  function closeMediaDialog() {
+    setDialogType(null);
+    setSource("");
+    setAltText("");
+    setWidth("");
+    setHeight("");
+    setSelectedFile(null);
+    setUploadError("");
+    setIsSavingMedia(false);
+    setIsMediaPickerOpen(false);
+  }
 
   useEffect(() => {
     if (!editor) {
@@ -248,17 +262,6 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
     if (format === "blockquote") {
       chain.toggleBlockquote().run();
     }
-  };
-
-  const closeMediaDialog = () => {
-    setDialogType(null);
-    setSource("");
-    setAltText("");
-    setWidth("");
-    setHeight("");
-    setSelectedFile(null);
-    setUploadError("");
-    setIsSavingMedia(false);
   };
 
   const openMediaDialog = (type: MediaDialogType) => {
@@ -598,6 +601,13 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
                     <Upload size={14} />
                     Upload
                   </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setIsMediaPickerOpen(true)}
+                  >
+                    Media Center
+                  </Button>
                 </div>
                 {selectedFile ? (
                   <p className="text-xs text-emerald-700">Selected: {selectedFile.name}</p>
@@ -655,6 +665,19 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
             </div>
           </div>
         </div>
+      ) : null}
+
+      {dialogType ? (
+        <MediaPickerDialog
+          isOpen={isMediaPickerOpen}
+          mediaType={dialogType}
+          onClose={() => setIsMediaPickerOpen(false)}
+          onSelect={(item) => {
+            setSource(item.url);
+            setSelectedFile(null);
+            setIsMediaPickerOpen(false);
+          }}
+        />
       ) : null}
     </>
   );
