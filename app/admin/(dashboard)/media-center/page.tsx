@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/admin/ui/page-header";
 
 export default function MediaCenterPage() {
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="w-full space-y-4 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
         title=""
         breadcrumbs={[{ label: "Home", href: "/admin" }, { label: "Media Center" }]}
