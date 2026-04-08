@@ -6,7 +6,6 @@ import {
   ChevronRight,
   FolderOpen,
   FolderPlus,
-  Trash2,
   Upload,
   X,
 } from "lucide-react";
@@ -24,7 +23,6 @@ import {
   createMediaFolder,
   getMediaFolders,
   getMediaItems,
-  removeMediaItem,
 } from "@/lib/admin/media-library";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +30,19 @@ function formatSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDateOnly(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
 }
 
 export function MediaCenterClient() {
@@ -142,10 +153,6 @@ export function MediaCenterClient() {
         fileInputRef.current.value = "";
       }
     }
-  };
-
-  const onDelete = (itemId: string) => {
-    setItems(removeMediaItem(itemId));
   };
 
   const onCreateFolder = () => {
@@ -305,7 +312,7 @@ export function MediaCenterClient() {
                 {filteredItems.map((item) => (
                   <div
                     key={item.id}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
                   >
                     <div className="aspect-video bg-slate-100">
                       {item.type === "image" ? (
@@ -324,28 +331,17 @@ export function MediaCenterClient() {
                       )}
                     </div>
 
-                    <div className="space-y-1 p-3">
+                    <div className="space-y-2 p-3.5">
                       <p
-                        className="truncate text-xs font-semibold text-slate-800"
+                        className="truncate text-base font-semibold text-slate-900"
                         title={item.name}
                       >
                         {item.name}
                       </p>
-                      <p className="text-[11px] text-slate-500">
-                        {formatSize(item.size)}
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        {new Date(item.created_at).toLocaleString()}
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => onDelete(item.id)}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-rose-600 hover:text-rose-700"
-                      >
-                        <Trash2 size={12} />
-                        Delete
-                      </button>
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span>{formatSize(item.size)}</span>
+                        <span>{formatDateOnly(item.created_at)}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
