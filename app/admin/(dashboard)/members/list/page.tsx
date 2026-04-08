@@ -11,20 +11,23 @@ export default function MembersListPage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Members List"
+        title=""
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Members" }]}
-        action={
-          <Link href="/admin/members/add">
-            <Button>
-              <Plus size={18} className="mr-2" />
-              Add Member
-            </Button>
-          </Link>
-        }
       />
 
       <Card>
         <CardContent className="p-0">
+          <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">
+            <h1 className="text-2xl font-bold text-slate-800">Members List</h1>
+
+            <Link href="/admin/members/add">
+              <Button>
+                <Plus size={18} className="mr-2" />
+                Add Member
+              </Button>
+            </Link>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50 text-slate-500 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
