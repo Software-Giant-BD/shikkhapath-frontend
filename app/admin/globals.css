@@ -38,6 +38,14 @@ body {
   outline: none;
 }
 
+.news-editor__content .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 .news-editor__content h2,
 .news-editor__content h3 {
   margin-top: 1rem;
@@ -76,4 +84,31 @@ body {
   border-left: 3px solid #cbd5e1;
   padding-left: 0.8rem;
   color: #334155;
+}
+
+.news-editor__content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.news-editor__content img {
+  margin: 0.8rem 0;
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+.news-editor__content .youtube {
+  position: relative;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 10px;
+  padding-top: 56.25%;
+}
+
+.news-editor__content .youtube iframe {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  border: 0;
 }
