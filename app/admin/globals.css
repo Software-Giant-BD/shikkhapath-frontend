@@ -97,6 +97,13 @@ body {
   border-radius: 10px;
 }
 
+.news-editor__content video {
+  margin: 0.8rem 0;
+  max-width: 100%;
+  border-radius: 10px;
+  background: #0f172a;
+}
+
 .news-editor__content .youtube {
   position: relative;
   margin: 1rem 0;
