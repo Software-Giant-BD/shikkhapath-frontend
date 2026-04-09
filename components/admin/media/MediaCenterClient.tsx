@@ -6,6 +6,7 @@ import {
   ChevronRight,
   FolderOpen,
   FolderPlus,
+  MoreHorizontal,
   Pencil,
   Trash2,
   Upload,
@@ -72,6 +73,7 @@ export function MediaCenterClient() {
   const [isSavingFolder, setIsSavingFolder] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<MediaFolder | null>(null);
+  const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [error, setError] = useState("");
   const [breadcrumbs, setBreadcrumbs] = useState<Array<{ id: string | null; name: string }>>([
@@ -135,8 +137,25 @@ export function MediaCenterClient() {
       setCurrentFolderId(null);
       setBreadcrumbs([{ id: null, name: "Home" }]);
       setIsCreateFolderOpen(false);
+      setOpenFolderMenuId(null);
     }
   }, [isVideoTab]);
+
+  useEffect(() => {
+    if (!openFolderMenuId) {
+      return;
+    }
+
+    const handleOutsideClick = () => {
+      setOpenFolderMenuId(null);
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [openFolderMenuId]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -275,6 +294,7 @@ export function MediaCenterClient() {
   };
 
   const onEditFolder = (folder: MediaFolder) => {
+    setOpenFolderMenuId(null);
     setEditingFolder(folder);
     setNewFolderName(folder.name);
     setIsCreateFolderOpen(true);
@@ -282,6 +302,8 @@ export function MediaCenterClient() {
   };
 
   const onDeleteFolder = async (folder: MediaFolder) => {
+    setOpenFolderMenuId(null);
+
     if (isSavingFolder) {
       return;
     }
@@ -308,6 +330,7 @@ export function MediaCenterClient() {
   };
 
   const onOpenFolder = (folder: MediaFolder) => {
+    setOpenFolderMenuId(null);
     setCurrentFolderId(folder.id);
   };
 
@@ -434,43 +457,60 @@ export function MediaCenterClient() {
                   {visibleFolders.map((folder) => (
                     <div
                       key={folder.id}
-                      className="space-y-2 rounded-xl border border-slate-200 bg-white px-3 py-4 transition hover:border-indigo-300"
+                      className="group relative rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-indigo-300 hover:bg-slate-100/70"
                     >
                       <button
                         type="button"
-                        onClick={() => onOpenFolder(folder)}
-                        className="flex w-full items-center gap-2 text-left"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOpenFolderMenuId((prev) => (prev === folder.id ? null : folder.id));
+                        }}
+                        className={cn(
+                          "absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition-opacity hover:bg-slate-200",
+                          openFolderMenuId === folder.id
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100",
+                        )}
+                        aria-label={`Folder actions for ${folder.name}`}
                       >
-                        <FolderOpen size={18} className="text-amber-500" />
-                        <span className="truncate text-sm font-medium text-slate-700">
+                        <MoreHorizontal size={16} />
+                      </button>
+
+                      {openFolderMenuId === folder.id ? (
+                        <div
+                          className="absolute right-2 top-11 z-20 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => onEditFolder(folder)}
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-100"
+                          >
+                            <Pencil size={14} />
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void onDeleteFolder(folder)}
+                            disabled={isSavingFolder}
+                            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                          >
+                            <Trash2 size={14} />
+                            Delete
+                          </button>
+                        </div>
+                      ) : null}
+
+                      <button
+                        type="button"
+                        onClick={() => onOpenFolder(folder)}
+                        className="flex w-full flex-col items-center gap-3 pt-2 text-center"
+                      >
+                        <FolderOpen size={64} className="text-amber-500" strokeWidth={1.8} />
+                        <span className="w-full truncate text-xl font-medium text-slate-600">
                           {folder.name}
                         </span>
                       </button>
-
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onEditFolder(folder)}
-                          title="Rename folder"
-                          aria-label={`Rename ${folder.name}`}
-                        >
-                          <Pencil size={14} />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => void onDeleteFolder(folder)}
-                          disabled={isSavingFolder}
-                          title="Delete folder"
-                          aria-label={`Delete ${folder.name}`}
-                          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
                     </div>
                   ))}
                 </div>
