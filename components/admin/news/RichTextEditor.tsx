@@ -37,10 +37,12 @@ import { Color } from "@tiptap/extension-color";
 import Placeholder from "@tiptap/extension-placeholder";
 import { mergeAttributes, Node } from "@tiptap/core";
 
+import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
+import { uploadImageAction } from "@/lib/api/image-actions";
 import { cn } from "@/lib/utils";
 
 type RichTextEditorProps = {
@@ -279,9 +281,38 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
     }
   };
 
+  const uploadSelectedImage = async (file: File) => {
+    const payload = new FormData();
+    payload.append("file", file);
+    payload.append("folder_id", "");
+
+    const result = await uploadImageAction(payload);
+    if (!result.ok || !result.item?.url) {
+      throw new Error(result.message || "Failed to upload image.");
+    }
+
+    const nextItem = {
+      ...result.item,
+      type: "image" as const,
+    };
+    const existingItems = getMediaItems();
+    const nextItems = [
+      nextItem,
+      ...existingItems.filter((item) => item.id !== nextItem.id),
+    ];
+
+    saveMediaItems(nextItems);
+
+    return result.item.url;
+  };
+
   const getMediaSrc = async () => {
     const inputSource = source.trim();
     if (selectedFile) {
+      if (dialogType === "image") {
+        return await uploadSelectedImage(selectedFile);
+      }
+
       return await fileToDataUrl(selectedFile);
     }
 
