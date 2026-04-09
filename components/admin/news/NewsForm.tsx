@@ -1,9 +1,11 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ArrowLeft, Save } from "lucide-react";
 
+import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
@@ -12,6 +14,7 @@ import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { RichTextEditor } from "@/components/admin/news/RichTextEditor";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
+import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
   title: string;
@@ -80,8 +83,11 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
   const [form, setForm] = useState<NewsFormValues>(defaultValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+  const [featureImageError, setFeatureImageError] = useState("");
+  const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
   const [slugEdited, setSlugEdited] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const tagPreview = useMemo(() => {
     return form.tags
@@ -90,6 +96,49 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
       .filter(Boolean)
       .slice(0, 10);
   }, [form.tags]);
+
+  const onUploadFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0] || null;
+    if (!selectedFile) {
+      return;
+    }
+
+    setIsUploadingFeatureImage(true);
+    setFeatureImageError("");
+
+    try {
+      const payload = new FormData();
+      payload.append("file", selectedFile);
+      payload.append("folder_id", "");
+
+      const result = await uploadImageAction(payload);
+      if (!result.ok || !result.item?.url) {
+        setFeatureImageError(result.message || "Failed to upload feature image.");
+        return;
+      }
+
+      const nextItem = {
+        ...result.item,
+        type: "image" as const,
+      };
+
+      const existingItems = getMediaItems();
+      const nextItems = [
+        nextItem,
+        ...existingItems.filter((item) => item.id !== nextItem.id),
+      ];
+
+      saveMediaItems(nextItems);
+      setForm((prev) => ({ ...prev, feature_image_url: result.item?.url || "" }));
+    } catch {
+      setFeatureImageError("Failed to upload feature image.");
+    } finally {
+      setIsUploadingFeatureImage(false);
+      if (featureImageInputRef.current) {
+        featureImageInputRef.current.value = "";
+      }
+    }
+  };
 
   return (
     <form
@@ -211,6 +260,23 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                   onChange={(event) => setForm((prev) => ({ ...prev, feature_image_url: event.target.value }))}
                   className="flex-1"
                 />
+                <input
+                  ref={featureImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(event) => {
+                    void onUploadFeatureImage(event);
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => featureImageInputRef.current?.click()}
+                  disabled={isUploadingFeatureImage}
+                >
+                  {isUploadingFeatureImage ? "Uploading..." : "Upload New"}
+                </Button>
                 <Button
                   type="button"
                   variant="secondary"
@@ -219,6 +285,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                   Select from Media Center
                 </Button>
               </div>
+              {featureImageError ? <p className="text-xs font-medium text-rose-600">{featureImageError}</p> : null}
             </div>
 
             <div className="space-y-2">
@@ -450,6 +517,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
         mediaType="image"
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(item) => {
+          setFeatureImageError("");
           setForm((prev) => ({ ...prev, feature_image_url: item.url }));
           setIsMediaPickerOpen(false);
         }}
