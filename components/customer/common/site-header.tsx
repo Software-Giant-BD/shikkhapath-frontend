@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,7 +21,7 @@ const navLinks = [
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isCompactDesktopHeader, setIsCompactDesktopHeader] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -53,132 +53,106 @@ export function SiteHeader() {
   }, [isOpen]);
 
   useEffect(() => {
-    const onScroll = () => {
-      setIsCompactDesktopHeader(window.scrollY > 72);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Implement Hysteresis (Buffer) to stop jitter
+      if (currentScrollY > 120) {
+        setIsCompact(true);
+      } else if (currentScrollY < 60) {
+        setIsCompact(false);
+      }
     };
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white">
+      <header className="sticky top-0 z-50 w-full bg-white shadow-md ring-1 ring-slate-200/5 transition-all">
+        {/* Top Branding Row */}
         <div
-          className={`hidden border-[#e0b22f] transition-all duration-200 md:block ${
-            isCompactDesktopHeader ? "max-h-0 overflow-hidden border-b-0 opacity-0" : "max-h-28 border-b opacity-100"
+          className={`hidden overflow-hidden border-b border-[#e0b22f]/20 transition-all duration-300 md:block ${
+            isCompact ? "max-h-0 opacity-0 transform -translate-y-2" : "max-h-24 opacity-100 transform translate-y-0"
           }`}
         >
-          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-3 py-2.5 sm:px-4 lg:px-5">
-            <Link
-              href="/"
-              className="inline-flex items-center transition-opacity hover:opacity-90"
-            >
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-4 lg:px-6">
+            <Link href="/" className="inline-flex items-center transition-opacity hover:opacity-90">
               <Image
                 src="/logo.png"
-                alt="Shikkhapath News Portal"
+                alt="Shikkhapath"
                 width={780}
                 height={130}
                 priority
-                className="h-14 w-auto drop-shadow-sm"
+                className="h-[56px] w-auto drop-shadow-sm"
               />
             </Link>
 
-            <div className="flex items-center gap-5 text-sm text-slate-700">
-              <p>বুধবার, ১ এপ্রিল ২০২৬</p>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
-                aria-label="Search"
-              >
-                <Search className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center text-slate-700 transition-colors hover:text-[#b38716]"
-                aria-label="Toggle theme"
-              >
-                <Moon className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:border-[#d5a726] hover:text-[#b38716]"
-              >
-                <Globe className="h-4 w-4" /> Eng
-              </button>
+            <div className="flex items-center gap-8 text-sm text-slate-700">
+              <span className="font-semibold text-slate-500">বুধবার, ১ এপ্রিল ২০২৬</span>
+              <div className="flex items-center gap-4 bg-slate-50 rounded-full px-5 py-2 ring-1 ring-slate-100">
+                <button type="button" className="text-slate-600 hover:text-[#b38716] transition-colors" aria-label="Search">
+                  <Search className="h-5 w-5" />
+                </button>
+                <div className="w-px h-4 bg-slate-200" />
+                <button type="button" className="text-slate-600 hover:text-[#b38716] transition-colors" aria-label="Toggle theme">
+                  <Moon className="h-5 w-5" />
+                </button>
+                <button type="button" className="inline-flex items-center gap-2 text-[13px] font-bold text-slate-700 hover:text-[#b38716] transition-colors">
+                  <Globe className="h-4 w-4" /> Eng
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="border-b border-[#e0b22f] md:hidden">
-          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-3 py-4 sm:px-4 lg:px-5">
+        {/* Mobile Header Row */}
+        <div className="border-b border-[#e0b22f]/30 md:hidden bg-white">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-3.5">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center rounded-md border border-slate-300 p-2 text-slate-700 transition-colors hover:bg-slate-50 hover:text-[#b38716] focus:outline-none md:hidden"
-              aria-expanded={isOpen}
-              aria-controls="mobile-main-menu"
+              className="inline-flex items-center justify-center rounded-xl bg-slate-50 p-2 text-slate-700 shadow-sm ring-1 ring-slate-200 transition-all active:scale-95"
             >
-              <span className="sr-only">Toggle main menu</span>
-              {isOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              )}
+              <Menu className="h-6 w-6" />
             </button>
 
-            <Link
-              href="/"
-              className="inline-flex items-center transition-opacity hover:opacity-90"
-            >
-              <Image
-                src="/logo.png"
-                alt="Shikkhapath News Portal"
-                width={780}
-                height={130}
-                priority
-                className="h-12 w-auto"
-              />
+            <Link href="/" className="inline-flex items-center">
+              <Image src="/logo.png" alt="Shikkhapath" width={780} height={130} priority className="h-9 w-auto" />
             </Link>
+
+            <button type="button" className="p-2 text-slate-700"><Search className="h-5 w-5" /></button>
           </div>
         </div>
 
-        <div className="hidden border-b border-[#e0b22f] md:block">
-          <div className="mx-auto flex w-full max-w-screen-2xl items-center gap-4 px-3 py-3 sm:px-4 lg:px-5">
-            {isCompactDesktopHeader ? (
-              <Link
-                href="/"
-                className="inline-flex shrink-0 items-center transition-opacity hover:opacity-90"
-              >
-                <Image
-                  src="/logo.png"
-                  alt="Shikkhapath News Portal"
-                  width={780}
-                  height={130}
-                  className="h-10 w-auto"
-                />
+        {/* Navigation Bar Row */}
+        <div className="hidden border-b border-[#e0b22f]/20 bg-white md:block">
+          <div className="mx-auto flex w-full max-w-screen-2xl items-center relative px-4 lg:px-6">
+            
+            {/* Sticky Logo - Absolute Positioned to prevent layout jump */}
+            <div className={`absolute left-4 lg:left-6 transition-all duration-300 flex items-center ${isCompact ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-5 pointer-events-none"}`}>
+              <Link href="/" className="inline-flex shrink-0 items-center">
+                <Image src="/logo.png" alt="Logo" width={780} height={130} className="h-8 w-auto" />
               </Link>
-            ) : null}
+            </div>
 
-            <nav className="flex min-w-0 flex-1 items-center justify-between gap-1 overflow-x-auto">
+            {/* Nav Menu */}
+            <nav className={`flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto no-scrollbar transition-all duration-300 ${isCompact ? "pl-[140px]" : "pl-0"}`}>
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
-
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`relative inline-flex shrink-0 items-center gap-1 px-3 py-1.5 text-[17px] font-semibold transition-all duration-300 hover:opacity-100 ${
-                      isActive 
-                        ? "text-[#b38716] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#b38716]" 
-                        : "text-slate-900 hover:text-[#b38716] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#b38716] after:transition-all hover:after:w-full"
+                    className={`relative inline-flex shrink-0 items-center gap-1 px-4 py-3.5 text-[16px] font-semibold transition-all duration-300 ${
+                      isActive ? "text-[#b38716]" : "text-slate-900 hover:text-[#b38716]"
                     }`}
                   >
                     {link.label}
-                    {link.hasDropdown ? <ChevronDown className="h-4 w-4 opacity-70" /> : null}
+                    {link.hasDropdown && <ChevronDown className="h-3.5 w-3.5 opacity-50" />}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 h-[3px] w-full bg-[#b38716] rounded-t-full" />
+                    )}
                   </Link>
                 );
               })}
@@ -187,84 +161,26 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile Navigation — rendered outside <header> to escape its stacking context */}
+      {/* Mobile Navigation Drawer */}
       {isOpen && (
-        <div
-          id="mobile-main-menu"
-          className="fixed inset-0 z-9999 md:hidden"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="absolute inset-0 bg-slate-950/50"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
-
-          <div
-            className="relative h-full w-full overflow-y-auto bg-white pb-10 shadow-2xl"
-          >
-            {/* Menu header with logo and close button */}
-            <div className="relative mx-auto flex w-full max-w-6xl items-center justify-between border-b border-[#e0b22f] px-4 py-3 sm:px-6">
-              <Link
-                href="/"
-                className="inline-flex items-center transition-opacity hover:opacity-90"
-              >
-                <Image
-                  src="/logo.png"
-                  alt="Shikkhapath News Portal"
-                  width={780}
-                  height={130}
-                  className="h-11 w-auto"
-                />
-              </Link>
-
-              <button
-                onClick={() => setIsOpen(false)}
-                className="inline-flex items-center justify-center rounded-md p-2 text-slate-700 transition-colors hover:bg-slate-100 hover:text-[#b38716] focus:outline-none"
-                aria-label="Close main menu"
-              >
-                <X className="h-7 w-7" aria-hidden="true" />
-              </button>
+        <div className="fixed inset-0 z-100 md:hidden" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+          <div className="relative h-full w-[85%] max-w-sm bg-white shadow-2xl transition-all duration-300">
+            <div className="flex items-center justify-between border-b px-5 py-5 bg-white sticky top-0">
+              <Link href="/" onClick={() => setIsOpen(false)}><Image src="/logo.png" alt="Logo" width={780} height={130} className="h-9 w-auto" /></Link>
+              <button onClick={() => setIsOpen(false)} className="rounded-full bg-slate-100 p-2"><X className="h-6 w-6" /></button>
             </div>
-
-            {/* Nav links */}
-            <nav className="relative flex flex-col px-6 pt-8">
-              <p className="mb-4 text-xs uppercase tracking-[0.22em] text-slate-500">
-                Navigation
-              </p>
-
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`rounded-xl px-4 py-3 text-base font-semibold transition-colors ${
-                      isActive
-                        ? "bg-[#fff6dd] text-[#b38716]"
-                        : "text-slate-900 hover:bg-slate-50 hover:text-[#b38716]"
-                    }`}
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {link.label}
-                      {link.hasDropdown ? <ChevronDown className="h-4 w-4" /> : null}
-                    </span>
-                  </Link>
-                );
-              })}
+            <nav className="p-6 space-y-2">
+              <p className="mb-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Navigation Menu</p>
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)} className={`flex items-center justify-between rounded-xl px-5 py-4 text-[17px] font-semibold transition-all ${pathname === link.href ? "bg-[#fff6dd] text-[#b38716]" : "hover:bg-slate-50"}`}>
+                  <span>{link.label}</span>
+                  {link.hasDropdown && <ChevronDown className="h-4 w-4 opacity-30" />}
+                </Link>
+              ))}
             </nav>
-
-            <div className="relative mx-6 mt-8 border-t border-slate-200 pt-6">
-              <Link
-                href="/contact-us"
-                onClick={() => setIsOpen(false)}
-                className="inline-flex items-center rounded-full bg-[#c79a1d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#b38716]"
-              >
-                যোগাযোগ করুন
-              </Link>
+            <div className="px-6 mt-10">
+              <Link href="/contact-us" onClick={() => setIsOpen(false)} className="flex items-center justify-center rounded-2xl bg-[#c79a1d] py-4.5 text-white font-bold shadow-lg shadow-[#c79a1d]/20 transition-all hover:bg-[#b38716]">যোগাযোগ করুন</Link>
             </div>
           </div>
         </div>

@@ -46,10 +46,14 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <SiteHeader />
-      <BreakingTicker />
 
       <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
-        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="my-3" heightClass="h-20" />
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+          className="my-4"
+          heightClass="h-24 sm:h-28"
+        />
+        <BreakingTicker />
 
         <HeroSection />
 
