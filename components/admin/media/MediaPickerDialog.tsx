@@ -9,9 +9,9 @@ import { Input } from "@/components/admin/ui/input";
 import type { MediaFolder, MediaItem, MediaType } from "@/lib/admin/media-library";
 import {
   addMediaFiles,
-  getMediaFolders,
   getMediaItems,
 } from "@/lib/admin/media-library";
+import { getFoldersAction } from "@/lib/api/folder-actions";
 import { cn } from "@/lib/utils";
 
 type MediaPickerDialogProps = {
@@ -42,10 +42,32 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
       return;
     }
 
-    setFolders(getMediaFolders());
+    let cancelled = false;
+
+    async function hydrateFolders() {
+      const result = await getFoldersAction();
+
+      if (cancelled) {
+        return;
+      }
+
+      if (!result.ok) {
+        setFolders([]);
+        setError(result.message || "Failed to load folders.");
+        return;
+      }
+
+      setFolders(result.items);
+      setError("");
+    }
+
+    void hydrateFolders();
     setItems(getMediaItems());
     setCurrentFolderId(null);
-    setError("");
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -157,7 +179,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-80 flex items-center justify-center p-4">
       <button
         type="button"
         className="absolute inset-0 bg-slate-900/45 backdrop-blur-[1px]"

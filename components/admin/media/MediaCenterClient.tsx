@@ -1,11 +1,13 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronRight,
   FolderOpen,
   FolderPlus,
+  Pencil,
+  Trash2,
   Upload,
   X,
 } from "lucide-react";
@@ -20,10 +22,14 @@ import type {
 } from "@/lib/admin/media-library";
 import {
   addMediaFiles,
-  createMediaFolder,
-  getMediaFolders,
   getMediaItems,
 } from "@/lib/admin/media-library";
+import {
+  createFolderAction,
+  deleteFolderAction,
+  getFoldersAction,
+  updateFolderAction,
+} from "@/lib/api/folder-actions";
 import { cn } from "@/lib/utils";
 
 function formatSize(bytes: number) {
@@ -47,23 +53,47 @@ function formatDateOnly(value: string) {
 
 export function MediaCenterClient() {
   const [items, setItems] = useState<MediaItem[]>(() => getMediaItems());
-  const [folders, setFolders] = useState<MediaFolder[]>(() =>
-    getMediaFolders(),
-  );
+  const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [tab, setTab] = useState<MediaType>("image");
   const [query, setQuery] = useState("");
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoadingFolders, setIsLoadingFolders] = useState(false);
+  const [isSavingFolder, setIsSavingFolder] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<MediaFolder | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isVideoTab = tab === "video";
 
+  const refreshFolders = useCallback(async () => {
+    setIsLoadingFolders(true);
+
+    const result = await getFoldersAction('');
+
+    if (!result.ok) {
+      setError(result.message || "Failed to load folders.");
+      setIsLoadingFolders(false);
+      return;
+    }
+
+    setFolders(result.items);
+    setError("");
+    setCurrentFolderId((prev) => {
+      if (!prev) {
+        return null;
+      }
+
+      return result.items.some((folder) => folder.id === prev) ? prev : null;
+    });
+    setIsLoadingFolders(false);
+  }, []);
+
   useEffect(() => {
     setItems(getMediaItems());
-    setFolders(getMediaFolders());
-  }, []);
+    void refreshFolders();
+  }, [refreshFolders]);
 
   useEffect(() => {
     if (isVideoTab) {
@@ -155,19 +185,70 @@ export function MediaCenterClient() {
     }
   };
 
-  const onCreateFolder = () => {
+  const onCreateFolder = async () => {
+    const nextName = newFolderName.trim();
+    if (!nextName || isSavingFolder) {
+      return;
+    }
+
+    setIsSavingFolder(true);
+
     try {
-      const result = createMediaFolder(newFolderName, currentFolderId);
-      setFolders(result.folders);
+      const result = editingFolder
+        ? await updateFolderAction(editingFolder.id, nextName, editingFolder.parent_id)
+        : await createFolderAction(nextName, currentFolderId);
+
+      if (!result.ok) {
+        setError(result.message || "Failed to save folder.");
+        return;
+      }
+
+      await refreshFolders();
       setNewFolderName("");
+      setEditingFolder(null);
       setIsCreateFolderOpen(false);
       setError("");
     } catch (createError) {
       setError(
         createError instanceof Error
           ? createError.message
-          : "Failed to create folder.",
+          : "Failed to save folder.",
       );
+    } finally {
+      setIsSavingFolder(false);
+    }
+  };
+
+  const onEditFolder = (folder: MediaFolder) => {
+    setEditingFolder(folder);
+    setNewFolderName(folder.name);
+    setIsCreateFolderOpen(true);
+    setError("");
+  };
+
+  const onDeleteFolder = async (folder: MediaFolder) => {
+    if (isSavingFolder) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Delete folder \"${folder.name}\"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    setIsSavingFolder(true);
+    setError("");
+
+    try {
+      const result = await deleteFolderAction(folder.id);
+      if (!result.ok) {
+        setError(result.message || "Failed to delete folder.");
+        return;
+      }
+
+      await refreshFolders();
+    } finally {
+      setIsSavingFolder(false);
     }
   };
 
@@ -211,7 +292,11 @@ export function MediaCenterClient() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setIsCreateFolderOpen(true)}
+                  onClick={() => {
+                    setEditingFolder(null);
+                    setNewFolderName("");
+                    setIsCreateFolderOpen(true);
+                  }}
                 >
                   <FolderPlus size={14} />
                   New Folder
@@ -272,24 +357,57 @@ export function MediaCenterClient() {
 
           {!isVideoTab ? (
             <div className="space-y-3">
-              {visibleFolders.length === 0 ? (
+              {isLoadingFolders ? (
+                <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                  Loading folders...
+                </div>
+              ) : visibleFolders.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
                   No folder found in this location.
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
                   {visibleFolders.map((folder) => (
-                    <button
+                    <div
                       key={folder.id}
-                      type="button"
-                      onClick={() => setCurrentFolderId(folder.id)}
-                      className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-4 text-left transition hover:border-indigo-300"
+                      className="space-y-2 rounded-xl border border-slate-200 bg-white px-3 py-4 transition hover:border-indigo-300"
                     >
-                      <FolderOpen size={18} className="text-amber-500" />
-                      <span className="truncate text-sm font-medium text-slate-700">
-                        {folder.name}
-                      </span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setCurrentFolderId(folder.id)}
+                        className="flex w-full items-center gap-2 text-left"
+                      >
+                        <FolderOpen size={18} className="text-amber-500" />
+                        <span className="truncate text-sm font-medium text-slate-700">
+                          {folder.name}
+                        </span>
+                      </button>
+
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onEditFolder(folder)}
+                          title="Rename folder"
+                          aria-label={`Rename ${folder.name}`}
+                        >
+                          <Pencil size={14} />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => void onDeleteFolder(folder)}
+                          disabled={isSavingFolder}
+                          title="Delete folder"
+                          aria-label={`Delete ${folder.name}`}
+                          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -352,23 +470,31 @@ export function MediaCenterClient() {
       </Card>
 
       {isCreateFolderOpen ? (
-        <div className="fixed inset-0 z-[85] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-85 flex items-center justify-center p-4">
           <button
             type="button"
             className="absolute inset-0 bg-slate-900/45"
-            onClick={() => setIsCreateFolderOpen(false)}
+            onClick={() => {
+              setIsCreateFolderOpen(false);
+              setEditingFolder(null);
+              setNewFolderName("");
+            }}
             aria-label="Close create folder dialog"
           />
 
           <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-slate-800">
-                Create New Folder
+                {editingFolder ? "Rename Folder" : "Create New Folder"}
               </h3>
               <button
                 type="button"
                 className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
-                onClick={() => setIsCreateFolderOpen(false)}
+                onClick={() => {
+                  setIsCreateFolderOpen(false);
+                  setEditingFolder(null);
+                  setNewFolderName("");
+                }}
                 aria-label="Close"
               >
                 <X size={16} />
@@ -386,12 +512,24 @@ export function MediaCenterClient() {
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setIsCreateFolderOpen(false)}
+                  onClick={() => {
+                    setIsCreateFolderOpen(false);
+                    setEditingFolder(null);
+                    setNewFolderName("");
+                  }}
                 >
                   Cancel
                 </Button>
-                <Button type="button" onClick={onCreateFolder}>
-                  Create
+                <Button
+                  type="button"
+                  onClick={() => void onCreateFolder()}
+                  disabled={isSavingFolder || !newFolderName.trim()}
+                >
+                  {isSavingFolder
+                    ? "Saving..."
+                    : editingFolder
+                      ? "Update"
+                      : "Create"}
                 </Button>
               </div>
             </div>
