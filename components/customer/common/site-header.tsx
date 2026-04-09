@@ -7,16 +7,17 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Globe, Menu, Moon, Search, X } from "lucide-react";
 
 const navLinks = [
-  { label: "সর্বশেষ", href: "/news?category=latest" },
-  { label: "শিক্ষাঙ্গন", href: "/news?category=education", hasDropdown: true },
-  { label: "উচ্চশিক্ষা", href: "/news?category=higher-education", hasDropdown: true },
-  { label: "শিক্ষা প্রশাসন", href: "/news?category=administration", hasDropdown: true },
-  { label: "ভর্তি পরীক্ষা", href: "/news?category=admission", hasDropdown: true },
-  { label: "কর্মসংস্থান", href: "/news?category=career", hasDropdown: true },
-  { label: "খেলাধুলা", href: "/news?category=sports" },
-  { label: "অর্থনীতি", href: "/news?category=economy" },
-  { label: "জাতীয়", href: "/news?category=national", hasDropdown: true },
-  { label: "আরও", href: "/news", hasDropdown: true },
+  { label: "সর্বশেষ", href: "/category/latest" },
+  { label: "শিক্ষাঙ্গন", href: "/category/education", hasDropdown: true },
+  { label: "উচ্চশিক্ষা", href: "/category/higher-education", hasDropdown: true },
+  { label: "শিক্ষা প্রশাসন", href: "/category/administration", hasDropdown: true },
+  { label: "ভর্তি পরীক্ষা", href: "/category/admission", hasDropdown: true },
+  { label: "কর্মসংস্থান", href: "/category/career", hasDropdown: true },
+  { label: "বিনোদন", href: "/category/entertainment" },
+  { label: "খেলাধুলা", href: "/category/sports" },
+  { label: "অর্থনীতি", href: "/category/economy" },
+  { label: "জাতীয়", href: "/category/national", hasDropdown: true },
+  { label: "আরও", href: "/category/national", hasDropdown: true },
 ];
 
 export function SiteHeader() {
