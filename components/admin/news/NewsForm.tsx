@@ -3,7 +3,7 @@
 import type { ChangeEvent } from "react";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Save } from "lucide-react";
 
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { Button } from "@/components/admin/ui/button";
@@ -250,16 +250,25 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
         <CardContent className="space-y-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="feature_image_url">Feature Image URL</Label>
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  id="feature_image_url"
-                  type="url"
-                  value={form.feature_image_url}
-                  placeholder="https://..."
-                  onChange={(event) => setForm((prev) => ({ ...prev, feature_image_url: event.target.value }))}
-                  className="flex-1"
-                />
+              <Label>Feature Image</Label>
+              <div className="space-y-3">
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  {form.feature_image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={form.feature_image_url}
+                      alt="Selected feature"
+                      className="h-44 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-44 items-center justify-center gap-2 text-sm text-slate-500">
+                      <ImageIcon size={18} />
+                      No feature image selected
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
                 <input
                   ref={featureImageInputRef}
                   type="file"
@@ -284,6 +293,17 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                 >
                   Select from Media Center
                 </Button>
+
+                {form.feature_image_url ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setForm((prev) => ({ ...prev, feature_image_url: "" }))}
+                  >
+                    Remove Image
+                  </Button>
+                ) : null}
+                </div>
               </div>
               {featureImageError ? <p className="text-xs font-medium text-rose-600">{featureImageError}</p> : null}
             </div>
