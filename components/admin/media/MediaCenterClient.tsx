@@ -51,12 +51,21 @@ function formatDateOnly(value: string) {
   }).format(date);
 }
 
+const ACTIVE_FOLDER_STORAGE_KEY = "sp_admin_media_active_folder_id";
+
 export function MediaCenterClient() {
   const [items, setItems] = useState<MediaItem[]>(() => getMediaItems());
   const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [tab, setTab] = useState<MediaType>("image");
   const [query, setQuery] = useState("");
-  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const savedFolderId = window.localStorage.getItem(ACTIVE_FOLDER_STORAGE_KEY);
+    return savedFolderId && savedFolderId.trim() ? savedFolderId : null;
+  });
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
   const [isSavingFolder, setIsSavingFolder] = useState(false);
@@ -82,14 +91,22 @@ export function MediaCenterClient() {
     }
 
     setFolders(result.items);
+    setBreadcrumbs([
+      { id: null, name: "Home" },
+      ...result.parent_hierarchy.map((node) => ({ id: node.id, name: node.name })),
+    ]);
+
+    if (folderId && result.parent_hierarchy.length === 0) {
+      setCurrentFolderId(null);
+    }
+
     setError("");
     setIsLoadingFolders(false);
   }, []);
 
   useEffect(() => {
     setItems(getMediaItems());
-    void refreshFolders("");
-  }, [refreshFolders]);
+  }, []);
 
   useEffect(() => {
     if (isVideoTab) {
@@ -106,6 +123,19 @@ export function MediaCenterClient() {
       setIsCreateFolderOpen(false);
     }
   }, [isVideoTab]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (currentFolderId) {
+      window.localStorage.setItem(ACTIVE_FOLDER_STORAGE_KEY, currentFolderId);
+      return;
+    }
+
+    window.localStorage.removeItem(ACTIVE_FOLDER_STORAGE_KEY);
+  }, [currentFolderId]);
 
   const visibleFolders = useMemo(() => {
     const lowerQuery = query.trim().toLowerCase();
@@ -237,15 +267,11 @@ export function MediaCenterClient() {
 
   const onOpenFolder = (folder: MediaFolder) => {
     setCurrentFolderId(folder.id);
-    setBreadcrumbs((prev) => [...prev, { id: folder.id, name: folder.name }]);
   };
 
   const onBreadcrumbClick = (index: number) => {
-    const nextBreadcrumbs = breadcrumbs.slice(0, index + 1);
-    const target = nextBreadcrumbs[nextBreadcrumbs.length - 1];
-
-    setBreadcrumbs(nextBreadcrumbs);
-    setCurrentFolderId(target.id);
+    const target = breadcrumbs[index];
+    setCurrentFolderId(target?.id ?? null);
   };
 
   return (

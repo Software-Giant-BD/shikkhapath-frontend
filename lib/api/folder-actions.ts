@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { fetchApi } from "./common";
-import { getFolders, type FolderApiModel } from "./folders";
+import { getFolders, type FolderApiModel, type FolderHierarchyNode } from "./folders";
 
 export type FolderActionResult = {
   ok: boolean;
@@ -14,6 +14,7 @@ export type GetFoldersActionResult = {
   ok: boolean;
   message: string;
   items: FolderApiModel[];
+  parent_hierarchy: FolderHierarchyNode[];
 };
 
 function getMessage(payload: unknown, fallback: string): string {
@@ -33,18 +34,20 @@ function toParentId(value: string | null | undefined): string {
 
 export async function getFoldersAction(folder_id = ""): Promise<GetFoldersActionResult> {
   try {
-    const items = await getFolders(folder_id);
+    const result = await getFolders(folder_id);
 
     return {
       ok: true,
       message: "Folders loaded successfully.",
-      items,
+      items: result.items,
+      parent_hierarchy: result.parent_hierarchy,
     };
   } catch {
     return {
       ok: false,
       message: "Folder API is unavailable.",
       items: [],
+      parent_hierarchy: [],
     };
   }
 }

@@ -9,6 +9,16 @@ export type FolderApiModel = {
   created_at: string;
 };
 
+export type FolderHierarchyNode = {
+  id: string;
+  name: string;
+};
+
+export type GetFoldersResult = {
+  items: FolderApiModel[];
+  parent_hierarchy: FolderHierarchyNode[];
+};
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
@@ -46,6 +56,26 @@ function extractList(payload: unknown): unknown[] {
   return [];
 }
 
+function extractParentHierarchy(payload: unknown): unknown[] {
+  const data = asObject(payload);
+  const resources = asObject(data.resources);
+
+  const candidates = [
+    resources.parent_hierarchy,
+    resources.parentHierarchy,
+    data.parent_hierarchy,
+    data.parentHierarchy,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+}
+
 function normalizeFolder(value: unknown): FolderApiModel {
   const item = asObject(value);
 
@@ -60,7 +90,19 @@ function normalizeFolder(value: unknown): FolderApiModel {
   };
 }
 
-export async function getFolders(folder_id = ""): Promise<FolderApiModel[]> {
+function normalizeHierarchyNode(value: unknown): FolderHierarchyNode | null {
+  const item = asObject(value);
+  const id = asString(item.id);
+  const name = asString(item.name);
+
+  if (!id || !name) {
+    return null;
+  }
+
+  return { id, name };
+}
+
+export async function getFolders(folder_id = ""): Promise<GetFoldersResult> {
   try {
     const query = new URLSearchParams({ folder_id });
     const url = `/admin/folders?${query.toString()}`;
@@ -71,12 +113,24 @@ export async function getFolders(folder_id = ""): Promise<FolderApiModel[]> {
       throw new Error(getPayloadMessage(payload) || "Failed to load folders.");
     }
 
-    return extractList(payload)
+    const items = extractList(payload)
       .map(normalizeFolder)
       .filter((folder) => folder.id && folder.name)
       .sort((a, b) => a.name.localeCompare(b.name));
+
+    const parent_hierarchy = extractParentHierarchy(payload)
+      .map(normalizeHierarchyNode)
+      .filter((node): node is FolderHierarchyNode => node !== null);
+
+    return {
+      items,
+      parent_hierarchy,
+    };
   } catch (error) {
     console.error("Failed to fetch folders:", error);
-    return [];
+    return {
+      items: [],
+      parent_hierarchy: [],
+    };
   }
 }
