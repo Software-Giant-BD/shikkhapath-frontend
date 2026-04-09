@@ -31,7 +31,7 @@ function toParentId(value: string | null | undefined): string {
   return value ? value : "";
 }
 
-export async function getFoldersAction(folder_id: number | string ): Promise<GetFoldersActionResult> {
+export async function getFoldersAction(folder_id = ""): Promise<GetFoldersActionResult> {
   try {
     const items = await getFolders(folder_id);
 

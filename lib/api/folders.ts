@@ -60,9 +60,10 @@ function normalizeFolder(value: unknown): FolderApiModel {
   };
 }
 
-export async function getFolders(folder_id: string | number = ''): Promise<FolderApiModel[]> {
+export async function getFolders(folder_id = ""): Promise<FolderApiModel[]> {
   try {
-    const url = `/admin/folders?folder_id=${folder_id}` ;
+    const query = new URLSearchParams({ folder_id });
+    const url = `/admin/folders?${query.toString()}`;
     const response = await fetchApi(url);
     const payload = await response.json().catch(() => null);
 

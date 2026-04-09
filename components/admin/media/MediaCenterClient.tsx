@@ -64,13 +64,16 @@ export function MediaCenterClient() {
   const [editingFolder, setEditingFolder] = useState<MediaFolder | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [error, setError] = useState("");
+  const [breadcrumbs, setBreadcrumbs] = useState<Array<{ id: string | null; name: string }>>([
+    { id: null, name: "Home" },
+  ]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isVideoTab = tab === "video";
 
-  const refreshFolders = useCallback(async () => {
+  const refreshFolders = useCallback(async (folderId: string) => {
     setIsLoadingFolders(true);
 
-    const result = await getFoldersAction('');
+    const result = await getFoldersAction(folderId);
 
     if (!result.ok) {
       setError(result.message || "Failed to load folders.");
@@ -80,49 +83,29 @@ export function MediaCenterClient() {
 
     setFolders(result.items);
     setError("");
-    setCurrentFolderId((prev) => {
-      if (!prev) {
-        return null;
-      }
-
-      return result.items.some((folder) => folder.id === prev) ? prev : null;
-    });
     setIsLoadingFolders(false);
   }, []);
 
   useEffect(() => {
     setItems(getMediaItems());
-    void refreshFolders();
+    void refreshFolders("");
   }, [refreshFolders]);
 
   useEffect(() => {
     if (isVideoTab) {
+      return;
+    }
+
+    void refreshFolders(currentFolderId ?? "");
+  }, [currentFolderId, isVideoTab, refreshFolders]);
+
+  useEffect(() => {
+    if (isVideoTab) {
       setCurrentFolderId(null);
+      setBreadcrumbs([{ id: null, name: "Home" }]);
       setIsCreateFolderOpen(false);
     }
   }, [isVideoTab]);
-
-  const breadcrumbs = useMemo(() => {
-    if (!currentFolderId) {
-      return [{ id: null as string | null, name: "Home" }];
-    }
-
-    const byId = new Map(folders.map((folder) => [folder.id, folder]));
-    const chain: MediaFolder[] = [];
-
-    let activeId: string | null = currentFolderId;
-    while (activeId) {
-      const currentFolder = byId.get(activeId);
-      if (!currentFolder) {
-        break;
-      }
-
-      chain.push(currentFolder);
-      activeId = currentFolder.parent_id;
-    }
-
-    return [{ id: null as string | null, name: "Home" }, ...chain.reverse()];
-  }, [currentFolderId, folders]);
 
   const visibleFolders = useMemo(() => {
     const lowerQuery = query.trim().toLowerCase();
@@ -203,7 +186,7 @@ export function MediaCenterClient() {
         return;
       }
 
-      await refreshFolders();
+      await refreshFolders(currentFolderId ?? "");
       setNewFolderName("");
       setEditingFolder(null);
       setIsCreateFolderOpen(false);
@@ -246,10 +229,23 @@ export function MediaCenterClient() {
         return;
       }
 
-      await refreshFolders();
+      await refreshFolders(currentFolderId ?? "");
     } finally {
       setIsSavingFolder(false);
     }
+  };
+
+  const onOpenFolder = (folder: MediaFolder) => {
+    setCurrentFolderId(folder.id);
+    setBreadcrumbs((prev) => [...prev, { id: folder.id, name: folder.name }]);
+  };
+
+  const onBreadcrumbClick = (index: number) => {
+    const nextBreadcrumbs = breadcrumbs.slice(0, index + 1);
+    const target = nextBreadcrumbs[nextBreadcrumbs.length - 1];
+
+    setBreadcrumbs(nextBreadcrumbs);
+    setCurrentFolderId(target.id);
   };
 
   return (
@@ -333,7 +329,7 @@ export function MediaCenterClient() {
                 <button
                   key={crumb.id ?? "root"}
                   type="button"
-                  onClick={() => setCurrentFolderId(crumb.id)}
+                  onClick={() => onBreadcrumbClick(index)}
                   className={cn(
                     "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
                     index === breadcrumbs.length - 1
@@ -374,7 +370,7 @@ export function MediaCenterClient() {
                     >
                       <button
                         type="button"
-                        onClick={() => setCurrentFolderId(folder.id)}
+                        onClick={() => onOpenFolder(folder)}
                         className="flex w-full items-center gap-2 text-left"
                       >
                         <FolderOpen size={18} className="text-amber-500" />
