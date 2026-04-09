@@ -85,7 +85,7 @@ export function HeroSection() {
       <aside className="hidden flex-col gap-3 lg:flex">
         {leftStories.map((story, i) => (
           <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-            <Link href="/news" className="flex flex-col gap-2 p-2">
+            <Link href="/news/sample-slug" className="flex flex-col gap-2 p-2">
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
                   src={story.image}
@@ -111,7 +111,7 @@ export function HeroSection() {
         <div className="grid gap-5 sm:grid-cols-2">
           {featuredStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
-              <Link href="/news" className="flex flex-col h-full">
+              <Link href="/news/sample-slug" className="flex flex-col h-full">
                 <div className="relative overflow-hidden shrink-0">
                   <Image
                     src={story.image}
@@ -159,7 +159,7 @@ export function HeroSection() {
         <div className="grid gap-4 sm:grid-cols-2">
           {centerGridStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-              <Link href="/news" className="flex gap-3 p-2.5">
+              <Link href="/news/sample-slug" className="flex gap-3 p-2.5">
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
                     src={story.image}

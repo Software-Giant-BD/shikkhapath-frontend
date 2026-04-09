@@ -19,7 +19,7 @@ export function NewsSectionBlock({ section, compact = false }: Props) {
       <div className={`grid gap-5 ${compact ? "grid-cols-1" : "lg:grid-cols-[1.6fr_1fr]"}`}>
         {/* Featured story */}
         <article className="group overflow-hidden rounded-xl border border-slate-100 bg-white transition-all hover:shadow-lg">
-          <Link href={href} className="flex flex-col">
+          <Link href="/news/sample-slug" className="flex flex-col">
             <div className="relative overflow-hidden">
               <Image
                 src={featured.image}
@@ -49,7 +49,7 @@ export function NewsSectionBlock({ section, compact = false }: Props) {
         <div className="flex flex-col gap-4">
           {sideItems.map((item) => (
             <article key={item.title} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-              <Link href={href} className="flex gap-4 p-3">
+              <Link href="/news/sample-slug" className="flex gap-4 p-3">
                 <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <Image
                     src={item.image}
