@@ -1,5 +1,6 @@
 import { NewsArticleContent } from "@/components/customer/news/news-article-content";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
+import { NewsComments } from "@/components/customer/news/news-comments";
 
 interface Props {
   params: {
@@ -12,7 +13,10 @@ export default function NewsDetailsPage({ params }: Props) {
     <main className="container mx-auto max-w-7xl px-4 py-8">
       <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
         {/* Main Content Area */}
-        <NewsArticleContent />
+        <div className="flex flex-col">
+          <NewsArticleContent />
+          <NewsComments />
+        </div>
 
         {/* Sidebar Area */}
         <NewsSidebar />
