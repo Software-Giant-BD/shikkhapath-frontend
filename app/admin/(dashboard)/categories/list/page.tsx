@@ -42,7 +42,7 @@ export default async function CategoriesListPage({
     id: item.id,
     title: item.title,
     slug: item.slug,
-    parent: item.parent_id || "-",
+    parent: item.parent?.title || "-",
     status: item.status === "published" ? "Published" : "Draft",
     sortOrder: Number(item.sort_order) || 0,
     metaTitle: item.meta_title,

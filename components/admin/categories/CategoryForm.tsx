@@ -36,6 +36,7 @@ type CategoryFormProps = {
   mode: "add" | "edit";
   initialValues?: CategoryFormInitialValues;
   categoryId?: string;
+  parentOptions?: { id: string; title: string }[];
   showDetailsHeader?: boolean;
   headerTitle?: string;
   headerAction?: React.ReactNode;
@@ -64,17 +65,11 @@ const defaultValues: CategoryFormValues = {
   featured: false,
 };
 
-const parentOptions = [
-  { value: "", label: "None (Top-level)" },
-  { value: "education", label: "Education" },
-  { value: "admission", label: "Admission" },
-  { value: "national", label: "National" },
-];
-
 export function CategoryForm({
   mode,
   initialValues,
   categoryId,
+  parentOptions = [],
   showDetailsHeader = true,
   headerTitle,
   headerAction,
@@ -220,9 +215,10 @@ export function CategoryForm({
                 value={form.parent_id}
                 onChange={(event) => setForm((prev) => ({ ...prev, parent_id: event.target.value }))}
               >
+                <option value="">None (Top-level)</option>
                 {parentOptions.map((option) => (
-                  <option key={option.value || "none"} value={option.value}>
-                    {option.label}
+                  <option key={option.id} value={option.id}>
+                    {option.title}
                   </option>
                 ))}
               </Select>

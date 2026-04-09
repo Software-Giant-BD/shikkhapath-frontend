@@ -5,7 +5,7 @@ import { List } from "lucide-react";
 import { CategoryForm } from "@/components/admin/categories/CategoryForm";
 import { Button } from "@/components/admin/ui/button";
 import { PageHeader } from "@/components/admin/ui/page-header";
-import { getCategoryById } from "@/lib/api/categories";
+import { getCategories, getCategoryById } from "@/lib/api/categories";
 
 export default async function EditCategoryPage({
   params,
@@ -13,7 +13,7 @@ export default async function EditCategoryPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const category = await getCategoryById(id);
+  const [category, categories] = await Promise.all([getCategoryById(id), getCategories()]);
 
   if (!category) {
     notFound();
@@ -38,7 +38,14 @@ export default async function EditCategoryPage({
         )}
       />
 
-      <CategoryForm mode="edit" categoryId={id} initialValues={category} />
+      <CategoryForm
+        mode="edit"
+        categoryId={id}
+        initialValues={category}
+        parentOptions={categories
+          .filter((item) => item.id !== id)
+          .map((item) => ({ id: item.id, title: item.title }))}
+      />
     </div>
   );
 }

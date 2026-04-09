@@ -4,11 +4,18 @@ import { extractPagination, fetchApi, type BasePagination } from "./common";
 
 export type CategoryStatus = "published" | "draft";
 
+export type CategoryParentApiModel = {
+  id: string;
+  title: string;
+  slug: string;
+};
+
 export type CategoryApiModel = {
   id: string;
   title: string;
   slug: string;
   parent_id: string;
+  parent?: CategoryParentApiModel;
   status: CategoryStatus;
   sort_order: string;
   description: string;
@@ -55,6 +62,20 @@ function normalizeStatus(value: unknown): CategoryStatus {
   return asString(value, "draft").toLowerCase() === "published" ? "published" : "draft";
 }
 
+function normalizeParentCategory(value: unknown): CategoryParentApiModel | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const parent = asObject(value);
+
+  return {
+    id: asString(parent.id),
+    title: asString(parent.title),
+    slug: asString(parent.slug),
+  };
+}
+
 function normalizeCategory(value: unknown): CategoryApiModel {
   const item = asObject(value);
 
@@ -63,6 +84,7 @@ function normalizeCategory(value: unknown): CategoryApiModel {
     title: asString(item.title),
     slug: asString(item.slug),
     parent_id: asString(item.parent_id ?? item.parentId),
+    parent: normalizeParentCategory(item.parent),
     status: normalizeStatus(item.status),
     sort_order: asString(item.sort_order ?? item.sortOrder ?? "0"),
     description: asString(item.description),
