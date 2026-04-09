@@ -84,7 +84,7 @@ export function SiteHeader() {
                 width={780}
                 height={130}
                 priority
-                className="h-10 w-auto"
+                className="h-14 w-auto drop-shadow-sm"
               />
             </Link>
 
@@ -140,7 +140,7 @@ export function SiteHeader() {
                 width={780}
                 height={130}
                 priority
-                className="h-10 w-auto"
+                className="h-12 w-auto"
               />
             </Link>
           </div>
@@ -158,7 +158,7 @@ export function SiteHeader() {
                   alt="Shikkhapath News Portal"
                   width={780}
                   height={130}
-                  className="h-8 w-auto"
+                  className="h-10 w-auto"
                 />
               </Link>
             ) : null}
@@ -171,12 +171,14 @@ export function SiteHeader() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`inline-flex shrink-0 items-center gap-1 px-2 py-1 text-[22px] leading-none font-semibold transition-colors ${
-                      isActive ? "text-[#b38716]" : "text-slate-900 hover:text-[#b38716]"
+                    className={`relative inline-flex shrink-0 items-center gap-1 px-3 py-1.5 text-[17px] font-semibold transition-all duration-300 hover:opacity-100 ${
+                      isActive 
+                        ? "text-[#b38716] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-[#b38716]" 
+                        : "text-slate-900 hover:text-[#b38716] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-[#b38716] after:transition-all hover:after:w-full"
                     }`}
                   >
                     {link.label}
-                    {link.hasDropdown ? <ChevronDown className="h-4 w-4" /> : null}
+                    {link.hasDropdown ? <ChevronDown className="h-4 w-4 opacity-70" /> : null}
                   </Link>
                 );
               })}
@@ -213,7 +215,7 @@ export function SiteHeader() {
                   alt="Shikkhapath News Portal"
                   width={780}
                   height={130}
-                  className="h-9 w-auto"
+                  className="h-11 w-auto"
                 />
               </Link>
 
