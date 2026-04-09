@@ -247,111 +247,128 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
         <CardHeader>
           <CardTitle>Media & Source</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Feature Image</Label>
-              <div className="space-y-3">
-                <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                  {form.feature_image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={form.feature_image_url}
-                      alt="Selected feature"
-                      className="h-44 w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-44 items-center justify-center gap-2 text-sm text-slate-500">
-                      <ImageIcon size={18} />
-                      No feature image selected
-                    </div>
-                  )}
-                </div>
+        <CardContent className="space-y-5 rounded-b-xl bg-slate-50/50">
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-semibold text-slate-800">Feature Media</h3>
+                <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-indigo-700">
+                  Metadata
+                </span>
+              </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                <input
-                  ref={featureImageInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(event) => {
-                    void onUploadFeatureImage(event);
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => featureImageInputRef.current?.click()}
-                  disabled={isUploadingFeatureImage}
-                >
-                  {isUploadingFeatureImage ? "Uploading..." : "Upload New"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => setIsMediaPickerOpen(true)}
-                >
-                  Select from Media Center
-                </Button>
-
+              <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                 {form.feature_image_url ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setForm((prev) => ({ ...prev, feature_image_url: "" }))}
-                  >
-                    Remove Image
-                  </Button>
-                ) : null}
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={form.feature_image_url}
+                    alt="Selected feature"
+                    className="h-56 w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-56 flex-col items-center justify-center gap-2 bg-linear-to-br from-slate-100 via-slate-50 to-slate-100 text-slate-500">
+                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+                      <ImageIcon size={18} />
+                    </span>
+                    <p className="text-sm font-medium">No feature image selected</p>
+                  </div>
+                )}
+
+                <div className="absolute inset-x-3 bottom-3 rounded-lg border border-white/35 bg-white/88 p-2 backdrop-blur-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      ref={featureImageInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(event) => {
+                        void onUploadFeatureImage(event);
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="h-9"
+                      onClick={() => featureImageInputRef.current?.click()}
+                      disabled={isUploadingFeatureImage}
+                    >
+                      {isUploadingFeatureImage ? "Uploading..." : "Upload"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="h-9"
+                      onClick={() => setIsMediaPickerOpen(true)}
+                    >
+                      Media Center
+                    </Button>
+                    {form.feature_image_url ? (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="h-9 text-rose-600 hover:text-rose-700"
+                        onClick={() => setForm((prev) => ({ ...prev, feature_image_url: "" }))}
+                      >
+                        Remove
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               </div>
+
               {featureImageError ? <p className="text-xs font-medium text-rose-600">{featureImageError}</p> : null}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="source_name" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Source Name
+                  </Label>
+                  <Input
+                    id="source_name"
+                    value={form.source_name}
+                    placeholder="e.g. Shikkhapath Daily"
+                    onChange={(event) => setForm((prev) => ({ ...prev, source_name: event.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="source_url" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    Source URL
+                  </Label>
+                  <Input
+                    id="source_url"
+                    type="url"
+                    value={form.source_url}
+                    placeholder="https://example.com/source"
+                    onChange={(event) => setForm((prev) => ({ ...prev, source_url: event.target.value }))}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
-              <Select
-                id="language"
-                value={form.language}
-                onChange={(event) => setForm((prev) => ({ ...prev, language: event.target.value }))}
-              >
-                <option value="bn">Bangla</option>
-                <option value="en">English</option>
-              </Select>
-            </div>
-          </div>
+            <div className="space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Language Settings</p>
+                <Select
+                  id="language"
+                  value={form.language}
+                  onChange={(event) => setForm((prev) => ({ ...prev, language: event.target.value }))}
+                >
+                  <option value="bn">Bangla</option>
+                  <option value="en">English</option>
+                </Select>
+              </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="source_name">Source Name</Label>
-              <Input
-                id="source_name"
-                value={form.source_name}
-                placeholder="e.g. Reuters"
-                onChange={(event) => setForm((prev) => ({ ...prev, source_name: event.target.value }))}
-              />
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Reporter / Author</p>
+                <Input
+                  id="author_name"
+                  value={form.author_name}
+                  placeholder="Reporter name"
+                  onChange={(event) => setForm((prev) => ({ ...prev, author_name: event.target.value }))}
+                />
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="source_url">Source URL</Label>
-              <Input
-                id="source_url"
-                type="url"
-                value={form.source_url}
-                placeholder="https://..."
-                onChange={(event) => setForm((prev) => ({ ...prev, source_url: event.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="author_name">Reporter / Author</Label>
-            <Input
-              id="author_name"
-              value={form.author_name}
-              placeholder="Reporter name"
-              onChange={(event) => setForm((prev) => ({ ...prev, author_name: event.target.value }))}
-            />
           </div>
         </CardContent>
       </Card>
