@@ -254,7 +254,7 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
           <Input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder={isVideoType ? "Search video" : "Search folder or file"}
+            placeholder={isVideoType ? "Search  file" : "Search  file"}
             className="max-w-sm"
           />
 

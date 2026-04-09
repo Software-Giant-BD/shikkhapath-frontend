@@ -502,7 +502,7 @@ export function MediaCenterClient() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={
-                  isVideoTab ? "Search video" : "Search folder or file"
+                  isVideoTab ? "Search File" : "Search  file"
                 }
                 className="w-56"
               />
