@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Play, Clock } from "lucide-react";
+import { Play, Clock, ChevronRight } from "lucide-react";
 
-// Expanded sample data to match the density of a premium portal
+// Expanded sample data for news stories
 const leftStories = [
   {
     image: "https://picsum.photos/seed/l1/200/200",
@@ -78,9 +78,72 @@ const centerGridStories = [
   },
 ];
 
+// Service Utility Hub Data
+const utilitySections = [
+  {
+    name: "🚨 Emergency",
+    color: "bg-red-50 text-red-600 border-red-100",
+    links: [
+      { label: "Ambulance 🚑", href: "#" },
+      { label: "Police 👮", href: "#" },
+      { label: "Fire 🚒", href: "#" },
+      { label: "Blood 🩸", href: "#" },
+      { label: "Doctor 🏥", href: "#" },
+    ],
+  },
+  {
+    name: "💳 Services",
+    color: "bg-blue-50 text-blue-600 border-blue-100",
+    links: [
+      { label: "Bill Pay", href: "#" },
+      { label: "Mobile Recharge 📱", href: "#" },
+      { label: "Train 🚆", href: "#" },
+      { label: "Gold Rate", href: "#" },
+      { label: "Dollar Rate 💵", href: "#" },
+    ],
+  },
+  {
+    name: "🎓 Education",
+    color: "bg-amber-50 text-amber-600 border-amber-100",
+    links: [
+      { label: "Campus", href: "#" },
+      { label: "Jobs", href: "#" },
+      { label: "SSC (রুটিন | রেজাল্ট)", href: "#" },
+      { label: "HSC (রুটিন | রেজাল্ট)", href: "#" },
+      { label: "Admission", href: "#" },
+    ],
+  },
+  {
+    name: "🏫 Uni & Medical",
+    color: "bg-green-50 text-green-600 border-green-100",
+    links: [
+      { label: "University Events", href: "#" },
+      { label: "Medical News", href: "#" },
+    ],
+  },
+  {
+    name: "🛠 Tools",
+    color: "bg-purple-50 text-purple-600 border-purple-100",
+    links: [
+      { label: "CGPA Calculator", href: "#" },
+      { label: "নামাজের সময়", href: "#" },
+    ],
+  },
+  {
+    name: "📰 জাতীয় খবর",
+    color: "bg-slate-50 text-slate-600 border-slate-100",
+    links: [
+      { label: "Breaking News", href: "#" },
+      { label: "সর্বশেষ খবর", href: "#" },
+      { label: "দেশের পরিস্থিতি", href: "#" },
+      { label: " রাজনীতি", href: "#" },
+    ],
+  },
+];
+
 export function HeroSection() {
   return (
-    <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_260px]">
+    <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
       {/* Left Column: Card-styled trend list */}
       <aside className="hidden flex-col gap-3 lg:flex">
         {leftStories.map((story, i) => (
@@ -107,7 +170,7 @@ export function HeroSection() {
 
       {/* Center Column */}
       <div className="flex flex-col gap-5">
-        {/* Dual Highlight Area - Sliced into 2 columns on desktop */}
+        {/* Dual Highlight Area */}
         <div className="grid gap-5 sm:grid-cols-2">
           {featuredStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
@@ -146,7 +209,7 @@ export function HeroSection() {
                   <div className="mt-auto pt-2">
                     <div className="flex items-center gap-1.5 justify-center bg-slate-50 px-3 py-1 rounded-full ring-1 ring-slate-100">
                       <Clock className="h-3 w-3 text-slate-400" />
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">{story.time}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{story.time}</p>
                     </div>
                   </div>
                 </div>
@@ -178,60 +241,47 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* Right Column (Widgets) */}
-      <aside className="flex flex-col gap-5">
-        <div className="relative overflow-hidden rounded-2xl bg-[#600000] p-4 text-white shadow-xl group">
-          <div className="absolute top-0 right-0 p-1.5 bg-white/10 rounded-bl-xl text-[9px] uppercase tracking-widest font-black opacity-60">Ad</div>
-          <div className="flex flex-col gap-4">
-            <h4 className="text-lg font-black leading-tight border-b border-white/10 pb-2">৬ষ্ঠ-১০ম শ্রেণি</h4>
-            <div className="space-y-1">
-                <p className="text-xs font-bold text-amber-300 uppercase tracking-wide">প্রগ্রেসিভ ব্যাচ ২০২৬</p>
-                <div className="flex h-10 items-center justify-center rounded-xl bg-white font-black text-[#600000] shadow-lg transition-transform hover:scale-[1.02]">শুরু: ১২ এপ্রিল</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-lg">
-           <div className="relative overflow-hidden">
-             <Image 
-               src="https://picsum.photos/seed/v1/400/225" 
-               alt="Video thumb" 
-               width={400} 
-               height={225} 
-               className="aspect-video w-full object-cover brightness-95 group-hover:scale-105 transition-transform duration-500"
-              />
-             <div className="absolute inset-0 flex items-center justify-center">
-               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-2xl ring-4 ring-white/20 transition-all group-hover:scale-110 group-hover:bg-red-700">
-                 <Play className="h-7 w-7 ml-1 fill-current" />
-               </div>
-             </div>
+      {/* Right Column: Service Utility Hub */}
+      <aside className="flex flex-col gap-4">
+        <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
+           {/* Hub Header */}
+           <div className="bg-slate-900 px-5 py-4 text-center">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">Hub & Services</h4>
+              <p className="text-[13px] font-bold text-white mt-0.5">প্রয়োজনীয় লিংক ও সেবা</p>
            </div>
-           <div className="p-4">
-             <h5 className="text-[15px] font-bold leading-snug line-clamp-2 text-slate-900 group-hover:text-red-600 transition-colors">খুব খারাপ সময় পার করেছি একসময়: ঢাবি উপাচার্য</h5>
-           </div>
-        </div>
 
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-50">
-           <div className="flex flex-col items-center text-center gap-4">
-             <div className="flex items-center gap-1.5 bg-red-50 px-3 py-1 rounded-full ring-1 ring-red-100">
-               <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
-               <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Live Updates</span>
-             </div>
-             <div className="space-y-1">
-                <h4 className="text-2xl font-black text-slate-900 tracking-tight">SUBSCRIBE</h4>
-                <p className="text-xs font-medium text-slate-500 leading-relaxed px-4">আমাদের ইউটিউব চ্যানেলে নিয়মিত আপডেট পেতে সাবস্ক্রাইব করুন</p>
-             </div>
-             <button className="w-full rounded-2xl bg-red-600 py-3.5 text-sm font-black text-white shadow-xl shadow-red-200 transition-all hover:bg-red-700 hover:shadow-red-300 active:scale-95">
-                Visit Channel
-             </button>
+           <div className="flex flex-col p-2 gap-2">
+              {utilitySections.map((section, idx) => (
+                 <div key={idx} className="flex flex-col gap-1.5">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${section.color} transition-all`}>
+                       <span className="text-[13px] font-black tracking-tight">{section.name}</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1 px-1 mb-2">
+                       {section.links.map((link, lIdx) => (
+                          <Link 
+                            key={lIdx} 
+                            href={link.href}
+                            className="group flex items-center justify-between px-3 py-2 rounded-lg text-[12.5px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100"
+                          >
+                             <span className="line-clamp-1">{link.label}</span>
+                             <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-all group-hover:translate-x-0.5" />
+                          </Link>
+                       ))}
+                    </div>
+                 </div>
+              ))}
+           </div>
+           
+           {/* Hub Footer */}
+           <div className="border-t border-slate-50 bg-slate-50/50 p-4 text-center">
+              <p className="text-[10px] font-bold text-slate-400">আপডেট পেতে সাথে থাকুন</p>
            </div>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <div className="h-44 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-3 transition-all hover:bg-white hover:shadow-md">
-              <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Sponsored</span>
-              <div className="h-24 w-44 bg-slate-200 rounded-xl animate-pulse" />
-          </div>
+        {/* Small Ad Slot at the bottom of Hub */}
+        <div className="relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100 p-4 shadow-inner flex flex-col items-center justify-center min-h-[100px] group transition-all hover:bg-white hover:shadow-md">
+           <span className="absolute top-2 right-3 text-[8px] font-black uppercase tracking-widest text-slate-300">Space available</span>
+           <p className="text-[10px] font-bold text-slate-400">বিজ্ঞাপন দিতে যোগাযোগ করুন</p>
         </div>
       </aside>
     </section>
