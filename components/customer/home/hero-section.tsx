@@ -24,6 +24,16 @@ const leftStories = [
     title: "দিনে চলবে মাত্র ১৫টি জাহাজ, হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান",
     time: "২ ঘণ্টা আগে",
   },
+  {
+    image: "https://picsum.photos/seed/l5/200/200",
+    title: "সুইস ব্যাংকে বাংলাদেশিদের জমা করা হাজার কোটি টাকা নিয়ে নতুন তথ্য প্রকাশ",
+    time: "৩ ঘণ্টা আগে",
+  },
+  {
+    image: "https://picsum.photos/seed/l6/200/200",
+    title: "আইপিএলে সাকিবের দাপট, বোলিং ফিগার দেখে মুগ্ধ ক্রিকেট বিশ্ব",
+    time: "৪ ঘণ্টা আগে",
+  },
 ];
 
 const featuredStories = [
@@ -42,6 +52,24 @@ const featuredStories = [
     time: "২ ঘণ্টা আগে",
   },
 ];
+
+// Data for the Themed Topic Block (Iran-Israel Theme)
+const topicStories = {
+  title: "ইরান-ইসরায়েল সংঘর্ষ",
+  main: {
+    image: "https://picsum.photos/seed/t-main/800/500",
+    title: "হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান, পাল্টা হুঁশিয়ারি ইসরায়েলের",
+    time: "২ ঘণ্টা আগে",
+  },
+  left: [
+    { image: "https://picsum.photos/seed/tl1/300/200", title: "তেহরানে বড় হামলার পরিকল্পনা করছে ইসরায়েল", time: "৫ মিনিট আগে" },
+    { image: "https://picsum.photos/seed/tl2/300/200", title: "ইরানি ড্রোন ভূপাতিত করার দাবি মার্কিন বাহিনীর", time: "১৫ মিনিট আগে" },
+  ],
+  right: [
+    { image: "https://picsum.photos/seed/tr1/300/200", title: "ইসরায়েলে হামলায় ব্যালিস্টিক মিসাইল ব্যবহার করবে ইরান", time: "৩০ মিনিট আগে" },
+    { image: "https://picsum.photos/seed/tr2/300/200", title: "যেকোনো পরিস্থিতির জন্য প্রস্তুত থাকার নির্দেশ হামাসের", time: "১ ঘণ্টা আগে" },
+  ]
+};
 
 const centerGridStories = [
   {
@@ -155,7 +183,7 @@ export function HeroSection() {
                   alt=""
                   width={240}
                   height={160}
-                  className="aspect-[3/2] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="aspect-3/2 w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
               <div className="px-1 py-1">
@@ -218,7 +246,66 @@ export function HeroSection() {
           ))}
         </div>
 
-        {/* 2-Column Grid of mini-stories */}
+        {/* Themed Topic Highlight Block (Iran-Israel Theme) */}
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
+           {/* Block Header */}
+           <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
+                <span className="text-[14px] font-black tracking-tight">{topicStories.title}</span>
+              </div>
+              <button className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
+                 সব খবর
+              </button>
+           </div>
+
+           {/* Block Grid */}
+           <div className="grid gap-4 p-4 lg:grid-cols-[1.2fr_2fr_1.2fr]">
+              {/* Left Column */}
+              <div className="flex flex-col gap-4">
+                 {topicStories.left.map((item, i) => (
+                    <article key={i} className="group flex flex-col gap-2">
+                       <Link href="/news/sample-slug" className="relative aspect-video overflow-hidden rounded-lg">
+                          <Image fill src={item.image} alt="" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                       </Link>
+                       <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">{item.title}</h4>
+                    </article>
+                 ))}
+              </div>
+
+              {/* Middle (Main Focus) */}
+              <article className="group flex flex-col text-center">
+                 <Link href="/news/sample-slug" className="flex flex-col h-full gap-4">
+                    <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-slate-100">
+                       <Image fill src={topicStories.main.image} alt="" className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
+                    </div>
+                    <div className="space-y-1.5 px-2">
+                       <h3 className="text-[17px] font-black leading-tight text-slate-950 group-hover:text-red-600 transition-colors">
+                          {topicStories.main.title}
+                       </h3>
+                       <div className="flex items-center justify-center gap-2 pt-1">
+                          <div className="h-1 w-1 rounded-full bg-red-600" />
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{topicStories.main.time}</p>
+                       </div>
+                    </div>
+                 </Link>
+              </article>
+
+              {/* Right Column */}
+              <div className="flex flex-col gap-4">
+                 {topicStories.right.map((item, i) => (
+                    <article key={i} className="group flex flex-col gap-2">
+                       <Link href="/news/sample-slug" className="relative aspect-video overflow-hidden rounded-lg">
+                         <Image fill src={item.image} alt="" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                       </Link>
+                       <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">{item.title}</h4>
+                    </article>
+                 ))}
+              </div>
+           </div>
+        </div>
+
+        {/* 2-Column Grid of mini-stories (Remaining) */}
         <div className="grid gap-4 sm:grid-cols-2">
           {centerGridStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
