@@ -23,6 +23,7 @@ const navLinks = [
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
   const pathname = usePathname();
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -30,6 +31,19 @@ export function SiteHeader() {
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    const date = new Date();
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    // Format: বুধবার, ১০ এপ্রিল ২০২৬
+    const formattedDate = date.toLocaleDateString('bn-BD', options).replace(/,/g, '');
+    setCurrentDate(formattedDate);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) {
@@ -91,7 +105,7 @@ export function SiteHeader() {
             </Link>
 
             <div className="flex items-center gap-8 text-sm text-slate-700">
-              <span className="font-semibold text-slate-500">বুধবার, ১ এপ্রিল ২০২৬</span>
+              <span className="font-semibold text-slate-500">{currentDate || "লোড হচ্ছে..."}</span>
               <div className="flex items-center gap-4 bg-slate-50 rounded-full px-5 py-2 ring-1 ring-slate-100">
                 <button type="button" className="text-slate-600 hover:text-[#b38716] transition-colors" aria-label="Search">
                   <Search className="h-5 w-5" />
