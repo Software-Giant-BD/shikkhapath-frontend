@@ -79,6 +79,9 @@ export function CategoryForm({
     ...defaultValues,
     ...initialValues,
   });
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(
+    mode === "edit" || Boolean(initialValues?.slug),
+  );
   const [ogImageFile, setOgImageFile] = useState<File | null>(null);
   const [ogImagePreview, setOgImagePreview] = useState(initialValues?.og_image_url ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -186,7 +189,7 @@ export function CategoryForm({
                   setForm((prev) => ({
                     ...prev,
                     title,
-                    slug: prev.slug ? prev.slug : slugify(title),
+                    slug: isSlugManuallyEdited ? prev.slug : slugify(title),
                   }));
                 }}
                 required
@@ -200,7 +203,9 @@ export function CategoryForm({
                 value={form.slug}
                 placeholder="e.g. education"
                 onChange={(event) => {
-                  setForm((prev) => ({ ...prev, slug: slugify(event.target.value) }));
+                  const nextSlug = slugify(event.target.value);
+                  setIsSlugManuallyEdited(Boolean(nextSlug));
+                  setForm((prev) => ({ ...prev, slug: nextSlug }));
                 }}
                 required
               />
