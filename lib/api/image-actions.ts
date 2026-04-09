@@ -18,6 +18,11 @@ export type UploadImageActionResult = {
   item: UploadedImageModel | null;
 };
 
+export type DeleteImagesActionResult = {
+  ok: boolean;
+  message: string;
+};
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
@@ -126,6 +131,44 @@ export async function uploadImageAction(payload: FormData): Promise<UploadImageA
       ok: false,
       message: "Image API is unavailable.",
       item: null,
+    };
+  }
+}
+
+export async function deleteImagesAction(ids: string[]): Promise<DeleteImagesActionResult> {
+  if (ids.length === 0) {
+    return {
+      ok: false,
+      message: "No images selected.",
+    };
+  }
+
+  try {
+    const response = await fetchApi("/admin/images/delete", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ids }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: getMessage(data, "Failed to delete selected images."),
+      };
+    }
+
+    return {
+      ok: true,
+      message: getMessage(data, "Images deleted successfully."),
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Image API is unavailable.",
     };
   }
 }

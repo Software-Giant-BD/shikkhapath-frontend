@@ -31,7 +31,7 @@ import {
   getFoldersAction,
   updateFolderAction,
 } from "@/lib/api/folder-actions";
-import { uploadImageAction } from "@/lib/api/image-actions";
+import { deleteImagesAction, uploadImageAction } from "@/lib/api/image-actions";
 import { cn } from "@/lib/utils";
 
 function formatSize(bytes: number) {
@@ -71,11 +71,14 @@ export function MediaCenterClient() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
   const [isSavingFolder, setIsSavingFolder] = useState(false);
+  const [isDeletingImages, setIsDeletingImages] = useState(false);
+  const [isDeleteImagesConfirmOpen, setIsDeleteImagesConfirmOpen] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<MediaFolder | null>(null);
   const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
   const [newFolderName, setNewFolderName] = useState("");
   const [error, setError] = useState("");
+  const [selectedImageIds, setSelectedImageIds] = useState<string[]>([]);
   const [breadcrumbs, setBreadcrumbs] = useState<Array<{ id: string | null; name: string }>>([
     { id: null, name: "Home" },
   ]);
@@ -138,8 +141,15 @@ export function MediaCenterClient() {
       setBreadcrumbs([{ id: null, name: "Home" }]);
       setIsCreateFolderOpen(false);
       setOpenFolderMenuId(null);
+      setSelectedImageIds([]);
     }
   }, [isVideoTab]);
+
+  useEffect(() => {
+    if (tab === "image") {
+      setSelectedImageIds([]);
+    }
+  }, [currentFolderId, tab]);
 
   useEffect(() => {
     if (!openFolderMenuId) {
@@ -205,6 +215,12 @@ export function MediaCenterClient() {
       return item.name.toLowerCase().includes(lowerQuery);
     });
   }, [currentFolderId, isVideoTab, items, query, tab]);
+
+  const imageItems = useMemo(() => {
+    return filteredItems.filter((item) => item.type === "image");
+  }, [filteredItems]);
+
+  const allVisibleImagesSelected = imageItems.length > 0 && imageItems.every((item) => selectedImageIds.includes(item.id));
 
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files || []);
@@ -337,6 +353,49 @@ export function MediaCenterClient() {
   const onBreadcrumbClick = (index: number) => {
     const target = breadcrumbs[index];
     setCurrentFolderId(target?.id ?? null);
+  };
+
+  const onToggleImageSelection = (imageId: string, checked: boolean) => {
+    setSelectedImageIds((prev) => {
+      if (checked) {
+        return prev.includes(imageId) ? prev : [...prev, imageId];
+      }
+
+      return prev.filter((id) => id !== imageId);
+    });
+  };
+
+  const onToggleSelectAllImages = () => {
+    if (allVisibleImagesSelected) {
+      setSelectedImageIds([]);
+      return;
+    }
+
+    setSelectedImageIds(imageItems.map((item) => item.id));
+  };
+
+  const onDeleteSelectedImages = async () => {
+    if (selectedImageIds.length === 0 || isDeletingImages) {
+      return;
+    }
+
+    setIsDeletingImages(true);
+    setError("");
+
+    try {
+      const result = await deleteImagesAction(selectedImageIds);
+
+      if (!result.ok) {
+        setError(result.message || "Failed to delete selected images.");
+        return;
+      }
+
+      setIsDeleteImagesConfirmOpen(false);
+      setSelectedImageIds([]);
+      await refreshFolders(currentFolderId ?? "");
+    } finally {
+      setIsDeletingImages(false);
+    }
   };
 
   return (
@@ -519,8 +578,36 @@ export function MediaCenterClient() {
           ) : null}
 
           <div className="space-y-3">
-            <div className="flex items-center rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
-              {tab === "image" ? "Image Gallery" : "Video Gallery"}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2">
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+                {tab === "image" ? "Image Gallery" : "Video Gallery"}
+              </p>
+
+              {tab === "image" ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={onToggleSelectAllImages}
+                    disabled={imageItems.length === 0}
+                  >
+                    {allVisibleImagesSelected ? "Unselect All" : "Select All"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setIsDeleteImagesConfirmOpen(true)}
+                    disabled={selectedImageIds.length === 0 || isDeletingImages}
+                  >
+                    <Trash2 size={14} />
+                    {isDeletingImages
+                      ? "Deleting..."
+                      : `Delete Selected (${selectedImageIds.length})`}
+                  </Button>
+                </div>
+              ) : null}
             </div>
 
             {filteredItems.length === 0 ? (
@@ -534,8 +621,24 @@ export function MediaCenterClient() {
                 {filteredItems.map((item) => (
                   <div
                     key={item.id}
-                    className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                    className={cn(
+                      "relative overflow-hidden rounded-xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
+                      item.type === "image" && selectedImageIds.includes(item.id)
+                        ? "border-orange-400 ring-2 ring-orange-200"
+                        : "border-slate-200",
+                    )}
                   >
+                    {tab === "image" && item.type === "image" ? (
+                      <label className="absolute left-2 top-2 z-10 inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-md bg-white/95 shadow">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 accent-orange-500"
+                          checked={selectedImageIds.includes(item.id)}
+                          onChange={(event) => onToggleImageSelection(item.id, event.target.checked)}
+                        />
+                      </label>
+                    ) : null}
+
                     <div className="aspect-video bg-slate-100">
                       {item.type === "image" ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -572,6 +675,66 @@ export function MediaCenterClient() {
           </div>
         </CardContent>
       </Card>
+
+      {isDeleteImagesConfirmOpen ? (
+        <div className="fixed inset-0 z-80 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/55"
+            onClick={() => {
+              if (!isDeletingImages) {
+                setIsDeleteImagesConfirmOpen(false);
+              }
+            }}
+            aria-label="Close image delete confirmation"
+          />
+
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-3xl font-semibold text-slate-900">
+                {selectedImageIds.length > 1 ? "Delete Images" : "Delete Image"}
+              </h3>
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+                onClick={() => {
+                  if (!isDeletingImages) {
+                    setIsDeleteImagesConfirmOpen(false);
+                  }
+                }}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="mb-6 text-l text-slate-600">
+              {selectedImageIds.length > 1
+                ? `Are you sure you want to delete these ${selectedImageIds.length} images?`
+                : "Are you sure you want to delete this image?"}
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsDeleteImagesConfirmOpen(false)}
+                disabled={isDeletingImages}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => void onDeleteSelectedImages()}
+                disabled={isDeletingImages}
+              >
+                {isDeletingImages ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {isCreateFolderOpen ? (
         <div className="fixed inset-0 z-85 flex items-center justify-center p-4">
