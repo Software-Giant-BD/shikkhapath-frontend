@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     "A modern, component-based company website for Shikkhapath.",
 };
 
+import { SiteHeader } from "@/components/customer/common/site-header";
+import { SiteFooter } from "@/components/customer/common/footer-sections";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,7 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.variable} ${sourceSerif.variable} antialiased`}>
-        {children}
+        <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+          <SiteHeader />
+          {children}
+          <SiteFooter />
+        </div>
       </body>
     </html>
   );

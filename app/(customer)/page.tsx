@@ -40,12 +40,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <SiteHeader />
 
       <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
         <AdBanner
@@ -86,7 +85,6 @@ export default function Home() {
 
         <NewsletterSection />
       </main>
-      <SiteFooter />
-    </div>
+    </>
   )
 }
