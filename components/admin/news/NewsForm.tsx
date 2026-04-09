@@ -38,6 +38,7 @@ type NewsFormValues = {
 };
 
 type NewsFormProps = {
+  categoryOptions?: { id: string; title: string }[];
   headerTitle?: string;
   headerAction?: React.ReactNode;
 };
@@ -75,7 +76,7 @@ function slugify(value: string) {
     .replace(/-+/g, "-");
 }
 
-export function NewsForm({ headerTitle, headerAction }: NewsFormProps) {
+export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: NewsFormProps) {
   const [form, setForm] = useState<NewsFormValues>(defaultValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
@@ -153,13 +154,19 @@ export function NewsForm({ headerTitle, headerAction }: NewsFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category_id">Category ID</Label>
-              <Input
+              <Label htmlFor="category_id">Category</Label>
+              <Select
                 id="category_id"
                 value={form.category_id}
-                placeholder="e.g. 3"
                 onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))}
-              />
+              >
+                <option value="">Select Category</option>
+                {categoryOptions.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.title}
+                  </option>
+                ))}
+              </Select>
             </div>
           </div>
 

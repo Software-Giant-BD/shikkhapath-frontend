@@ -4,8 +4,11 @@ import { List } from "lucide-react";
 import { NewsForm } from "@/components/admin/news/NewsForm";
 import { Button } from "@/components/admin/ui/button";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { getCategories } from "@/lib/api/categories";
 
-export default function AddNewsPage() {
+export default async function AddNewsPage() {
+  const categories = await getCategories();
+
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
@@ -18,6 +21,7 @@ export default function AddNewsPage() {
       />
 
       <NewsForm
+        categoryOptions={categories.map((category) => ({ id: category.id, title: category.title }))}
         headerTitle="Add News"
         headerAction={(
           <Link href="/admin/news/list">
