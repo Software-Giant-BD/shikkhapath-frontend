@@ -61,6 +61,9 @@ type ToolbarButtonProps = {
 
 type MediaDialogType = "image" | "video";
 
+const DEFAULT_IMAGE_WIDTH = "1200";
+const DEFAULT_IMAGE_HEIGHT = "675";
+
 const ResizableImage = Image.extend({
   addAttributes() {
     return {
@@ -123,6 +126,13 @@ function ToolbarButton({ title, isActive = false, onClick, disabled = false, chi
       {children}
     </button>
   );
+}
+
+function getDefaultAltText(fileName: string) {
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/[-_]+/g, " ")
+    .trim();
 }
 
 async function fileToDataUrl(file: File): Promise<string> {
@@ -278,6 +288,12 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
 
     if (file && !source) {
       setSource(file.name);
+    }
+
+    if (file && dialogType === "image") {
+      setWidth(DEFAULT_IMAGE_WIDTH);
+      setHeight(DEFAULT_IMAGE_HEIGHT);
+      setAltText(getDefaultAltText(file.name));
     }
   };
 
@@ -594,7 +610,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
           <div className="relative z-10 w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-2xl font-semibold text-slate-800">
-                {dialogType === "image" ? "Insert/Edit Image" : "Insert/Edit Video"}
+                {dialogType === "image" ? "Select Image" : "Select Video"}
               </h3>
               <button
                 type="button"
@@ -700,6 +716,11 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
           onClose={() => setIsMediaPickerOpen(false)}
           onSelect={(item) => {
             setSource(item.url);
+            if (dialogType === "image") {
+              setWidth(DEFAULT_IMAGE_WIDTH);
+              setHeight(DEFAULT_IMAGE_HEIGHT);
+              setAltText(getDefaultAltText(item.name));
+            }
             setSelectedFile(null);
             setIsMediaPickerOpen(false);
           }}
