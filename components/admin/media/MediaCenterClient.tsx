@@ -23,7 +23,6 @@ import type {
 import {
   addMediaFiles,
   getMediaItems,
-  saveMediaItems,
 } from "@/lib/admin/media-library";
 import {
   createFolderAction,
@@ -93,6 +92,19 @@ export function MediaCenterClient() {
     }
 
     setFolders(result.items);
+    const videoItems = getMediaItems().filter((item) => item.type === "video");
+    const imageItems = result.images.map((image) => ({
+      id: image.id,
+      type: "image" as const,
+      name: image.file_name,
+      url: image.original_url,
+      mime_type: image.mime_type,
+      size: image.size,
+      created_at: image.created_at,
+      folder_id: image.folder_id,
+    }));
+    setItems([...imageItems, ...videoItems]);
+
     setBreadcrumbs([
       { id: null, name: "Home" },
       ...result.parent_hierarchy.map((node) => ({ id: node.id, name: node.name })),
@@ -186,7 +198,7 @@ export function MediaCenterClient() {
 
     try {
       if (tab === "image") {
-        const uploadedItems = [] as MediaItem[];
+        let successCount = 0;
 
         for (const file of selected) {
           if (!file.type.startsWith("image/")) {
@@ -203,25 +215,11 @@ export function MediaCenterClient() {
             continue;
           }
 
-          if (!result.item) {
-            continue;
-          }
-
-          uploadedItems.push({
-            ...result.item,
-            type: "image",
-          });
+          successCount += 1;
         }
 
-        if (uploadedItems.length > 0) {
-          const existingItems = getMediaItems();
-          const nextItems = [
-            ...uploadedItems,
-            ...existingItems.filter((item) => !uploadedItems.some((uploaded) => uploaded.id === item.id)),
-          ];
-
-          saveMediaItems(nextItems);
-          setItems(nextItems);
+        if (successCount > 0) {
+          await refreshFolders(currentFolderId ?? "");
         }
 
         return;

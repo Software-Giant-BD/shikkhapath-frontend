@@ -14,9 +14,20 @@ export type FolderHierarchyNode = {
   name: string;
 };
 
+export type FolderImageApiModel = {
+  id: string;
+  file_name: string;
+  mime_type: string;
+  size: number;
+  original_url: string;
+  created_at: string;
+  folder_id: string | null;
+};
+
 export type GetFoldersResult = {
   items: FolderApiModel[];
   parent_hierarchy: FolderHierarchyNode[];
+  images: FolderImageApiModel[];
 };
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -27,6 +38,11 @@ function asString(value: unknown, fallback = ""): string {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
   return fallback;
+}
+
+function asNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function getPayloadMessage(payload: unknown): string | null {
@@ -76,6 +92,21 @@ function extractParentHierarchy(payload: unknown): unknown[] {
   return [];
 }
 
+function extractImages(payload: unknown): unknown[] {
+  const data = asObject(payload);
+  const resources = asObject(data.resources);
+
+  const candidates = [resources.images, resources.files, data.images, data.files];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return [];
+}
+
 function normalizeFolder(value: unknown): FolderApiModel {
   const item = asObject(value);
 
@@ -102,6 +133,29 @@ function normalizeHierarchyNode(value: unknown): FolderHierarchyNode | null {
   return { id, name };
 }
 
+function normalizeFolderImage(value: unknown, requestedFolderId: string): FolderImageApiModel | null {
+  const item = asObject(value);
+
+  const id = asString(item.id);
+  const original_url = asString(item.original_url ?? item.url ?? item.image_url);
+
+  if (!id || !original_url) {
+    return null;
+  }
+
+  const folderId = asString(item.folder_id ?? item.folderId ?? requestedFolderId);
+
+  return {
+    id,
+    file_name: asString(item.file_name ?? item.name ?? "image"),
+    mime_type: asString(item.mime_type ?? item.mimeType ?? "image/*"),
+    size: asNumber(item.size),
+    original_url,
+    created_at: asString(item.created_at ?? item.createdAt, new Date().toISOString()),
+    folder_id: folderId || null,
+  };
+}
+
 export async function getFolders(folder_id = ""): Promise<GetFoldersResult> {
   try {
     const query = new URLSearchParams({ folder_id });
@@ -122,15 +176,21 @@ export async function getFolders(folder_id = ""): Promise<GetFoldersResult> {
       .map(normalizeHierarchyNode)
       .filter((node): node is FolderHierarchyNode => node !== null);
 
+    const images = extractImages(payload)
+      .map((image) => normalizeFolderImage(image, folder_id))
+      .filter((image): image is FolderImageApiModel => image !== null);
+
     return {
       items,
       parent_hierarchy,
+      images,
     };
   } catch (error) {
     console.error("Failed to fetch folders:", error);
     return {
       items: [],
       parent_hierarchy: [],
+      images: [],
     };
   }
 }
