@@ -26,14 +26,22 @@ const leftStories = [
   },
 ];
 
-const mainStory = {
-  image: "https://picsum.photos/seed/m1/800/480",
-  category: "শিক্ষাঙ্গন",
-  title: "এনএসপিতে রুমিন ফারহানা, জুনায়েদ-রাফিসহ অর্ধশত জুলাইয়ের পরিচিত মুখ যোগ দেওয়ার গুঞ্জন",
-  excerpt:
-    "জাতীয় নাগরিক পার্টিতে (এনএসপি) যোগ দেওয়ার গুঞ্জন উঠেছে স্বতন্ত্র সংসদ সদস্য রুমিন ফারহানা, ছাত্র আন্দোলনের সমন্বয়ক আলী আহসান জুনায়েদসহ অনেকে যারা জুলাই বিপ্লবে রাজপথে সাহসী ভূমিকা রেখেছিলেন।",
-  time: "১ ঘণ্টা আগে",
-};
+const featuredStories = [
+  {
+    image: "https://picsum.photos/seed/m1/800/480",
+    category: "শিক্ষাঙ্গন",
+    title: "এনএসপিতে রুমিন ফারহানা, জুনায়েদ-রাফিসহ অর্ধশত জুলাইয়ের পরিচিত মুখ যোগ দেওয়ার গুঞ্জন",
+    excerpt: "জাতীয় নাগরিক পার্টিতে যোগ দেওয়ার গুঞ্জন উঠেছে স্বতন্ত্র সংসদ সদস্য রুমিন ফারহানা ও ছাত্রদের সমন্বয়কদের।",
+    time: "১ ঘণ্টা আগে",
+  },
+  {
+    image: "https://picsum.photos/seed/m2/800/480",
+    category: "জাতীয়",
+    title: "ঢাকা বিশ্ববিদ্যালয়ে আন্তর্জাতিক সম্মেলন অনুষ্ঠিত: গবেষণায় নতুন দিগন্তের উন্মোচন",
+    excerpt: "বিশ্ববিদ্যালয় পর্যায়ে উচ্চতর গবেষণা ও আন্তর্জাতিক সহযোগিতা বৃদ্ধির লক্ষে এই সম্মেলনের আয়োজন করা হয়েছে।",
+    time: "২ ঘণ্টা আগে",
+  },
+];
 
 const centerGridStories = [
   {
@@ -95,67 +103,59 @@ export function HeroSection() {
             </Link>
           </article>
         ))}
-
-        {/* Ad Slot in Left Column */}
-        <div className="mt-2 flex flex-col gap-3">
-          <div className="relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100 p-4 shadow-inner flex flex-col items-center justify-center min-h-[180px] group transition-all hover:bg-white hover:shadow-md">
-            <span className="absolute top-2 right-3 text-[9px] font-black uppercase tracking-widest text-slate-300">Advertisement</span>
-            <div className="text-center space-y-2">
-              <div className="mx-auto h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
-                 <div className="h-6 w-6 rounded bg-slate-200 animate-pulse" />
-              </div>
-              <p className="text-[11px] font-bold text-slate-400">আপনার বিজ্ঞাপন এখানে দিন</p>
-            </div>
-          </div>
-        </div>
       </aside>
 
-      {/* Center Column: Box-styled Highlight + Sub-grid */}
+      {/* Center Column */}
       <div className="flex flex-col gap-5">
-        {/* Main Highlight Story - CENTERED & BEAUTIFIED */}
-        <article className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
-          <Link href="/news" className="flex flex-col">
-            <div className="relative overflow-hidden">
-              <Image
-                src={mainStory.image}
-                alt={mainStory.title}
-                width={800}
-                height={480}
-                priority
-                className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"
-              />
-              <div className="absolute inset-x-0 bottom-0 flex justify-center p-4">
-                 <span className="rounded-full bg-white/95 px-5 py-1.5 text-[13px] font-black uppercase tracking-widest text-slate-900 shadow-xl backdrop-blur-sm ring-1 ring-slate-200/50">
-                    {mainStory.category}
-                 </span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center text-center gap-3 p-6 lg:p-7">
-              <h1 className="text-xl font-[900] leading-snug tracking-tight text-slate-900 group-hover:text-[#b38716] transition-colors md:text-2xl lg:text-[28px] px-2">
-                {mainStory.title}
-              </h1>
-              
-              {/* Decorative Separator */}
-              <div className="flex items-center gap-4 justify-center">
-                 <div className="h-[2px] w-6 rounded-full bg-slate-100" />
-                 <div className="h-1.5 w-1.5 rounded-full bg-[#c79a1d] shadow-[0_0_8px_rgba(199,154,29,0.3)]" />
-                 <div className="h-[2px] w-6 rounded-full bg-slate-100" />
-              </div>
+        {/* Dual Highlight Area - Sliced into 2 columns on desktop */}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {featuredStories.map((story, i) => (
+            <article key={i} className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
+              <Link href="/news" className="flex flex-col h-full">
+                <div className="relative overflow-hidden shrink-0">
+                  <Image
+                    src={story.image}
+                    alt={story.title}
+                    width={500}
+                    height={300}
+                    priority
+                    className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.05]"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 flex justify-center p-3">
+                     <span className="rounded-full bg-white/95 px-4 py-1 text-[11px] font-black uppercase tracking-widest text-slate-900 shadow-lg backdrop-blur-sm ring-1 ring-slate-200/50">
+                        {story.category}
+                     </span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-1 flex-col items-center text-center gap-3 p-5 lg:p-6 pb-4">
+                  <h2 className="text-lg font-black leading-tight tracking-tight text-slate-900 group-hover:text-[#b38716] transition-colors md:text-xl lg:text-[22px] line-clamp-2 px-1">
+                    {story.title}
+                  </h2>
+                  
+                  <div className="flex items-center gap-3 justify-center">
+                     <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
+                     <div className="h-1 w-1 rounded-full bg-[#c79a1d]" />
+                     <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
+                  </div>
 
-              <p className="line-clamp-3 text-[14px] md:text-[15px] leading-relaxed text-slate-600 max-w-xl font-medium">
-                {mainStory.excerpt}
-              </p>
-              
-              <div className="flex items-center gap-2 justify-center bg-slate-50 px-4 py-1.5 rounded-full ring-1 ring-slate-100">
-                <Clock className="h-3.5 w-3.5 text-slate-400" />
-                <p className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">{mainStory.time}</p>
-              </div>
-            </div>
-          </Link>
-        </article>
+                  <p className="line-clamp-2 text-[13px] md:text-[14px] leading-relaxed text-slate-600 font-medium">
+                    {story.excerpt}
+                  </p>
+                  
+                  <div className="mt-auto pt-2">
+                    <div className="flex items-center gap-1.5 justify-center bg-slate-50 px-3 py-1 rounded-full ring-1 ring-slate-100">
+                      <Clock className="h-3 w-3 text-slate-400" />
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em]">{story.time}</p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </article>
+          ))}
+        </div>
 
-        {/* 2-Column Grid of Box-styled mini-stories */}
+        {/* 2-Column Grid of mini-stories */}
         <div className="grid gap-4 sm:grid-cols-2">
           {centerGridStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
