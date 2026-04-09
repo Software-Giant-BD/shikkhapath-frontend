@@ -575,11 +575,6 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
               </button>
             </div>
 
-            <div className="mb-4 flex gap-6 border-b border-slate-200 text-sm font-medium text-slate-500">
-              <span className="border-b-2 border-indigo-500 pb-2 text-indigo-600">General</span>
-              <span className="pb-2">Source</span>
-            </div>
-
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label htmlFor="media-source">Source</Label>
