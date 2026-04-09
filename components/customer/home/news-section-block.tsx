@@ -13,55 +13,56 @@ export function NewsSectionBlock({ section, compact = false }: Props) {
   const { title, href, featured, sideItems } = SECTION_DATA[section]
 
   return (
-    <section className={compact ? "mt-0" : "mt-5"}>
+    <section className={compact ? "mt-0" : "mt-8 mb-4 lowercaseFirst"}>
       <SectionHeader title={title} href={href} />
 
-      <div className={`grid gap-3 ${compact ? "grid-cols-1" : "lg:grid-cols-[1.6fr_1fr]"}`}>
+      <div className={`grid gap-5 ${compact ? "grid-cols-1" : "lg:grid-cols-[1.6fr_1fr]"}`}>
         {/* Featured story */}
-        <article className="group overflow-hidden rounded bg-white shadow-sm">
-          <Link href={href} className="block">
+        <article className="group overflow-hidden rounded-xl border border-slate-100 bg-white transition-all hover:shadow-lg">
+          <Link href={href} className="flex flex-col">
             <div className="relative overflow-hidden">
               <Image
                 src={featured.image}
                 alt={featured.title}
-                width={600}
-                height={380}
-                className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                width={800}
+                height={480}
+                className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               />
-              <span className="absolute left-2 top-2 rounded bg-[#c79a1d] px-2 py-0.5 text-xs font-bold text-white">
+              <span className="absolute left-3 top-3 rounded-lg bg-[#c79a1d] px-2.5 py-1 text-xs font-bold text-white shadow-xl">
                 {featured.category}
               </span>
             </div>
-            <div className="p-3">
-              <h3 className={`font-bold leading-snug text-slate-900 group-hover:text-[#b38716] ${compact ? "text-sm md:text-base" : "text-base md:text-lg"}`}>
+            <div className="p-4 md:p-5">
+              <h3 className={`font-extrabold leading-snug text-slate-900 group-hover:text-[#b38716] ${compact ? "text-base" : "text-xl md:text-2xl"}`}>
                 {featured.title}
               </h3>
               {!compact && (
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-600 line-clamp-2">{featured.excerpt}</p>
+                <p className="mt-3 text-[15px] leading-relaxed text-slate-600 line-clamp-3">
+                  {featured.excerpt}
+                </p>
               )}
             </div>
           </Link>
         </article>
 
-        {/* Side list */}
-        <div className="flex flex-col gap-2">
+        {/* Side list with clean card style */}
+        <div className="flex flex-col gap-4">
           {sideItems.map((item) => (
-            <article key={item.title} className="group flex gap-2 overflow-hidden rounded bg-white shadow-sm p-2">
-              <Link href={href} className="flex gap-2 w-full">
-                <div className="relative w-24 shrink-0 overflow-hidden rounded">
+            <article key={item.title} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+              <Link href={href} className="flex gap-4 p-3">
+                <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <Image
                     src={item.image}
                     alt={item.title}
-                    width={300}
-                    height={200}
-                    className="h-16 w-24 object-cover"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold leading-snug text-slate-900 group-hover:text-[#b38716] line-clamp-2">
+                <div className="flex flex-col justify-center gap-1.5 min-w-0">
+                  <h4 className="text-[15px] font-bold leading-tight text-slate-900 group-hover:text-[#b38716] line-clamp-3 transition-colors">
                     {item.title}
-                  </p>
-                  <p className="mt-1 text-[11px] text-slate-400">{item.time}</p>
+                  </h4>
+                  <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{item.time}</p>
                 </div>
               </Link>
             </article>

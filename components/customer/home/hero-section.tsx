@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { Play, Clock } from "lucide-react";
 
 // Expanded sample data to match the density of a premium portal
 const leftStories = [
@@ -28,9 +28,10 @@ const leftStories = [
 
 const mainStory = {
   image: "https://picsum.photos/seed/m1/800/480",
+  category: "শিক্ষাঙ্গন",
   title: "এনএসপিতে রুমিন ফারহানা, জুনায়েদ-রাফিসহ অর্ধশত জুলাইয়ের পরিচিত মুখ যোগ দেওয়ার গুঞ্জন",
   excerpt:
-    "জাতীয় নাগরিক পার্টিতে (এনএসপি) যোগ দেওয়ার গুঞ্জন উঠেছে স্বতন্ত্র সংসদ সদস্য রুমিন ফারহানা, ছাত্র আন্দোলনের সমন্বয়ক আলী আহসান জুনায়েদসহ অনেকে...",
+    "জাতীয় নাগরিক পার্টিতে (এনএসপি) যোগ দেওয়ার গুঞ্জন উঠেছে স্বতন্ত্র সংসদ সদস্য রুমিন ফারহানা, ছাত্র আন্দোলনের সমন্বয়ক আলী আহসান জুনায়েদসহ অনেকে যারা জুলাই বিপ্লবে রাজপথে সাহসী ভূমিকা রেখেছিলেন।",
   time: "১ ঘণ্টা আগে",
 };
 
@@ -72,12 +73,12 @@ const centerGridStories = [
 export function HeroSection() {
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_260px]">
-      {/* Left Column: Vertical mini-list */}
-      <aside className="hidden flex-col gap-4 lg:flex">
+      {/* Left Column: Card-styled trend list */}
+      <aside className="hidden flex-col gap-3 lg:flex">
         {leftStories.map((story, i) => (
-          <article key={i} className="group border-b border-slate-100 pb-3 last:border-0">
-            <Link href="/news" className="flex flex-col gap-2">
-              <div className="overflow-hidden rounded-md bg-slate-100">
+          <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <Link href="/news" className="flex flex-col gap-2 p-2">
+              <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
                   src={story.image}
                   alt=""
@@ -86,116 +87,151 @@ export function HeroSection() {
                   className="aspect-[3/2] w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <h3 className="line-clamp-3 text-[15px] font-bold leading-snug text-slate-900 group-hover:text-[#b38716]">
-                {story.title}
-              </h3>
+              <div className="px-1 py-1">
+                <h3 className="line-clamp-3 text-[14px] font-bold leading-snug text-slate-900 group-hover:text-[#b38716] transition-colors">
+                  {story.title}
+                </h3>
+              </div>
             </Link>
           </article>
         ))}
-        {/* Mock Ad placement inside left column */}
-        <div className="mt-2 h-40 w-full rounded-lg bg-slate-50 flex items-center justify-center border border-dashed border-slate-200">
-           <span className="text-xs text-slate-400">বিজ্ঞাপন</span>
+
+        {/* Ad Slot in Left Column */}
+        <div className="mt-2 flex flex-col gap-3">
+          <div className="relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100 p-4 shadow-inner flex flex-col items-center justify-center min-h-[180px] group transition-all hover:bg-white hover:shadow-md">
+            <span className="absolute top-2 right-3 text-[9px] font-black uppercase tracking-widest text-slate-300">Advertisement</span>
+            <div className="text-center space-y-2">
+              <div className="mx-auto h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center">
+                 <div className="h-6 w-6 rounded bg-slate-200 animate-pulse" />
+              </div>
+              <p className="text-[11px] font-bold text-slate-400">আপনার বিজ্ঞাপন এখানে দিন</p>
+            </div>
+          </div>
         </div>
       </aside>
 
-      {/* Center Column: Highlight + Sub-grid */}
-      <div className="flex flex-col gap-6 border-slate-200 lg:border-x lg:px-5">
-        {/* Main Highlight Story */}
-        <article className="group">
-          <Link href="/news" className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-xl shadow-lg ring-1 ring-slate-200/10">
+      {/* Center Column: Box-styled Highlight + Sub-grid */}
+      <div className="flex flex-col gap-5">
+        {/* Main Highlight Story - CENTERED & BEAUTIFIED */}
+        <article className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
+          <Link href="/news" className="flex flex-col">
+            <div className="relative overflow-hidden">
               <Image
                 src={mainStory.image}
                 alt={mainStory.title}
                 width={800}
                 height={480}
                 priority
-                className="aspect-video w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"
               />
+              <div className="absolute inset-x-0 bottom-0 flex justify-center p-4">
+                 <span className="rounded-full bg-white/95 px-5 py-1.5 text-[13px] font-black uppercase tracking-widest text-slate-900 shadow-xl backdrop-blur-sm ring-1 ring-slate-200/50">
+                    {mainStory.category}
+                 </span>
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <h1 className="text-xl font-extrabold leading-tight text-slate-900 group-hover:text-[#b38716] md:text-2xl lg:text-3xl">
+            
+            <div className="flex flex-col items-center text-center gap-3 p-6 lg:p-7">
+              <h1 className="text-xl font-[900] leading-snug tracking-tight text-slate-900 group-hover:text-[#b38716] transition-colors md:text-2xl lg:text-[28px] px-2">
                 {mainStory.title}
               </h1>
-              <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">
+              
+              {/* Decorative Separator */}
+              <div className="flex items-center gap-4 justify-center">
+                 <div className="h-[2px] w-6 rounded-full bg-slate-100" />
+                 <div className="h-1.5 w-1.5 rounded-full bg-[#c79a1d] shadow-[0_0_8px_rgba(199,154,29,0.3)]" />
+                 <div className="h-[2px] w-6 rounded-full bg-slate-100" />
+              </div>
+
+              <p className="line-clamp-3 text-[14px] md:text-[15px] leading-relaxed text-slate-600 max-w-xl font-medium">
                 {mainStory.excerpt}
               </p>
-              <p className="text-xs font-semibold text-slate-400">{mainStory.time}</p>
+              
+              <div className="flex items-center gap-2 justify-center bg-slate-50 px-4 py-1.5 rounded-full ring-1 ring-slate-100">
+                <Clock className="h-3.5 w-3.5 text-slate-400" />
+                <p className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">{mainStory.time}</p>
+              </div>
             </div>
           </Link>
         </article>
 
-        {/* 2-Column Grid for Sub-stories */}
-        <div className="grid gap-x-5 gap-y-6 sm:grid-cols-2 lg:pt-4">
+        {/* 2-Column Grid of Box-styled mini-stories */}
+        <div className="grid gap-4 sm:grid-cols-2">
           {centerGridStories.map((story, i) => (
-            <article key={i} className="group flex gap-3 border-b border-slate-50 pb-4 last:border-0">
-              <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 sm:h-20 sm:w-28">
-                <Image
-                  src={story.image}
-                  alt=""
-                  width={150}
-                  height={100}
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <h4 className="line-clamp-3 text-sm font-bold leading-tight text-slate-900 group-hover:text-[#b38716]">
-                {story.title}
-              </h4>
+            <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+              <Link href="/news" className="flex gap-3 p-2.5">
+                <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
+                  <Image
+                    src={story.image}
+                    alt=""
+                    width={150}
+                    height={100}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                </div>
+                <h4 className="line-clamp-3 text-[13px] font-bold leading-tight text-slate-900 group-hover:text-[#b38716] transition-colors">
+                  {story.title}
+                </h4>
+              </Link>
             </article>
           ))}
         </div>
       </div>
 
-      {/* Right Column: Sidebar (Ads / Video / Subscribe) */}
-      <aside className="flex flex-col gap-6">
-        {/* Ad Space 1 */}
-        <div className="relative overflow-hidden rounded-xl bg-[#600000] p-4 text-white shadow-xl">
-          <div className="absolute top-0 right-0 p-1 bg-white/10 rounded-bl text-[9px] uppercase tracking-widest">Ad</div>
-          <div className="flex flex-col gap-3">
-            <h4 className="text-lg font-black leading-tight">৬ষ্ঠ-১০ম শ্রেণি</h4>
-            <p className="text-xs font-bold text-amber-300">প্রগ্রেসিভ ব্যাচ ২০২৩</p>
-            <div className="inline-block rounded bg-white py-1.5 text-center font-bold text-[#600000]">শুরু: ১২ এপ্রিল</div>
+      {/* Right Column (Widgets) */}
+      <aside className="flex flex-col gap-5">
+        <div className="relative overflow-hidden rounded-2xl bg-[#600000] p-4 text-white shadow-xl group">
+          <div className="absolute top-0 right-0 p-1.5 bg-white/10 rounded-bl-xl text-[9px] uppercase tracking-widest font-black opacity-60">Ad</div>
+          <div className="flex flex-col gap-4">
+            <h4 className="text-lg font-black leading-tight border-b border-white/10 pb-2">৬ষ্ঠ-১০ম শ্রেণি</h4>
+            <div className="space-y-1">
+                <p className="text-xs font-bold text-amber-300 uppercase tracking-wide">প্রগ্রেসিভ ব্যাচ ২০২৬</p>
+                <div className="flex h-10 items-center justify-center rounded-xl bg-white font-black text-[#600000] shadow-lg transition-transform hover:scale-[1.02]">শুরু: ১২ এপ্রিল</div>
+            </div>
           </div>
         </div>
 
-        {/* Video Player Placeholder */}
-        <div className="group relative overflow-hidden rounded-xl bg-slate-100 shadow-md">
-           <Image 
-             src="https://picsum.photos/seed/v1/400/225" 
-             alt="Video thumb" 
-             width={400} 
-             height={225} 
-             className="aspect-video w-full object-cover brightness-90 group-hover:scale-105 transition-transform duration-500"
-            />
-           <div className="absolute inset-0 flex items-center justify-center">
-             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white shadow-xl ring-4 ring-white/20 transition-transform group-hover:scale-110">
-               <Play className="h-6 w-6 ml-1 fill-current" />
+        <div className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-lg">
+           <div className="relative overflow-hidden">
+             <Image 
+               src="https://picsum.photos/seed/v1/400/225" 
+               alt="Video thumb" 
+               width={400} 
+               height={225} 
+               className="aspect-video w-full object-cover brightness-95 group-hover:scale-105 transition-transform duration-500"
+              />
+             <div className="absolute inset-0 flex items-center justify-center">
+               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-2xl ring-4 ring-white/20 transition-all group-hover:scale-110 group-hover:bg-red-700">
+                 <Play className="h-7 w-7 ml-1 fill-current" />
+               </div>
              </div>
            </div>
-           <div className="bg-white p-3">
-             <h5 className="text-sm font-bold leading-tight line-clamp-2">খুব খারাপ সময় পার করেছি একসময়: ঢাবি উপাচার্য</h5>
+           <div className="p-4">
+             <h5 className="text-[15px] font-bold leading-snug line-clamp-2 text-slate-900 group-hover:text-red-600 transition-colors">খুব খারাপ সময় পার করেছি একসময়: ঢাবি উপাচার্য</h5>
            </div>
         </div>
 
-        {/* Newsletter/Subscribe Widget */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-           <div className="flex flex-col items-center text-center gap-3">
-             <div className="flex items-center gap-1 text-red-600">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm ring-1 ring-slate-50">
+           <div className="flex flex-col items-center text-center gap-4">
+             <div className="flex items-center gap-1.5 bg-red-50 px-3 py-1 rounded-full ring-1 ring-red-100">
                <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse" />
-               <span className="text-[10px] font-black uppercase tracking-widest">Live Now</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Live Updates</span>
              </div>
-             <h4 className="text-xl font-bold text-slate-900">SUBSCRIBE</h4>
-             <p className="text-xs text-slate-500">আমাদের ইউটিউব চ্যানেলে নিয়মিত আপডেট পেতে সাবস্ক্রাইব করুন</p>
-             <button className="w-full rounded-full bg-red-600 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700 active:scale-95">
+             <div className="space-y-1">
+                <h4 className="text-2xl font-black text-slate-900 tracking-tight">SUBSCRIBE</h4>
+                <p className="text-xs font-medium text-slate-500 leading-relaxed px-4">আমাদের ইউটিউব চ্যানেলে নিয়মিত আপডেট পেতে সাবস্ক্রাইব করুন</p>
+             </div>
+             <button className="w-full rounded-2xl bg-red-600 py-3.5 text-sm font-black text-white shadow-xl shadow-red-200 transition-all hover:bg-red-700 hover:shadow-red-300 active:scale-95">
                 Visit Channel
              </button>
            </div>
         </div>
 
-        {/* Bottom Small Ad */}
-        <div className="h-40 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center gap-2">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Sponsered</span>
-            <div className="h-24 w-40 bg-slate-200 rounded animate-pulse" />
+        <div className="flex flex-col gap-4">
+          <div className="h-44 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center justify-center gap-3 transition-all hover:bg-white hover:shadow-md">
+              <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Sponsored</span>
+              <div className="h-24 w-44 bg-slate-200 rounded-xl animate-pulse" />
+          </div>
         </div>
       </aside>
     </section>
