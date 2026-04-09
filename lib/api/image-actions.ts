@@ -23,6 +23,11 @@ export type DeleteImagesActionResult = {
   message: string;
 };
 
+export type MoveImagesActionResult = {
+  ok: boolean;
+  message: string;
+};
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
@@ -164,6 +169,50 @@ export async function deleteImagesAction(ids: string[]): Promise<DeleteImagesAct
     return {
       ok: true,
       message: getMessage(data, "Images deleted successfully."),
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Image API is unavailable.",
+    };
+  }
+}
+
+export async function moveImagesAction(
+  folder_id: string,
+  ids: string[],
+): Promise<MoveImagesActionResult> {
+  if (ids.length === 0) {
+    return {
+      ok: false,
+      message: "No images selected.",
+    };
+  }
+
+  try {
+    const response = await fetchApi("/admin/images/move", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        folder_id,
+        ids,
+      }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: getMessage(data, "Failed to move selected images."),
+      };
+    }
+
+    return {
+      ok: true,
+      message: getMessage(data, "Images moved successfully."),
     };
   } catch {
     return {

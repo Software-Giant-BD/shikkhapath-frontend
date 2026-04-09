@@ -4,6 +4,7 @@ import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronRight,
+  Check,
   FolderOpen,
   FolderPlus,
   MoreHorizontal,
@@ -31,7 +32,7 @@ import {
   getFoldersAction,
   updateFolderAction,
 } from "@/lib/api/folder-actions";
-import { deleteImagesAction, uploadImageAction } from "@/lib/api/image-actions";
+import { deleteImagesAction, moveImagesAction, uploadImageAction } from "@/lib/api/image-actions";
 import { cn } from "@/lib/utils";
 
 function formatSize(bytes: number) {
@@ -72,7 +73,9 @@ export function MediaCenterClient() {
   const [isLoadingFolders, setIsLoadingFolders] = useState(false);
   const [isSavingFolder, setIsSavingFolder] = useState(false);
   const [isDeletingImages, setIsDeletingImages] = useState(false);
+  const [isMovingImages, setIsMovingImages] = useState(false);
   const [isDeleteImagesConfirmOpen, setIsDeleteImagesConfirmOpen] = useState(false);
+  const [isMoveImagesOpen, setIsMoveImagesOpen] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [editingFolder, setEditingFolder] = useState<MediaFolder | null>(null);
   const [openFolderMenuId, setOpenFolderMenuId] = useState<string | null>(null);
@@ -82,6 +85,12 @@ export function MediaCenterClient() {
   const [breadcrumbs, setBreadcrumbs] = useState<Array<{ id: string | null; name: string }>>([
     { id: null, name: "Home" },
   ]);
+  const [moveFolders, setMoveFolders] = useState<MediaFolder[]>([]);
+  const [moveBreadcrumbs, setMoveBreadcrumbs] = useState<Array<{ id: string | null; name: string }>>([
+    { id: null, name: "Home" },
+  ]);
+  const [targetMoveFolderId, setTargetMoveFolderId] = useState<string>("");
+  const [isLoadingMoveFolders, setIsLoadingMoveFolders] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isVideoTab = tab === "video";
 
@@ -398,6 +407,70 @@ export function MediaCenterClient() {
     }
   };
 
+  const loadMoveFolders = useCallback(async (folderId: string) => {
+    setIsLoadingMoveFolders(true);
+
+    try {
+      const result = await getFoldersAction(folderId);
+
+      if (!result.ok) {
+        setError(result.message || "Failed to load folders.");
+        return;
+      }
+
+      setMoveFolders(result.items);
+      setMoveBreadcrumbs([
+        { id: null, name: "Home" },
+        ...result.parent_hierarchy.map((node) => ({ id: node.id, name: node.name })),
+      ]);
+      setTargetMoveFolderId(folderId);
+    } finally {
+      setIsLoadingMoveFolders(false);
+    }
+  }, []);
+
+  const onOpenMoveModal = async () => {
+    if (selectedImageIds.length === 0 || isMovingImages) {
+      return;
+    }
+
+    setIsMoveImagesOpen(true);
+    await loadMoveFolders(currentFolderId ?? "");
+  };
+
+  const onMoveBreadcrumbClick = async (index: number) => {
+    const target = moveBreadcrumbs[index];
+    await loadMoveFolders(target?.id ?? "");
+  };
+
+  const onMoveFolderOpen = async (folder: MediaFolder) => {
+    await loadMoveFolders(folder.id);
+  };
+
+  const onConfirmMoveImages = async () => {
+    if (selectedImageIds.length === 0 || isMovingImages) {
+      return;
+    }
+
+    setIsMovingImages(true);
+    setError("");
+
+    try {
+      const result = await moveImagesAction(targetMoveFolderId, selectedImageIds);
+
+      if (!result.ok) {
+        setError(result.message || "Failed to move selected images.");
+        return;
+      }
+
+      setSelectedImageIds([]);
+      setIsMoveImagesOpen(false);
+      await refreshFolders(currentFolderId ?? "");
+    } finally {
+      setIsMovingImages(false);
+    }
+  };
+
   return (
     <>
       <Card>
@@ -606,6 +679,15 @@ export function MediaCenterClient() {
                       ? "Deleting..."
                       : `Delete Selected (${selectedImageIds.length})`}
                   </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void onOpenMoveModal()}
+                    disabled={selectedImageIds.length === 0 || isMovingImages}
+                  >
+                    {isMovingImages ? "Moving..." : "Move to"}
+                  </Button>
                 </div>
               ) : null}
             </div>
@@ -730,6 +812,118 @@ export function MediaCenterClient() {
                 disabled={isDeletingImages}
               >
                 {isDeletingImages ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isMoveImagesOpen ? (
+        <div className="fixed inset-0 z-80 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-900/55"
+            onClick={() => {
+              if (!isMovingImages) {
+                setIsMoveImagesOpen(false);
+              }
+            }}
+            aria-label="Close move images dialog"
+          />
+
+          <div className="relative z-10 w-full max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-xl">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-2xl font-semibold text-slate-900">Move Image to</h3>
+              <button
+                type="button"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+                onClick={() => {
+                  if (!isMovingImages) {
+                    setIsMoveImagesOpen(false);
+                  }
+                }}
+                aria-label="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="mb-3 text-sm text-slate-500">Select a folder to move the images to.</p>
+
+            <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm">
+              {moveBreadcrumbs.map((crumb, index) => (
+                <button
+                  key={crumb.id ?? "root"}
+                  type="button"
+                  onClick={() => void onMoveBreadcrumbClick(index)}
+                  className={cn(
+                    "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
+                    index === moveBreadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
+                  )}
+                >
+                  {index === 0 ? <FolderOpen size={15} /> : null}
+                  {crumb.name}
+                  {index < moveBreadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
+                </button>
+              ))}
+            </div>
+
+            {isLoadingMoveFolders ? (
+              <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                Loading folders...
+              </div>
+            ) : moveFolders.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                No sub-folder found in this location.
+              </div>
+            ) : (
+              <div className="grid max-h-[38vh] grid-cols-2 gap-4 overflow-y-auto pr-1 md:grid-cols-3 lg:grid-cols-4">
+                {moveFolders.map((folder) => {
+                  const isSelected = targetMoveFolderId === folder.id;
+
+                  return (
+                    <button
+                      key={folder.id}
+                      type="button"
+                      onClick={() => {
+                        setTargetMoveFolderId(folder.id);
+                      }}
+                      onDoubleClick={() => void onMoveFolderOpen(folder)}
+                      className={cn(
+                        "relative rounded-xl border bg-white p-3 text-left transition hover:border-indigo-300",
+                        isSelected ? "border-indigo-400 ring-2 ring-indigo-100" : "border-slate-200",
+                      )}
+                    >
+                      {isSelected ? (
+                        <span className="absolute right-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
+                          <Check size={12} />
+                        </span>
+                      ) : null}
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <FolderOpen size={52} className="text-amber-500" />
+                        <span className="w-full truncate text-sm font-medium text-slate-700">{folder.name}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-5 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsMoveImagesOpen(false)}
+                disabled={isMovingImages}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={() => void onConfirmMoveImages()}
+                disabled={isMovingImages}
+              >
+                {isMovingImages ? "Moving..." : "Confirm"}
               </Button>
             </div>
           </div>
