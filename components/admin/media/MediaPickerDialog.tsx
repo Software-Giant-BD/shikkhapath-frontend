@@ -10,8 +10,10 @@ import type { MediaFolder, MediaItem, MediaType } from "@/lib/admin/media-librar
 import {
   addMediaFiles,
   getMediaItems,
+  saveMediaItems,
 } from "@/lib/admin/media-library";
 import { getFoldersAction } from "@/lib/api/folder-actions";
+import { uploadImageAction } from "@/lib/api/image-actions";
 import { cn } from "@/lib/utils";
 
 type MediaPickerDialogProps = {
@@ -159,6 +161,48 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     setError("");
 
     try {
+      if (mediaType === "image") {
+        const uploadedItems = [] as MediaItem[];
+
+        for (const file of selected) {
+          if (!file.type.startsWith("image/")) {
+            continue;
+          }
+
+          const payload = new FormData();
+          payload.append("file", file);
+          payload.append("folder_id", currentFolderId ?? "");
+
+          const result = await uploadImageAction(payload);
+          if (!result.ok) {
+            setError(result.message || "Failed to upload files.");
+            continue;
+          }
+
+          if (!result.item) {
+            continue;
+          }
+
+          uploadedItems.push({
+            ...result.item,
+            type: "image",
+          });
+        }
+
+        if (uploadedItems.length > 0) {
+          const existingItems = getMediaItems();
+          const nextItems = [
+            ...uploadedItems,
+            ...existingItems.filter((item) => !uploadedItems.some((uploaded) => uploaded.id === item.id)),
+          ];
+
+          saveMediaItems(nextItems);
+          setItems(nextItems);
+        }
+
+        return;
+      }
+
       const nextItems = await addMediaFiles(selected, {
         folder_id: isVideoType ? null : currentFolderId,
         media_type: mediaType,

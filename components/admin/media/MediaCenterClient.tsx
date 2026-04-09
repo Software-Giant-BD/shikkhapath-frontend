@@ -23,6 +23,7 @@ import type {
 import {
   addMediaFiles,
   getMediaItems,
+  saveMediaItems,
 } from "@/lib/admin/media-library";
 import {
   createFolderAction,
@@ -30,6 +31,7 @@ import {
   getFoldersAction,
   updateFolderAction,
 } from "@/lib/api/folder-actions";
+import { uploadImageAction } from "@/lib/api/image-actions";
 import { cn } from "@/lib/utils";
 
 function formatSize(bytes: number) {
@@ -183,6 +185,48 @@ export function MediaCenterClient() {
     setError("");
 
     try {
+      if (tab === "image") {
+        const uploadedItems = [] as MediaItem[];
+
+        for (const file of selected) {
+          if (!file.type.startsWith("image/")) {
+            continue;
+          }
+
+          const payload = new FormData();
+          payload.append("file", file);
+          payload.append("folder_id", currentFolderId ?? "");
+
+          const result = await uploadImageAction(payload);
+          if (!result.ok) {
+            setError(result.message || "Files upload failed. Check file type and try again.");
+            continue;
+          }
+
+          if (!result.item) {
+            continue;
+          }
+
+          uploadedItems.push({
+            ...result.item,
+            type: "image",
+          });
+        }
+
+        if (uploadedItems.length > 0) {
+          const existingItems = getMediaItems();
+          const nextItems = [
+            ...uploadedItems,
+            ...existingItems.filter((item) => !uploadedItems.some((uploaded) => uploaded.id === item.id)),
+          ];
+
+          saveMediaItems(nextItems);
+          setItems(nextItems);
+        }
+
+        return;
+      }
+
       const nextItems = await addMediaFiles(selected, {
         folder_id: isVideoTab ? null : currentFolderId,
         media_type: tab,
