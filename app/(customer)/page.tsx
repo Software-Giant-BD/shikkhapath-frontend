@@ -1,15 +1,14 @@
 import type { Metadata } from "next"
 
-import { SiteFooter } from "@/components/customer/common/footer-sections"
-import { SiteHeader } from "@/components/customer/common/site-header"
 import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
 import { HeroSection } from "@/components/customer/home/hero-section"
 import { AdBanner } from "@/components/customer/home/ad-banner"
-import { type NewsSectionKey } from "@/components/customer/home/home-content.data"
+import { SECTION_DATA, type NewsSectionKey } from "@/components/customer/home/home-content.data"
 import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
 import { TabSectionBlock } from "@/components/customer/home/tab-section-block"
 import { NewsletterSection } from "@/components/customer/home/newsletter-section"
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block"
+import { getCategories } from "@/lib/api/categories"
 
 export const metadata: Metadata = {
   title: "শিক্ষাপথ | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ",
@@ -25,12 +24,32 @@ export const metadata: Metadata = {
   },
 }
 
-export default function Home() {
-  const primarySections: NewsSectionKey[] = ["education", "admission", "national"]
-  const compactSectionRows: [NewsSectionKey, NewsSectionKey][] = [
-    ["sports", "economy"],
-    ["science", "international"],
-  ]
+const FALLBACK_HOME_SECTIONS: NewsSectionKey[] = [
+  "education",
+  "admission",
+  "national",
+  "sports",
+  "economy",
+  "career",
+  "science",
+  "international",
+]
+
+export default async function Home() {
+  const categories = await getCategories()
+
+  const configuredSections = categories
+    .filter((category) => category.show_on_home)
+    .sort((a, b) => Number(a.home_sort_order || "0") - Number(b.home_sort_order || "0"))
+    .map((category) => category.slug)
+    .filter((slug): slug is NewsSectionKey => slug in SECTION_DATA)
+
+  const homeSections = configuredSections.length > 0 ? configuredSections : FALLBACK_HOME_SECTIONS
+  const primarySections = homeSections.slice(0, 3)
+  const remainingSections = homeSections.slice(3)
+  const topCompactSections = remainingSections.slice(0, 2)
+  const highlightSection = remainingSections[2] ?? "career"
+  const bottomCompactSections = remainingSections.slice(3, 5)
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -61,27 +80,27 @@ export default function Home() {
         ))}
 
         <VideoSectionBlock />
-        {compactSectionRows.slice(0, 1).map((row, index) => (
-          <div key={`compact-top-${index}`} className="mt-5 grid gap-4 md:grid-cols-2">
-            {row.map((section) => (
+        {topCompactSections.length > 0 ? (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {topCompactSections.map((section) => (
               <NewsSectionBlock key={section} section={section} compact />
             ))}
           </div>
-        ))}
+        ) : null}
 
         <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" />
 
         <TabSectionBlock />
 
-        <NewsSectionBlock section="career" />
+        <NewsSectionBlock section={highlightSection} />
 
-        {compactSectionRows.slice(1).map((row, index) => (
-          <div key={`compact-bottom-${index}`} className="mt-5 grid gap-4 md:grid-cols-2">
-            {row.map((section) => (
+        {bottomCompactSections.length > 0 ? (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {bottomCompactSections.map((section) => (
               <NewsSectionBlock key={section} section={section} compact />
             ))}
           </div>
-        ))}
+        ) : null}
 
         <NewsletterSection />
       </main>

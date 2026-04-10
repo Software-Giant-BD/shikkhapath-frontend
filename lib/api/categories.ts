@@ -18,11 +18,13 @@ export type CategoryApiModel = {
   parent?: CategoryParentApiModel;
   status: CategoryStatus;
   sort_order: string;
+  home_sort_order: string;
   description: string;
   meta_title: string;
   meta_description: string;
   meta_keywords: string;
   show_in_menu: boolean;
+  show_on_home: boolean;
   featured: boolean;
   og_image_url?: string;
 };
@@ -87,11 +89,13 @@ function normalizeCategory(value: unknown): CategoryApiModel {
     parent: normalizeParentCategory(item.parent),
     status: normalizeStatus(item.status),
     sort_order: asString(item.sort_order ?? item.sortOrder ?? "0"),
+    home_sort_order: asString(item.home_sort_order ?? item.homeSortOrder ?? item.sort_order ?? item.sortOrder ?? "0"),
     description: asString(item.description),
     meta_title: asString(item.meta_title ?? item.metaTitle),
     meta_description: asString(item.meta_description ?? item.metaDescription),
     meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
     show_in_menu: asBoolean(item.show_in_menu ?? item.showInMenu, true),
+    show_on_home: asBoolean(item.show_on_home ?? item.showOnHome ?? item.featured, false),
     featured: asBoolean(item.featured, false),
     og_image_url: asString(item.og_image_url ?? item.ogImageUrl) || undefined,
   };

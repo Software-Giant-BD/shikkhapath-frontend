@@ -6,7 +6,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Globe, Menu, Moon, Search, X, Sun } from "lucide-react";
 
-const navLinks = [
+export type SiteNavLink = {
+  label: string;
+  href: string;
+  hasDropdown?: boolean;
+};
+
+const defaultNavLinks: SiteNavLink[] = [
   { label: "সর্বশেষ", href: "/category/latest" },
   { label: "শিক্ষাঙ্গন", href: "/category/education", hasDropdown: true },
   { label: "উচ্চশিক্ষা", href: "/category/higher-education", hasDropdown: true },
@@ -20,7 +26,7 @@ const navLinks = [
   { label: "আরও", href: "/category/national", hasDropdown: true },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavLink[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
