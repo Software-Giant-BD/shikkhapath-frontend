@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { ArrowLeft, Image as ImageIcon, Save } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
+import { createNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
@@ -22,6 +25,7 @@ type NewsFormValues = {
   excerpt: string;
   content: string;
   category_id: string;
+    sub_category_id: string;
   author_name: string;
   source_name: string;
   source_url: string;
@@ -40,7 +44,7 @@ type NewsFormValues = {
 };
 
 type NewsFormProps = {
-  categoryOptions?: { id: string; title: string }[];
+  categoryOptions?: { id: string; title: string; parent_id?: string | null }[];
   headerTitle?: string;
   headerAction?: React.ReactNode;
 };
@@ -51,6 +55,7 @@ const defaultValues: NewsFormValues = {
   excerpt: "",
   content: "",
   category_id: "",
+    sub_category_id: "",
   author_name: "",
   source_name: "",
   source_url: "",
@@ -81,11 +86,25 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
   const [form, setForm] = useState<NewsFormValues>(defaultValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
+    const [submitError, setSubmitError] = useState("");
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [featureImageError, setFeatureImageError] = useState("");
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
   const [slugEdited, setSlugEdited] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
+
+  const router = useRouter();
+
+  const parentCategories = useMemo(
+    () => categoryOptions.filter((c) => !c.parent_id),
+    [categoryOptions],
+  );
+
+  const subCategoryOptions = useMemo(
+    () => (form.category_id ? categoryOptions.filter((c) => c.parent_id === form.category_id) : []),
+    [categoryOptions, form.category_id],
+  );
 
   const tagPreview = useMemo(() => {
     return form.tags
@@ -146,12 +165,43 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
 
         setIsSubmitting(true);
         setSubmitMessage("");
+        setSubmitError("");
+        setFieldErrors({});
 
-        // Keeping this as a UI-ready form until News API endpoints are wired.
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        const result = await createNewsAction({
+          title: form.title,
+          slug: form.slug || undefined,
+          excerpt: form.excerpt || undefined,
+          content: form.content || undefined,
+          category_id: form.category_id || undefined,
+          sub_category_id: form.sub_category_id || undefined,
+          author_name: form.author_name || undefined,
+          source_name: form.source_name || undefined,
+          source_url: form.source_url || undefined,
+          feature_image_url: form.feature_image_url || undefined,
+          status: form.status,
+          publish_at: form.publish_at || undefined,
+          tags: form.tags || undefined,
+          language: form.language || undefined,
+          read_time_minutes: form.read_time_minutes ? parseInt(form.read_time_minutes, 10) : undefined,
+          is_featured: form.is_featured === "1",
+          is_breaking: form.is_breaking === "1",
+          allow_comments: form.allow_comments === "1",
+          meta_title: form.meta_title || undefined,
+          meta_description: form.meta_description || undefined,
+          meta_keywords: form.meta_keywords || undefined,
+        });
 
         setIsSubmitting(false);
-        setSubmitMessage("News draft is ready. Connect API to persist this payload.");
+
+        if (!result.ok) {
+          if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+          setSubmitError(result.message);
+          return;
+        }
+
+        setSubmitMessage(result.message);
+        router.push("/admin/news/list");
       }}
     >
       <Card>
@@ -195,6 +245,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                 onChange={(event) => {
                   setSlugEdited(true);
                   setForm((prev) => ({ ...prev, slug: slugify(event.target.value) }));
+                              {fieldErrors.slug ? <p className="text-xs font-medium text-rose-600">{fieldErrors.slug[0]}</p> : null}
                 }}
                 required
               />
@@ -205,17 +256,39 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
               <Select
                 id="category_id"
                 value={form.category_id}
-                onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, category_id: event.target.value, sub_category_id: "" }))
+                }
               >
                 <option value="">Select Category</option>
-                {categoryOptions.map((category) => (
+                {parentCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.title}
                   </option>
                 ))}
               </Select>
+                          {fieldErrors.category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.category_id[0]}</p> : null}
             </div>
           </div>
+
+          {subCategoryOptions.length > 0 ? (
+            <div className="space-y-2">
+              <Label htmlFor="sub_category_id">Sub-category</Label>
+              <Select
+                id="sub_category_id"
+                value={form.sub_category_id}
+                onChange={(event) => setForm((prev) => ({ ...prev, sub_category_id: event.target.value }))}
+              >
+                <option value="">Select Sub-category</option>
+                {subCategoryOptions.map((sc) => (
+                  <option key={sc.id} value={sc.id}>
+                    {sc.title}
+                  </option>
+                ))}
+              </Select>
+              {fieldErrors.sub_category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.sub_category_id[0]}</p> : null}
+            </div>
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="excerpt">Short Summary</Label>
@@ -523,6 +596,12 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
       {submitMessage ? (
         <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
           {submitMessage}
+        </p>
+      ) : null}
+
+      {submitError ? (
+        <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+          {submitError}
         </p>
       ) : null}
 

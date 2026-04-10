@@ -21,7 +21,11 @@ export default async function AddNewsPage() {
       />
 
       <NewsForm
-        categoryOptions={categories.map((category) => ({ id: category.id, title: category.title }))}
+        categoryOptions={categories.map((category) => ({
+          id: category.id,
+          title: category.title,
+          parent_id: category.parent_id || null,
+        }))}
         headerTitle="Add News"
         headerAction={(
           <Link href="/admin/news/list">
