@@ -22,11 +22,11 @@ import {
   ArrowDown,
   ArrowUp,
   GripVertical,
+  Info,
   LayoutTemplate,
   Plus,
   RotateCcw,
   Search,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 
@@ -253,12 +253,23 @@ export function HomepageCategoryManager({ allCategories, initialHomeCategories }
     <section className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-            Homepage Categories
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Organize how news sections appear on the main landing page. Reorder the list to change editorial priority and add or remove categories when needed.
-          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <h4 className="text-3xl font-black tracking-tight text-slate-900">
+              Homepage Categories
+            </h4>
+            <div className="group relative">
+              <button
+                type="button"
+                aria-label="Homepage category info"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition-colors hover:text-indigo-600"
+              >
+                <Info size={16} />
+              </button>
+              <div className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-80 rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-600 shadow-xl group-hover:block">
+                Organize how news sections appear on the main landing page. Reorder the list to change editorial priority and add or remove categories when needed.
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">

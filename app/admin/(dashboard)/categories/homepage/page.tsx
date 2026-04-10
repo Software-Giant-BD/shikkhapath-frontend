@@ -1,8 +1,4 @@
-import Link from "next/link";
-import { List } from "lucide-react";
-
 import { HomepageCategoryManager } from "@/components/admin/categories/HomepageCategoryManager";
-import { Button } from "@/components/admin/ui/button";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import { getCategoriesList } from "@/lib/api/categories";
 import { getHomeCategoriesAction } from "@/lib/api/home-category-actions";
@@ -20,20 +16,11 @@ export default async function HomePageCategoriesPage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Home Page Categories"
         breadcrumbs={[
           { label: "Home", href: "/admin" },
           { label: "Categories", href: "/admin/categories/list" },
           { label: "Home Page Categories" },
         ]}
-        action={(
-          <Link href="/admin/categories/list">
-            <Button variant="secondary">
-              <List size={16} />
-              Category List
-            </Button>
-          </Link>
-        )}
       />
 
       <HomepageCategoryManager
