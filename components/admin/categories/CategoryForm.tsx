@@ -20,13 +20,11 @@ export type CategoryFormValues = {
   parent_id: string;
   status: "published" | "draft";
   sort_order: string;
-  home_sort_order: string;
   description: string;
   meta_title: string;
   meta_description: string;
   meta_keywords: string;
   show_in_menu: boolean;
-  show_on_home: boolean;
   featured: boolean;
 };
 
@@ -59,13 +57,11 @@ const defaultValues: CategoryFormValues = {
   parent_id: "",
   status: "published",
   sort_order: "0",
-  home_sort_order: "0",
   description: "",
   meta_title: "",
   meta_description: "",
   meta_keywords: "",
   show_in_menu: true,
-  show_on_home: false,
   featured: false,
 };
 
@@ -79,12 +75,10 @@ export function CategoryForm({
   headerAction,
 }: CategoryFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState<CategoryFormValues>(() => ({
+  const [form, setForm] = useState<CategoryFormValues>({
     ...defaultValues,
     ...initialValues,
-    show_on_home: initialValues?.show_on_home ?? initialValues?.featured ?? defaultValues.show_on_home,
-    home_sort_order: initialValues?.home_sort_order ?? initialValues?.sort_order ?? defaultValues.home_sort_order,
-  }));
+  });
   const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(
     mode === "edit" || Boolean(initialValues?.slug),
   );
@@ -142,10 +136,7 @@ export function CategoryForm({
         payload.append("meta_description", form.meta_description);
         payload.append("meta_keywords", form.meta_keywords);
         payload.append("show_in_menu", form.show_in_menu ? "1" : "0");
-        payload.append("show_on_home", form.show_on_home ? "1" : "0");
-        payload.append("home_sort_order", form.home_sort_order);
-        // Keep legacy field for APIs that still use featured to indicate homepage visibility.
-        payload.append("featured", form.show_on_home ? "1" : "0");
+        payload.append("featured", form.featured ? "1" : "0");
 
         if (ogImageFile) {
           payload.append("og_image", ogImageFile);
@@ -364,27 +355,9 @@ export function CategoryForm({
             Show this category in website menu
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <Checkbox
-              checked={form.show_on_home}
-              onCheckedChange={(value) => setForm((prev) => ({ ...prev, show_on_home: Boolean(value) }))}
-            />
-            Show this category on homepage
-          </label>
-
-          {form.show_on_home ? (
-            <div className="space-y-2">
-              <Label htmlFor="home_sort_order">Homepage Order</Label>
-              <Input
-                id="home_sort_order"
-                type="number"
-                min={0}
-                value={form.home_sort_order}
-                onChange={(event) => setForm((prev) => ({ ...prev, home_sort_order: event.target.value }))}
-              />
-              <p className="text-xs text-slate-500">Smaller number appears earlier on homepage sections.</p>
-            </div>
-          ) : null}
+          <p className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            Homepage category order is managed from <strong>Categories &gt; Home Page Categories</strong>.
+          </p>
         </CardContent>
       </Card>
 

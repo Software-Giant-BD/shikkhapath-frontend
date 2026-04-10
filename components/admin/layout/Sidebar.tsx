@@ -39,6 +39,7 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "Category List", href: "/admin/categories/list" },
           { title: "Add Category", href: "/admin/categories/add" },
+          { title: "Home Page Categories", href: "/admin/categories/homepage" },
         ],
       },
       {
