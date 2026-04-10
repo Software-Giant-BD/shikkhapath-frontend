@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { updateNewsStatusAction, type NewsStatusValue } from "@/lib/api/news-actions";
 import { getNewsList } from "@/lib/api/news";
 
 type SearchParams = Promise<{ page?: string }>;
@@ -53,6 +54,19 @@ export default async function NewsListPage({
     publishAt: formatDateTime(item.publish_at),
   }));
 
+  async function updateStatus(formData: FormData) {
+    "use server";
+
+    const newsId = String(formData.get("news_id") || "");
+    const status = String(formData.get("status") || "draft") as NewsStatusValue;
+
+    if (!newsId || !["draft", "published", "scheduled"].includes(status)) {
+      return;
+    }
+
+    await updateNewsStatusAction(newsId, status);
+  }
+
   const startItem = pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.perPage + 1;
   const endItem = Math.min(pagination.currentPage * pagination.perPage, pagination.total);
   const pageLinks = Array.from({ length: pagination.lastPage }, (_, idx) => idx + 1);
@@ -89,6 +103,7 @@ export default async function NewsListPage({
                   <th className="px-6 py-4 font-semibold">Author</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold">Publish At</th>
+                  <th className="px-6 py-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -105,11 +120,37 @@ export default async function NewsListPage({
                       </span>
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-slate-600">{news.publishAt}</td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <Link href={`/admin/news/${news.id}/edit`}>
+                          <Button variant="secondary" size="sm">
+                            <Pencil size={14} />
+                            Edit
+                          </Button>
+                        </Link>
+
+                        <form action={updateStatus} className="flex items-center gap-2">
+                          <input type="hidden" name="news_id" value={news.id} />
+                          <select
+                            name="status"
+                            defaultValue={news.status.toLowerCase()}
+                            className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-700"
+                          >
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                            <option value="scheduled">Scheduled</option>
+                          </select>
+                          <Button type="submit" variant="secondary" size="sm">
+                            Update
+                          </Button>
+                        </form>
+                      </div>
+                    </td>
                   </tr>
                 ))}
                 {rows.length === 0 ? (
                   <tr>
-                    <td className="px-6 py-8 text-center text-slate-500" colSpan={7}>
+                    <td className="px-6 py-8 text-center text-slate-500" colSpan={8}>
                       No news found.
                     </td>
                   </tr>

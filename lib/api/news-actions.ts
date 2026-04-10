@@ -10,6 +10,8 @@ export type NewsActionResult = {
   fieldErrors?: FieldErrors;
 };
 
+export type NewsStatusValue = "draft" | "published" | "scheduled";
+
 function getMessage(payload: unknown, fallback: string): string {
   if (payload && typeof payload === "object") {
     const maybeMessage = (payload as Record<string, unknown>).message;
@@ -72,6 +74,39 @@ export async function createNewsAction(payload: CreateNewsPayload): Promise<News
     return {
       ok: true,
       message: getMessage(data, "News created successfully."),
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "News API is unavailable.",
+    };
+  }
+}
+
+export async function updateNewsStatusAction(
+  newsId: string,
+  status: NewsStatusValue,
+): Promise<NewsActionResult> {
+  try {
+    const response = await fetchApi(`/admin/news/${newsId}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: getMessage(data, "Failed to update news status."),
+      };
+    }
+
+    revalidatePath("/admin/news/list");
+    return {
+      ok: true,
+      message: getMessage(data, "News status updated successfully."),
     };
   } catch {
     return {
