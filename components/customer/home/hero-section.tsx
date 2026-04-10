@@ -2,8 +2,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
 
-// Expanded sample data for news stories
-const leftStories = [
+const HOME_LAYOUT_CONFIG = {
+  leftNewsCount: 6,
+  heroCardCount: 2,
+  centerGridCount: 8,
+} as const;
+
+// Static demo pools: update only HOME_LAYOUT_CONFIG to change counts/layout.
+const leftStoriesPool = [
   {
     image: "https://picsum.photos/seed/l1/200/200",
     title: "ছাত্রদল নেতাদের নেতৃত্বে ঢামেকে হামলা, যা রয়েছে সিসিটিভি ফুটেজে",
@@ -36,7 +42,7 @@ const leftStories = [
   },
 ];
 
-const featuredStories = [
+const heroStoriesPool = [
   {
     image: "https://picsum.photos/seed/m1/800/480",
     category: "শিক্ষাঙ্গন",
@@ -71,7 +77,7 @@ const topicStories = {
   ]
 };
 
-const centerGridStories = [
+const centerGridStoriesPool = [
   {
     image: "https://picsum.photos/seed/c1/300/200",
     title: "ঢাকা লিগে এবারও থাকছে না বিদেশি ক্রিকেটার",
@@ -170,6 +176,10 @@ const utilitySections = [
 ];
 
 export function HeroSection() {
+  const leftStories = leftStoriesPool.slice(0, HOME_LAYOUT_CONFIG.leftNewsCount);
+  const featuredStories = heroStoriesPool.slice(0, HOME_LAYOUT_CONFIG.heroCardCount);
+  const centerGridStories = centerGridStoriesPool.slice(0, HOME_LAYOUT_CONFIG.centerGridCount);
+
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
       {/* Left Column: Card-styled trend list */}
