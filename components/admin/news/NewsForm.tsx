@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { getCategoriesByParentAction } from "@/lib/api/category-actions";
-import { createNewsAction } from "@/lib/api/news-actions";
+import { createNewsAction, updateNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
@@ -26,7 +26,7 @@ type NewsFormValues = {
   excerpt: string;
   content: string;
   category_id: string;
-    sub_category_id: string;
+  sub_category_id: string;
   author_name: string;
   source_name: string;
   source_url: string;
@@ -44,10 +44,15 @@ type NewsFormValues = {
   meta_keywords: string;
 };
 
+export type NewsFormInitialValues = Partial<NewsFormValues>;
+
 type NewsFormProps = {
   categoryOptions?: { id: string; title: string; parent_id?: string | null }[];
   headerTitle?: string;
   headerAction?: React.ReactNode;
+  mode?: "create" | "edit";
+  newsId?: string;
+  initialValues?: NewsFormInitialValues;
 };
 
 const defaultValues: NewsFormValues = {
@@ -56,7 +61,7 @@ const defaultValues: NewsFormValues = {
   excerpt: "",
   content: "",
   category_id: "",
-    sub_category_id: "",
+  sub_category_id: "",
   author_name: "",
   source_name: "",
   source_url: "",
@@ -83,8 +88,31 @@ function slugify(value: string) {
     .replace(/-+/g, "-");
 }
 
-export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: NewsFormProps) {
-  const [form, setForm] = useState<NewsFormValues>(defaultValues);
+function toDateTimeLocal(value: string) {
+  if (!value) return "";
+  const normalized = value.replace(" ", "T");
+  return normalized.length >= 16 ? normalized.slice(0, 16) : normalized;
+}
+
+function buildInitialFormValues(initialValues?: NewsFormInitialValues): NewsFormValues {
+  if (!initialValues) return defaultValues;
+
+  return {
+    ...defaultValues,
+    ...initialValues,
+    publish_at: toDateTimeLocal(initialValues.publish_at ?? ""),
+  };
+}
+
+export function NewsForm({
+  categoryOptions = [],
+  headerTitle,
+  headerAction,
+  mode = "create",
+  newsId,
+  initialValues,
+}: NewsFormProps) {
+  const [form, setForm] = useState<NewsFormValues>(() => buildInitialFormValues(initialValues));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
@@ -93,16 +121,22 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
   const [subCategoryOptions, setSubCategoryOptions] = useState<Array<{ id: string; title: string }>>([]);
   const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
-  const [slugEdited, setSlugEdited] = useState(false);
+  const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const router = useRouter();
+  const isEditMode = mode === "edit" && Boolean(newsId);
 
   const parentCategories = useMemo(
     () => categoryOptions.filter((c) => !c.parent_id),
     [categoryOptions],
   );
+
+  useEffect(() => {
+    setForm(buildInitialFormValues(initialValues));
+    setSlugEdited(Boolean(initialValues?.slug));
+  }, [initialValues]);
 
   useEffect(() => {
     let active = true;
@@ -199,7 +233,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
         setSubmitError("");
         setFieldErrors({});
 
-        const result = await createNewsAction({
+        const payload = {
           title: form.title,
           slug: form.slug || undefined,
           excerpt: form.excerpt || undefined,
@@ -221,7 +255,11 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
           meta_title: form.meta_title || undefined,
           meta_description: form.meta_description || undefined,
           meta_keywords: form.meta_keywords || undefined,
-        });
+        };
+
+        const result = isEditMode && newsId
+          ? await updateNewsAction(newsId, payload)
+          : await createNewsAction(payload);
 
         setIsSubmitting(false);
 
@@ -654,7 +692,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
 
         <Button type="submit" disabled={isSubmitting}>
           <Save size={16} />
-          {isSubmitting ? "Saving..." : "Save News"}
+          {isSubmitting ? "Saving..." : isEditMode ? "Update News" : "Save News"}
         </Button>
       </div>
 

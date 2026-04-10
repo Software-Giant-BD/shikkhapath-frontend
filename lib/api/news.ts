@@ -15,16 +15,24 @@ export type NewsApiModel = {
   title: string;
   slug: string;
   excerpt: string;
+  content: string;
   category_id: string;
   sub_category_id: string;
   author_name: string;
+  source_name: string;
+  source_url: string;
   feature_image_url: string;
   status: NewsStatus;
   publish_at: string;
+  tags: string;
+  language: string;
   read_time_minutes: number;
   is_featured: boolean;
   is_breaking: boolean;
   allow_comments: boolean;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
   category?: NewsRelationCategory;
   sub_category?: NewsRelationCategory;
   created_at: string;
@@ -95,16 +103,24 @@ function normalizeNews(value: unknown): NewsApiModel {
     title: asString(item.title),
     slug: asString(item.slug),
     excerpt: asString(item.excerpt),
+    content: asString(item.content),
     category_id: asString(item.category_id ?? item.categoryId),
     sub_category_id: asString(item.sub_category_id ?? item.subCategoryId),
     author_name: asString(item.author_name ?? item.authorName),
+    source_name: asString(item.source_name ?? item.sourceName),
+    source_url: asString(item.source_url ?? item.sourceUrl),
     feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
     status: normalizeStatus(item.status),
     publish_at: asString(item.publish_at ?? item.publishAt),
+    tags: asString(item.tags),
+    language: asString(item.language, "bn"),
     read_time_minutes: Math.max(0, asNumber(item.read_time_minutes ?? item.readTimeMinutes, 0)),
     is_featured: asBoolean(item.is_featured ?? item.isFeatured, false),
     is_breaking: asBoolean(item.is_breaking ?? item.isBreaking, false),
     allow_comments: asBoolean(item.allow_comments ?? item.allowComments, true),
+    meta_title: asString(item.meta_title ?? item.metaTitle),
+    meta_description: asString(item.meta_description ?? item.metaDescription),
+    meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
     category: normalizeRelationCategory(item.category),
     sub_category: normalizeRelationCategory(item.sub_category ?? item.subCategory),
     created_at: asString(item.created_at ?? item.createdAt),
@@ -131,6 +147,35 @@ function extractList(payload: unknown): unknown[] {
   }
 
   return [];
+}
+
+function extractOne(payload: unknown): unknown | null {
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    const root = payload as Record<string, unknown>;
+    if (root.id !== undefined) {
+      return root;
+    }
+  }
+
+  const root = asObject(payload);
+  const resources = asObject(root.resources);
+
+  const candidates = [
+    root.resources,
+    resources.news,
+    resources.item,
+    resources.data,
+    root.news,
+    root.data,
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
 }
 
 export async function getNewsList(params?: GetNewsParams): Promise<NewsListResult> {
@@ -172,5 +217,30 @@ export async function getNewsList(params?: GetNewsParams): Promise<NewsListResul
         total: 0,
       },
     };
+  }
+}
+
+export async function getNewsById(newsId: string): Promise<NewsApiModel | null> {
+  try {
+    const response = await fetchApi(`/admin/news/${newsId}`);
+    const payload = await response.json().catch(() => null);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error((payload as Record<string, unknown>)?.message as string || "Failed to load news item.");
+    }
+
+    const item = extractOne(payload);
+    if (!item) {
+      return null;
+    }
+
+    return normalizeNews(item);
+  } catch (error) {
+    console.error(`Failed to fetch news ${newsId}:`, error);
+    return null;
   }
 }

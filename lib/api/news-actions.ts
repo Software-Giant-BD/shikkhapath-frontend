@@ -83,6 +83,48 @@ export async function createNewsAction(payload: CreateNewsPayload): Promise<News
   }
 }
 
+export async function updateNewsAction(
+  newsId: string,
+  payload: CreateNewsPayload,
+): Promise<NewsActionResult> {
+  try {
+    const response = await fetchApi(`/admin/news/${newsId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      if (response.status === 422 && data?.errors) {
+        return {
+          ok: false,
+          message: getMessage(data, "Please fix the validation errors."),
+          fieldErrors: data.errors as FieldErrors,
+        };
+      }
+
+      return {
+        ok: false,
+        message: getMessage(data, "Failed to update news."),
+      };
+    }
+
+    revalidatePath("/admin/news/list");
+    revalidatePath(`/admin/news/${newsId}/edit`);
+    return {
+      ok: true,
+      message: getMessage(data, "News updated successfully."),
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "News API is unavailable.",
+    };
+  }
+}
+
 export async function updateNewsStatusAction(
   newsId: string,
   status: NewsStatusValue,
