@@ -106,7 +106,6 @@ function SortableCategoryCard({
               <h3 className="truncate text-base font-bold text-slate-900">{category.title}</h3>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
                 <span>/{category.slug}</span>
-                <span className="text-indigo-500">Always visible</span>
                 {index === 0 ? <span className="text-amber-600">High priority</span> : null}
               </div>
             </div>

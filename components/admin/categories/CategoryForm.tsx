@@ -354,10 +354,6 @@ export function CategoryForm({
             />
             Show this category in website menu
           </label>
-
-          <p className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">
-            Homepage category order is managed from <strong>Categories &gt; Home Page Categories</strong>.
-          </p>
         </CardContent>
       </Card>
 
