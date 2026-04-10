@@ -48,8 +48,9 @@ export default async function NewsListPage({
     category: item.category?.title || "-",
     subCategory: item.sub_category?.title || "-",
     author: item.author_name || "-",
-    status:
-      item.status === "published" ? "Published" : item.status === "scheduled" ? "Scheduled" : "Draft",
+    status: (
+      item.status === "published" ? "Published" : item.status === "scheduled" ? "Scheduled" : "Draft"
+    ) as "Published" | "Scheduled" | "Draft",
     publishAt: formatDateTime(item.publish_at),
   }));
 
