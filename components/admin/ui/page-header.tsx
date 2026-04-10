@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronRight } from "lucide-react";
 
 interface PageHeaderProps {
-  title: string;
+  title?: string;
   breadcrumbs: { label: string; href?: string }[];
   action?: React.ReactNode;
 }
