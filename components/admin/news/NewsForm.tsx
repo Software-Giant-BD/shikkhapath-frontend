@@ -2,12 +2,13 @@
 
 import type { ChangeEvent } from "react";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Image as ImageIcon, Save } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
+import { getCategoriesByParentAction } from "@/lib/api/category-actions";
 import { createNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
@@ -86,9 +87,11 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
   const [form, setForm] = useState<NewsFormValues>(defaultValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
-    const [submitError, setSubmitError] = useState("");
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [featureImageError, setFeatureImageError] = useState("");
+  const [subCategoryOptions, setSubCategoryOptions] = useState<Array<{ id: string; title: string }>>([]);
+  const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
   const [slugEdited, setSlugEdited] = useState(false);
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -101,10 +104,38 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
     [categoryOptions],
   );
 
-  const subCategoryOptions = useMemo(
-    () => (form.category_id ? categoryOptions.filter((c) => c.parent_id === form.category_id) : []),
-    [categoryOptions, form.category_id],
-  );
+  useEffect(() => {
+    let active = true;
+
+    async function loadSubCategories() {
+      if (!form.category_id) {
+        setSubCategoryOptions([]);
+        setIsSubCategoryLoading(false);
+        return;
+      }
+
+      setIsSubCategoryLoading(true);
+      const result = await getCategoriesByParentAction(form.category_id);
+
+      if (!active) return;
+
+      if (!result.ok) {
+        setSubCategoryOptions([]);
+        setSubmitError(result.message);
+        setIsSubCategoryLoading(false);
+        return;
+      }
+
+      setSubCategoryOptions(result.items.map((item) => ({ id: item.id, title: item.title })));
+      setIsSubCategoryLoading(false);
+    }
+
+    void loadSubCategories();
+
+    return () => {
+      active = false;
+    };
+  }, [form.category_id]);
 
   const tagPreview = useMemo(() => {
     return form.tags
@@ -233,6 +264,7 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
               }}
               required
             />
+            {fieldErrors.title ? <p className="text-xs font-medium text-rose-600">{fieldErrors.title[0]}</p> : null}
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
@@ -245,10 +277,10 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                 onChange={(event) => {
                   setSlugEdited(true);
                   setForm((prev) => ({ ...prev, slug: slugify(event.target.value) }));
-                              {fieldErrors.slug ? <p className="text-xs font-medium text-rose-600">{fieldErrors.slug[0]}</p> : null}
                 }}
                 required
               />
+              {fieldErrors.slug ? <p className="text-xs font-medium text-rose-600">{fieldErrors.slug[0]}</p> : null}
             </div>
 
             <div className="space-y-2">
@@ -267,28 +299,33 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                   </option>
                 ))}
               </Select>
-                          {fieldErrors.category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.category_id[0]}</p> : null}
+              {fieldErrors.category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.category_id[0]}</p> : null}
             </div>
           </div>
 
-          {subCategoryOptions.length > 0 ? (
-            <div className="space-y-2">
-              <Label htmlFor="sub_category_id">Sub-category</Label>
-              <Select
-                id="sub_category_id"
-                value={form.sub_category_id}
-                onChange={(event) => setForm((prev) => ({ ...prev, sub_category_id: event.target.value }))}
-              >
-                <option value="">Select Sub-category</option>
-                {subCategoryOptions.map((sc) => (
-                  <option key={sc.id} value={sc.id}>
-                    {sc.title}
-                  </option>
-                ))}
-              </Select>
-              {fieldErrors.sub_category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.sub_category_id[0]}</p> : null}
-            </div>
-          ) : null}
+          <div className="space-y-2">
+            <Label htmlFor="sub_category_id">Sub-category</Label>
+            <Select
+              id="sub_category_id"
+              value={form.sub_category_id}
+              onChange={(event) => setForm((prev) => ({ ...prev, sub_category_id: event.target.value }))}
+              disabled={!form.category_id || isSubCategoryLoading}
+            >
+              <option value="">
+                {isSubCategoryLoading
+                  ? "Loading sub-categories..."
+                  : form.category_id
+                    ? "Select Sub-category"
+                    : "Select Category first"}
+              </option>
+              {subCategoryOptions.map((sc) => (
+                <option key={sc.id} value={sc.id}>
+                  {sc.title}
+                </option>
+              ))}
+            </Select>
+            {fieldErrors.sub_category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.sub_category_id[0]}</p> : null}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="excerpt">Short Summary</Label>
@@ -472,7 +509,9 @@ export function NewsForm({ categoryOptions = [], headerTitle, headerAction }: Ne
                 type="datetime-local"
                 value={form.publish_at}
                 onChange={(event) => setForm((prev) => ({ ...prev, publish_at: event.target.value }))}
+                required
               />
+              {fieldErrors.publish_at ? <p className="text-xs font-medium text-rose-600">{fieldErrors.publish_at[0]}</p> : null}
             </div>
 
             <div className="space-y-2">
