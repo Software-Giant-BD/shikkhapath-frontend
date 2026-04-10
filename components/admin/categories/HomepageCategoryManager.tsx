@@ -2,6 +2,23 @@
 
 import { useMemo, useState, useTransition } from "react";
 import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
   ArrowDown,
   ArrowUp,
   GripVertical,
@@ -30,19 +47,131 @@ type HomepageCategoryManagerProps = {
   initialHomeCategories: HomeCategoryItem[];
 };
 
+type SortableCategoryCardProps = {
+  category: CategoryOption;
+  index: number;
+  total: number;
+  onMove: (index: number, direction: -1 | 1) => void;
+  onRemove: (id: string) => void;
+};
+
+function SortableCategoryCard({
+  category,
+  index,
+  total,
+  onMove,
+  onRemove,
+}: SortableCategoryCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card
+        className={cn(
+          "overflow-hidden rounded-[22px] border border-indigo-100/70 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] transition-transform duration-200",
+          index === 0 && "ring-2 ring-indigo-200/80",
+          isDragging && "z-20 scale-[1.01] shadow-[0_22px_48px_rgba(79,70,229,0.18)]",
+        )}
+      >
+        <CardContent className="flex items-center justify-between gap-4 px-5 py-5">
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="flex items-center gap-3 text-slate-300">
+              <button
+                type="button"
+                aria-label={`Drag ${category.title}`}
+                className="cursor-grab touch-none rounded-xl p-1 text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-500 active:cursor-grabbing"
+                {...attributes}
+                {...listeners}
+              >
+                <GripVertical size={18} />
+              </button>
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-sm font-black text-indigo-700 ring-1 ring-indigo-100">
+                {index + 1}
+              </span>
+            </div>
+
+            <div className="min-w-0 space-y-1">
+              <h3 className="truncate text-base font-bold text-slate-900">{category.title}</h3>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                <span>/{category.slug}</span>
+                <span className="text-indigo-500">Always visible</span>
+                {index === 0 ? <span className="text-amber-600">High priority</span> : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onMove(index, -1)}
+              disabled={index === 0}
+              aria-label={`Move ${category.title} up`}
+              className="rounded-xl border border-slate-100 bg-slate-50 text-slate-500 hover:bg-white"
+            >
+              <ArrowUp size={16} />
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => onMove(index, 1)}
+              disabled={index === total - 1}
+              aria-label={`Move ${category.title} down`}
+              className="rounded-xl border border-slate-100 bg-slate-50 text-slate-500 hover:bg-white"
+            >
+              <ArrowDown size={16} />
+            </Button>
+
+            <Button
+              type="button"
+              variant="danger"
+              size="icon"
+              onClick={() => onRemove(category.id)}
+              aria-label={`Remove ${category.title}`}
+              className="rounded-xl"
+            >
+              <Trash2 size={16} />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function HomepageCategoryManager({ allCategories, initialHomeCategories }: HomepageCategoryManagerProps) {
   const initialOrderedIds = useMemo(
     () => initialHomeCategories.map((category) => category.id),
     [initialHomeCategories],
   );
-  const [orderedIds, setOrderedIds] = useState<string[]>(
-    initialOrderedIds,
-  );
+  const [orderedIds, setOrderedIds] = useState<string[]>(initialOrderedIds);
   const [searchTerm, setSearchTerm] = useState("");
-  const [draggingId, setDraggingId] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   const categoryMap = useMemo(() => {
     return new Map(allCategories.map((category) => [category.id, category]));
@@ -74,23 +203,22 @@ export function HomepageCategoryManager({ allCategories, initialHomeCategories }
       .filter((category): category is CategoryOption => Boolean(category));
   }, [orderedIds, categoryMap]);
 
-  const reorderItems = (activeId: string, targetId: string) => {
-    if (!activeId || !targetId || activeId === targetId) {
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
       return;
     }
 
     setOrderedIds((prev) => {
-      const activeIndex = prev.indexOf(activeId);
-      const targetIndex = prev.indexOf(targetId);
+      const oldIndex = prev.indexOf(String(active.id));
+      const newIndex = prev.indexOf(String(over.id));
 
-      if (activeIndex === -1 || targetIndex === -1) {
+      if (oldIndex === -1 || newIndex === -1) {
         return prev;
       }
 
-      const next = [...prev];
-      next.splice(activeIndex, 1);
-      next.splice(targetIndex, 0, activeId);
-      return next;
+      return arrayMove(prev, oldIndex, newIndex);
     });
   };
 
@@ -125,11 +253,8 @@ export function HomepageCategoryManager({ allCategories, initialHomeCategories }
     <section className="space-y-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-indigo-500">
-            Homepage Configuration
-          </p>
           <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-            Category Layout
+            Homepage Categories
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             Organize how news sections appear on the main landing page. Reorder the list to change editorial priority and add or remove categories when needed.
@@ -188,133 +313,25 @@ export function HomepageCategoryManager({ allCategories, initialHomeCategories }
               </p>
             </div>
           ) : (
-            orderedCategories.map((category, index) => (
-              <div
-                key={category.id}
-                onDragOver={(event) => {
-                  if (!draggingId || draggingId === category.id) {
-                    return;
-                  }
-
-                  event.preventDefault();
-                }}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  if (!draggingId) {
-                    return;
-                  }
-
-                  reorderItems(draggingId, category.id);
-                  setDraggingId(null);
-                }}
-              >
-                <Card
-                  className={cn(
-                    "overflow-hidden rounded-[22px] border border-indigo-100/70 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)]",
-                    index === 0 && "ring-2 ring-indigo-200/80",
-                    draggingId === category.id && "scale-[0.995] opacity-70",
-                  )}
-                >
-                  <CardContent className="flex items-center justify-between gap-4 px-5 py-5">
-                    <div className="flex min-w-0 items-center gap-4">
-                      <div className="flex items-center gap-3 text-slate-300">
-                        <button
-                          type="button"
-                          draggable
-                          onDragStart={(event) => {
-                            setDraggingId(category.id);
-                            event.dataTransfer.effectAllowed = "move";
-                            event.dataTransfer.setData("text/plain", category.id);
-                          }}
-                          onDragEnd={() => setDraggingId(null)}
-                          aria-label={`Drag ${category.title}`}
-                          className="cursor-grab rounded-xl p-1 text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-500 active:cursor-grabbing"
-                        >
-                          <GripVertical size={18} />
-                        </button>
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-sm font-black text-indigo-700 ring-1 ring-indigo-100">
-                          {index + 1}
-                        </span>
-                      </div>
-
-                      <div className="min-w-0 space-y-1">
-                        <h3 className="truncate text-base font-bold text-slate-900">{category.title}</h3>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                          <span>/{category.slug}</span>
-                          <span className="text-indigo-500">Always visible</span>
-                          {index === 0 ? <span className="text-amber-600">High priority</span> : null}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => moveItem(index, -1)}
-                        disabled={index === 0}
-                        aria-label={`Move ${category.title} up`}
-                        className="rounded-xl border border-slate-100 bg-slate-50 text-slate-500 hover:bg-white"
-                      >
-                        <ArrowUp size={16} />
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => moveItem(index, 1)}
-                        disabled={index === orderedCategories.length - 1}
-                        aria-label={`Move ${category.title} down`}
-                        className="rounded-xl border border-slate-100 bg-slate-50 text-slate-500 hover:bg-white"
-                      >
-                        <ArrowDown size={16} />
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="danger"
-                        size="icon"
-                        onClick={() => removeItem(category.id)}
-                        aria-label={`Remove ${category.title}`}
-                        className="rounded-xl"
-                      >
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ))
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
+                <div className="space-y-4">
+                  {orderedCategories.map((category, index) => (
+                    <SortableCategoryCard
+                      key={category.id}
+                      category={category}
+                      index={index}
+                      total={orderedCategories.length}
+                      onMove={moveItem}
+                      onRemove={removeItem}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           )}
 
-          <div
-            className={cn(
-              "flex min-h-32 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-6 py-10 text-center shadow-[0_10px_30px_rgba(15,23,42,0.03)]",
-              draggingId && "border-indigo-200 bg-indigo-50/40",
-            )}
-            onDragOver={(event) => {
-              if (!draggingId) {
-                return;
-              }
-
-              event.preventDefault();
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
-              if (!draggingId) {
-                return;
-              }
-
-              setOrderedIds((prev) => {
-                const next = prev.filter((id) => id !== draggingId);
-                next.push(draggingId);
-                return next;
-              });
-              setDraggingId(null);
-            }}
-          >
+          <div className="flex min-h-32 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-6 py-10 text-center shadow-[0_10px_30px_rgba(15,23,42,0.03)]">
             <div>
               <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                 <Plus size={18} />
@@ -367,17 +384,6 @@ export function HomepageCategoryManager({ allCategories, initialHomeCategories }
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border border-slate-100 bg-linear-to-br from-indigo-600 via-indigo-500 to-violet-500 text-white shadow-[0_18px_44px_rgba(79,70,229,0.24)]">
-            <CardContent className="space-y-3 px-5 py-5">
-              <div className="flex items-center gap-2 text-indigo-100">
-                <Sparkles size={16} />
-                <p className="text-xs font-black uppercase tracking-[0.18em]">Publishing Tip</p>
-              </div>
-              <p className="text-sm leading-6 text-indigo-50">
-                Put the highest-priority editorial sections at the top. The first three categories usually get the strongest visibility on the homepage.
-              </p>
-            </CardContent>
-          </Card>
 
           {submitError ? (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
