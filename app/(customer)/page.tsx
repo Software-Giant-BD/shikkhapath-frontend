@@ -10,17 +10,20 @@ import { NewsletterSection } from "@/components/customer/home/newsletter-section
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block"
 import { getCategories } from "@/lib/api/categories"
 
+const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
+
 export const metadata: Metadata = {
-  title: "শিক্ষাপথ | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ",
+  title: `${SITE_NAME} | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ`,
   description:
-    "শিক্ষাপথ — শিক্ষা, ক্যাম্পাস, কর্মসংস্থান, জাতীয় ও আন্তর্জাতিক সর্বশেষ সংবাদ পড়ুন।",
+    `${SITE_NAME} — শিক্ষা, ক্যাম্পাস, কর্মসংস্থান, জাতীয় ও আন্তর্জাতিক সর্বশেষ সংবাদ পড়ুন।`,
   alternates: { canonical: "/" },
   openGraph: {
-    title: "শিক্ষাপথ",
+    title: SITE_NAME,
     description: "বিশ্বস্ত শিক্ষা ও ক্যাম্পাস সংবাদ পোর্টাল।",
     type: "website",
-    url: "/",
-    siteName: "শিক্ষাপথ",
+    url: SITE_URL,
+    siteName: SITE_NAME,
   },
 }
 
@@ -54,8 +57,8 @@ export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsMediaOrganization",
-    name: "শিক্ষাপথ",
-    url: "https://shikkhapath.news",
+    name: SITE_NAME,
+    url: SITE_URL,
   }
 
   return (
