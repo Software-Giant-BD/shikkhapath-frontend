@@ -8,6 +8,55 @@ interface Props {
   compact?: boolean
 }
 
+const BANGLA_DIGITS = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"]
+
+function toBanglaNumber(value: number) {
+  return String(value).replace(/\d/g, (digit) => BANGLA_DIGITS[Number(digit)] ?? digit)
+}
+
+function formatRelativePublishTime(publishAt: string): string {
+  const value = publishAt.trim()
+  if (!value) return ""
+
+  const publishedAt = new Date(value)
+  if (Number.isNaN(publishedAt.getTime())) return ""
+
+  const diffMs = Date.now() - publishedAt.getTime()
+  const isFuture = diffMs < 0
+  const totalMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60))
+
+  if (totalMinutes < 1) {
+    return isFuture ? "কিছুক্ষণ পর" : "এইমাত্র"
+  }
+
+  if (totalMinutes < 60) {
+    const amount = toBanglaNumber(totalMinutes)
+    return isFuture ? `${amount} মিনিট পর` : `${amount} মিনিট আগে`
+  }
+
+  const totalHours = Math.floor(totalMinutes / 60)
+  if (totalHours < 24) {
+    const amount = toBanglaNumber(totalHours)
+    return isFuture ? `${amount} ঘণ্টা পর` : `${amount} ঘণ্টা আগে`
+  }
+
+  const totalDays = Math.floor(totalHours / 24)
+  if (totalDays < 30) {
+    const amount = toBanglaNumber(totalDays)
+    return isFuture ? `${amount} দিন পর` : `${amount} দিন আগে`
+  }
+
+  const totalMonths = Math.floor(totalDays / 30)
+  if (totalMonths < 12) {
+    const amount = toBanglaNumber(totalMonths)
+    return isFuture ? `${amount} মাস পর` : `${amount} মাস আগে`
+  }
+
+  const totalYears = Math.floor(totalDays / 365)
+  const amount = toBanglaNumber(totalYears)
+  return isFuture ? `${amount} বছর পর` : `${amount} বছর আগে`
+}
+
 function getImageUrl(src: string, seed: string, width: number, height: number) {
   const value = src.trim()
   if (value) return value
@@ -74,7 +123,9 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
                     {item.title}
                   </h4>
                   {item.publish_at ? (
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{item.publish_at}</p>
+                    <p className="text-[11px] font-bold text-slate-400 tracking-wider">
+                      {formatRelativePublishTime(item.publish_at)}
+                    </p>
                   ) : null}
                 </div>
               </Link>
