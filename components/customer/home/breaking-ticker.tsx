@@ -6,24 +6,6 @@ type BreakingNewsItem = {
   url_slug: string
 }
 
-const FALLBACK_ITEMS: BreakingNewsItem[] = [
-  {
-    id: "fallback-1",
-    title: "ভর্তি পরীক্ষার গাইডেন্স পোর্টাল চালু হয়েছে — আবেদনের শেষ তারিখ ১৫ এপ্রিল",
-    url_slug: "sample-slug",
-  },
-  {
-    id: "fallback-2",
-    title: "মেডিকেল ভর্তি পরীক্ষা ১৫ মে অনুষ্ঠিত হবে",
-    url_slug: "sample-slug",
-  },
-  {
-    id: "fallback-3",
-    title: "বুয়েটে ভর্তি আবেদন শুরু ১০ এপ্রিল থেকে",
-    url_slug: "sample-slug",
-  },
-]
-
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -79,7 +61,7 @@ async function getBreakingNews(): Promise<BreakingNewsItem[]> {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   if (!apiBaseUrl) {
-    return FALLBACK_ITEMS
+    return []
   }
 
   try {
@@ -91,7 +73,7 @@ async function getBreakingNews(): Promise<BreakingNewsItem[]> {
     })
 
     if (!response.ok) {
-      return FALLBACK_ITEMS
+      return []
     }
 
     const payload = await response.json().catch(() => null)
@@ -99,14 +81,18 @@ async function getBreakingNews(): Promise<BreakingNewsItem[]> {
       .map(normalizeBreakingNews)
       .filter((item): item is BreakingNewsItem => item !== null)
 
-    return items.length > 0 ? items : FALLBACK_ITEMS
+    return items
   } catch {
-    return FALLBACK_ITEMS
+    return []
   }
 }
 
 export async function BreakingTicker() {
   const items = await getBreakingNews()
+
+  if (items.length === 0) {
+    return null
+  }
 
   return (
     <div className="flex items-center border-b border-[#e0b22f] bg-white">
