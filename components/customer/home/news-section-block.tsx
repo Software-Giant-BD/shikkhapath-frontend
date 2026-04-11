@@ -57,10 +57,10 @@ function formatRelativePublishTime(publishAt: string): string {
   return isFuture ? `${amount} বছর পর` : `${amount} বছর আগে`
 }
 
-function getImageUrl(src: string, seed: string, width: number, height: number) {
+function getImageUrl(src: string) {
   const value = src.trim()
   if (value) return value
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${width}/${height}`
+  return "/No_Image_Available.jpg"
 }
 
 export function NewsSectionBlock({ sectionData, compact = false }: Props) {
@@ -83,7 +83,7 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
           <Link href={`/news/${encodeURIComponent(featured.url_slug)}`} className="flex flex-col">
             <div className="relative overflow-hidden">
               <img
-                src={getImageUrl(featured.feature_image_url, `featured-${featured.id}`, 800, 480)}
+                src={getImageUrl(featured.feature_image_url)}
                 alt={featured.title}
                 className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
@@ -112,7 +112,7 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
               <Link href={`/news/${encodeURIComponent(item.url_slug)}`} className="flex gap-4 p-3">
                 <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <img
-                    src={getImageUrl(item.feature_image_url, `side-${item.id}`, 300, 200)}
+                    src={getImageUrl(item.feature_image_url)}
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
