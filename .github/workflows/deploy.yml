@@ -18,6 +18,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
+            set -e
             cd /projects/shikkhapath.com  # Apnar server-e project folder-er path
             git clean -fd
             git config pull.rebase false
