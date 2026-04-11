@@ -3,12 +3,15 @@ import type { Metadata } from "next"
 import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
 import { HeroSection } from "@/components/customer/home/hero-section"
 import { AdBanner } from "@/components/customer/home/ad-banner"
-import { SECTION_DATA, type NewsSectionKey } from "@/components/customer/home/home-content.data"
 import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
 import { TabSectionBlock } from "@/components/customer/home/tab-section-block"
 import { NewsletterSection } from "@/components/customer/home/newsletter-section"
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block"
 import { getCategories } from "@/lib/api/categories"
+import {
+  getHomePageCategoryNews,
+  type HomePageCategoryNewsSection,
+} from "@/lib/api/home-page-category-news"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
@@ -27,31 +30,33 @@ export const metadata: Metadata = {
   },
 }
 
-const FALLBACK_HOME_SECTIONS: NewsSectionKey[] = [
-  "education",
-  "admission",
-  "national",
-  "sports",
-  "economy",
-  "career",
-  "science",
-  "international",
-]
-
 export default async function Home() {
-  const categories = await getCategories()
+  const [categories, categoryNewsSections] = await Promise.all([
+    getCategories(),
+    getHomePageCategoryNews(),
+  ])
+
+  const categoryNewsBySlug = new Map(
+    categoryNewsSections
+      .filter((section) => section.news.length > 0)
+      .map((section) => [section.category.slug, section] as const),
+  )
 
   const configuredSections = categories
     .filter((category) => category.show_on_home)
     .sort((a, b) => Number(a.home_sort_order || "0") - Number(b.home_sort_order || "0"))
-    .map((category) => category.slug)
-    .filter((slug): slug is NewsSectionKey => slug in SECTION_DATA)
+    .map((category) => categoryNewsBySlug.get(category.slug))
+    .filter((section): section is HomePageCategoryNewsSection => Boolean(section))
 
-  const homeSections = configuredSections.length > 0 ? configuredSections : FALLBACK_HOME_SECTIONS
+  const homeSections =
+    configuredSections.length > 0
+      ? configuredSections
+      : categoryNewsSections.filter((section) => section.news.length > 0)
+
   const primarySections = homeSections.slice(0, 3)
   const remainingSections = homeSections.slice(3)
   const topCompactSections = remainingSections.slice(0, 2)
-  const highlightSection = remainingSections[2] ?? "career"
+  const highlightSection = remainingSections[2] ?? null
   const bottomCompactSections = remainingSections.slice(3, 5)
 
   const jsonLd = {
@@ -79,14 +84,14 @@ export default async function Home() {
         <HeroSection />
 
         {primarySections.map((section) => (
-          <NewsSectionBlock key={section} section={section} />
+          <NewsSectionBlock key={section.category.id} sectionData={section} />
         ))}
 
         <VideoSectionBlock />
         {topCompactSections.length > 0 ? (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {topCompactSections.map((section) => (
-              <NewsSectionBlock key={section} section={section} compact />
+              <NewsSectionBlock key={section.category.id} sectionData={section} compact />
             ))}
           </div>
         ) : null}
@@ -95,12 +100,12 @@ export default async function Home() {
 
         <TabSectionBlock />
 
-        <NewsSectionBlock section={highlightSection} />
+        {highlightSection ? <NewsSectionBlock sectionData={highlightSection} /> : null}
 
         {bottomCompactSections.length > 0 ? (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {bottomCompactSections.map((section) => (
-              <NewsSectionBlock key={section} section={section} compact />
+              <NewsSectionBlock key={section.category.id} sectionData={section} compact />
             ))}
           </div>
         ) : null}
