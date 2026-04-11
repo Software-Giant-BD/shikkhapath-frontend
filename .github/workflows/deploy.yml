@@ -20,7 +20,7 @@ jobs:
           script: |
             set -e
             cd /projects/shikkhapath.com  # Apnar server-e project folder-er path
-            git clean -fd
+            git reset --hard HEAD
             git config pull.rebase false
             git pull origin develop
             rm -rf .next node_modules
