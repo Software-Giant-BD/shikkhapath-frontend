@@ -8,7 +8,15 @@ import { getNewsList } from "@/lib/api/news";
 
 type SearchParams = Promise<{ page?: string }>;
 
-function statusClass(status: "Draft" | "Published" | "Scheduled") {
+type DisplayNewsStatus = "Draft" | "Published" | "Scheduled";
+
+function toDisplayNewsStatus(status: string): DisplayNewsStatus {
+  if (status === "published") return "Published";
+  if (status === "scheduled") return "Scheduled";
+  return "Draft";
+}
+
+function statusClass(status: DisplayNewsStatus) {
   if (status === "Published") {
     return "bg-emerald-50 text-emerald-700";
   }
@@ -48,8 +56,7 @@ export default async function NewsListPage({
     category: item.category?.title || "-",
     subCategory: item.sub_category?.title || "-",
     author: item.author_name || "-",
-    status:
-      item.status === "published" ? "Published" : item.status === "scheduled" ? "Scheduled" : "Draft",
+    status: toDisplayNewsStatus(item.status),
     publishAt: formatDateTime(item.publish_at),
   }));
 
