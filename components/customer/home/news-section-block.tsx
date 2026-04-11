@@ -71,7 +71,7 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
   }
 
   const sideItems = sectionData.news.slice(1)
-  const sectionHref = `/news?category=${encodeURIComponent(sectionData.category.slug)}`
+  const sectionHref = `/${encodeURIComponent(sectionData.category.slug)}`
 
   return (
     <section className={compact ? "mt-0" : "mt-8 mb-4 lowercaseFirst"}>
