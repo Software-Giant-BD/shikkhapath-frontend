@@ -123,11 +123,7 @@ const utilitySections = [
     name: "💳 Services",
     color: "bg-blue-50 text-blue-600 border-blue-100",
     links: [
-      { label: "Bill Pay", href: "#" },
-      { label: "Mobile Recharge 📱", href: "#" },
       { label: "Train 🚆", href: "#" },
-      { label: "Gold Rate", href: "#" },
-      { label: "Dollar Rate 💵", href: "#" },
     ],
   },
   {
