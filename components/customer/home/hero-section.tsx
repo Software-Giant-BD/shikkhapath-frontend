@@ -114,7 +114,7 @@ const utilitySections = [
     links: [
       { label: "Ambulance 🚑", href: "/ambulance" },
       { label: "Police 👮", href: "#" },
-      { label: "Fire 🚒", href: "#" },
+      { label: "Fire 🚒", href: "/fire-service" },
       { label: "Blood 🩸", href: "/blood-donation" },
       { label: "Doctor 🏥", href: "/doctors" },
     ],
