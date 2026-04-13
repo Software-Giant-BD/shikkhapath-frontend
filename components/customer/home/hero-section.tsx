@@ -112,7 +112,7 @@ const utilitySections = [
     name: "🚨 Emergency",
     color: "bg-red-50 text-red-600 border-red-100",
     links: [
-      { label: "Ambulance 🚑", href: "#" },
+      { label: "Ambulance 🚑", href: "/ambulance" },
       { label: "Police 👮", href: "#" },
       { label: "Fire 🚒", href: "#" },
       { label: "Blood 🩸", href: "#" },

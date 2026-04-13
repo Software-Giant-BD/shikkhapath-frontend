@@ -2,7 +2,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
 export type FieldErrors = Record<string, string[]>;
 
@@ -23,8 +23,8 @@ export async function fetchApi(
   init?: RequestInit,
   options?: { includeAuth?: boolean },
 ) {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not defined.");
+  if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+    console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is not defined in .env file. Falling back to localhost.");
   }
 
   const includeAuth = options?.includeAuth ?? true;

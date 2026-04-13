@@ -3,11 +3,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
 
 export async function loginUser(email: string, password: string) {
-  if (!API_BASE_URL) {
-    throw new Error("API base URL is not defined.");
+  if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+    console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is not defined in .env file. Falling back to localhost.");
   }
   const response = await fetch(`${API_BASE_URL}/admin/login`, {
     method: "POST",
