@@ -5,6 +5,7 @@ import { PoliceEmergencyBanner } from "./police-emergency-banner";
 import { PoliceStationFilter } from "./police-station-filter";
 import { PoliceStationList } from "./police-station-list";
 import { Shield, Star, Lock, Info, ChevronRight, Activity, Phone } from "lucide-react";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function PoliceServiceClient() {
   const [filters, setFilters] = useState({
@@ -49,9 +50,14 @@ export function PoliceServiceClient() {
           </div>
         </div>
       </div>
+      
+      {/* Ad Section */}
+      <div className="container mx-auto mt-4 px-4">
+        <ServiceAdBanner label="[ Police Station Directory Sponsor ]" />
+      </div>
 
       {/* Main Content */}
-      <div id="search" className="container mx-auto -mt-16 px-4 pb-32 relative z-10">
+      <div id="search" className="container mx-auto mt-12 px-4 pb-32 relative z-10">
         <div className="rounded-[56px] bg-white p-10 shadow-[0_32px_120px_-20px_rgba(49,130,206,0.08)] border border-white">
           <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between px-4">
             <div className="space-y-1">

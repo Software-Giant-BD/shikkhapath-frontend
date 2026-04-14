@@ -7,6 +7,7 @@ import { BANGLADESH_RAILWAY_STATIONS } from "@/lib/constants/stations";
 import { TrainCard } from "./train-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function TrainScheduleClient() {
   const [trains, setTrains] = useState<Train[]>([]);
@@ -135,6 +136,11 @@ export function TrainScheduleClient() {
             </div>
           </form>
         </div>
+      </div>
+      
+      {/* Ad Section */}
+      <div className="container mx-auto mt-4 px-4">
+        <ServiceAdBanner label="[ Bangladesh Railway Service Sponsor ]" />
       </div>
 
       {/* Results Section */}

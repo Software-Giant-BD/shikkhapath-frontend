@@ -6,6 +6,7 @@ import { LocationFilter } from "./location-filter";
 import { AmbulanceList } from "./ambulance-list";
 import { AmbulanceRegistrationForm } from "./ambulance-registration-form";
 import { Button } from "@/components/ui/button";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function AmbulancePageClient() {
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -58,6 +59,11 @@ export function AmbulancePageClient() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Ad Section */}
+      <div className="container mx-auto mt-8 px-4">
+        <ServiceAdBanner label="[ Ambulance Service Sponsor ]" />
       </div>
 
       {/* Success Message */}

@@ -6,6 +6,7 @@ import { DonorList } from "./donor-list";
 import { DonorRegistrationForm } from "./donor-registration-form";
 import { Button } from "@/components/ui/button";
 import { Heart, Plus, Search, Droplets, Info } from "lucide-react";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function BloodDonationClient() {
   const [filters, setFilters] = useState({
@@ -49,9 +50,14 @@ export function BloodDonationClient() {
           </div>
         </div>
       </div>
+      
+      {/* Ad Section */}
+      <div className="container mx-auto mt-4 px-4">
+        <ServiceAdBanner label="[ Life Savers Network Sponsor ]" />
+      </div>
 
       {/* Main Content */}
-      <div id="search" className="container mx-auto -mt-12 px-4 pb-24 relative z-10">
+      <div id="search" className="container mx-auto mt-12 px-4 pb-24 relative z-10">
         <div className="rounded-[40px] bg-white p-6 shadow-2xl shadow-slate-200/50 border border-white">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
             <div>

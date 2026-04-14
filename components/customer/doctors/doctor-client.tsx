@@ -6,6 +6,7 @@ import { DoctorList } from "./doctor-list";
 import { DoctorRegistrationForm } from "./doctor-registration-form";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, Plus, Search, MapPin, ChevronRight, CheckCircle2 } from "lucide-react";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function DoctorClient() {
   const [filters, setFilters] = useState({
@@ -54,10 +55,15 @@ export function DoctorClient() {
           </div>
         </div>
       </div>
+      
+      {/* Ad Section */}
+      <div className="container mx-auto mt-4 px-4">
+        <ServiceAdBanner label="[ Medical Professionals Directory Sponsor ]" />
+      </div>
 
       {/* Filter & Results Section */}
       <div id="search" className="container mx-auto px-4 pb-32">
-        <div className="relative -mt-16 rounded-[48px] bg-white p-8 shadow-2xl shadow-blue-900/5 border border-white">
+        <div className="relative mt-12 rounded-[48px] bg-white p-8 shadow-2xl shadow-blue-900/5 border border-white">
           <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between px-4">
             <div className="space-y-1">
               <h2 className="text-3xl font-black text-slate-800 uppercase italic leading-none">Verified <span className="text-blue-600">Profiles</span></h2>

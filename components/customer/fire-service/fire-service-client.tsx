@@ -5,6 +5,7 @@ import { EmergencyBanner } from "./emergency-banner";
 import { FireStationFilter } from "./fire-station-filter";
 import { FireStationList } from "./fire-station-list";
 import { Flame, Star, Shield, Info } from "lucide-react";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function FireServiceClient() {
   const [filters, setFilters] = useState({
@@ -41,9 +42,14 @@ export function FireServiceClient() {
           </p>
         </div>
       </div>
+      
+      {/* Ad Section */}
+      <div className="container mx-auto mt-4 px-4">
+        <ServiceAdBanner label="[ Fire Service Support Sponsor ]" />
+      </div>
 
       {/* Main Content */}
-      <div className="container mx-auto -mt-16 px-4 pb-32 relative z-10">
+      <div className="container mx-auto mt-12 px-4 pb-32 relative z-10">
         <div className="rounded-[56px] bg-white p-10 shadow-[0_32px_120px_-20px_rgba(255,100,100,0.08)] border border-white">
           <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between px-4">
             <div className="space-y-1">
