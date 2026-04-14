@@ -3,19 +3,26 @@
 module.exports = {
   experimental: {
     serverActions: {
-      bodySizeLimit: '30mb',
+      bodySizeLimit: "30mb",
     },
   },
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
+        protocol: "https",
+        hostname: "picsum.photos",
       },
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/storage/**",
       },
     ],
   },
-}
+};

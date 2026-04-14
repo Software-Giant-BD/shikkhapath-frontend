@@ -10,73 +10,39 @@ const HOME_LAYOUT_CONFIG = {
   centerGridCount: 8,
 } as const;
 
-// Static demo pools: update only HOME_LAYOUT_CONFIG to change counts/layout.
-const leftStoriesPool = [
-  {
-    image: "https://picsum.photos/seed/l1/200/200",
-    title: "ছাত্রদল নেতাদের নেতৃত্বে ঢামেকে হামলা, যা রয়েছে সিসিটিভি ফুটেজে",
-    time: "১০ মিনিট আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/l2/200/200",
-    title: "স্কুল-কলেজে সাপ্তাহিক ছুটি কমছে, নতুন নির্দেশিকা জারি",
-    time: "৩০ মিনিট আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/l3/200/200",
-    title: "শেরপুর-৩ নির্বাচন: লক্ষাধিক ভোটে জয়ী বিএনপির প্রার্থী",
-    time: "১ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/l4/200/200",
-    title: "দিনে চলবে মাত্র ১৫টি জাহাজ, হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান",
-    time: "২ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/l5/200/200",
-    title: "সুইস ব্যাংকে বাংলাদেশিদের জমা করা হাজার কোটি টাকা নিয়ে নতুন তথ্য প্রকাশ",
-    time: "৩ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/l6/200/200",
-    title: "আইপিএলে সাকিবের দাপট, বোলিং ফিগার দেখে মুগ্ধ ক্রিকেট বিশ্ব",
-    time: "৪ ঘণ্টা আগে",
-  },
-];
-
-const heroStoriesPool = [
-  {
-    image: "https://picsum.photos/seed/m1/800/480",
-    category: "শিক্ষাঙ্গন",
-    title: "এনএসপিতে রুমিন ফারহানা, জুনায়েদ-রাফিসহ অর্ধশত জুলাইয়ের পরিচিত মুখ যোগ দেওয়ার গুঞ্জন",
-    excerpt: "জাতীয় নাগরিক পার্টিতে যোগ দেওয়ার গুঞ্জন উঠেছে স্বতন্ত্র সংসদ সদস্য রুমিন ফারহানা ও ছাত্রদের সমন্বয়কদের।",
-    time: "১ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/m2/800/480",
-    category: "জাতীয়",
-    title: "ঢাকা বিশ্ববিদ্যালয়ে আন্তর্জাতিক সম্মেলন অনুষ্ঠিত: গবেষণায় নতুন দিগন্তের উন্মোচন",
-    excerpt: "বিশ্ববিদ্যালয় পর্যায়ে উচ্চতর গবেষণা ও আন্তর্জাতিক সহযোগিতা বৃদ্ধির লক্ষে এই সম্মেলনের আয়োজন করা হয়েছে।",
-    time: "২ ঘণ্টা আগে",
-  },
-];
-
 // Data for the Themed Topic Block (Iran-Israel Theme)
 const topicStories = {
   title: "ইরান-ইসরায়েল সংঘর্ষ",
   main: {
     image: "https://picsum.photos/seed/t-main/800/500",
-    title: "হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান, পাল্টা হুঁশিয়ারি ইসরায়েলের",
+    title:
+      "হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান, পাল্টা হুঁশিয়ারি ইসরায়েলের",
     time: "২ ঘণ্টা আগে",
   },
   left: [
-    { image: "https://picsum.photos/seed/tl1/300/200", title: "তেহরানে বড় হামলার পরিকল্পনা করছে ইসরায়েল", time: "৫ মিনিট আগে" },
-    { image: "https://picsum.photos/seed/tl2/300/200", title: "ইরানি ড্রোন ভূপাতিত করার দাবি মার্কিন বাহিনীর", time: "১৫ মিনিট আগে" },
+    {
+      image: "https://picsum.photos/seed/tl1/300/200",
+      title: "তেহরানে বড় হামলার পরিকল্পনা করছে ইসরায়েল",
+      time: "৫ মিনিট আগে",
+    },
+    {
+      image: "https://picsum.photos/seed/tl2/300/200",
+      title: "ইরানি ড্রোন ভূপাতিত করার দাবি মার্কিন বাহিনীর",
+      time: "১৫ মিনিট আগে",
+    },
   ],
   right: [
-    { image: "https://picsum.photos/seed/tr1/300/200", title: "ইসরায়েলে হামলায় ব্যালিস্টিক মিসাইল ব্যবহার করবে ইরান", time: "৩০ মিনিট আগে" },
-    { image: "https://picsum.photos/seed/tr2/300/200", title: "যেকোনো পরিস্থিতির জন্য প্রস্তুত থাকার নির্দেশ হামাসের", time: "১ ঘণ্টা আগে" },
-  ]
+    {
+      image: "https://picsum.photos/seed/tr1/300/200",
+      title: "ইসরায়েলে হামলায় ব্যালিস্টিক মিসাইল ব্যবহার করবে ইরান",
+      time: "৩০ মিনিট আগে",
+    },
+    {
+      image: "https://picsum.photos/seed/tr2/300/200",
+      title: "যেকোনো পরিস্থিতির জন্য প্রস্তুত থাকার নির্দেশ হামাসের",
+      time: "১ ঘণ্টা আগে",
+    },
+  ],
 };
 
 const centerGridStoriesPool = [
@@ -86,7 +52,8 @@ const centerGridStoriesPool = [
   },
   {
     image: "https://picsum.photos/seed/c2/300/200",
-    title: "ভুটান ব্যবসাকে কেন্দ্র করে দুই গ্রুপের সংঘর্ষে মাদরাসাছাত্র গুলিবিদ্ধ",
+    title:
+      "ভুটান ব্যবসাকে কেন্দ্র করে দুই গ্রুপের সংঘর্ষে মাদরাসাছাত্র গুলিবিদ্ধ",
   },
   {
     image: "https://picsum.photos/seed/c3/300/200",
@@ -130,9 +97,7 @@ const utilitySections = [
   {
     name: "💳 Services",
     color: "bg-blue-50 text-blue-600 border-blue-100",
-    links: [
-      { label: "Train 🚆", href: "/trains" },
-    ],
+    links: [{ label: "Train 🚆", href: "/trains" }],
   },
   {
     name: "🎓 Education",
@@ -177,35 +142,52 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ data }: HeroSectionProps) {
-  const leftStories = data?.home_left && data.home_left.length > 0 
-    ? data.home_left.map(item => ({
-        image: item.feature_image_url,
-        title: item.title,
-        time: formatBengaliRelativeTime(item.publish_at),
-        slug: item.slug
-      }))
-    : leftStoriesPool.slice(0, HOME_LAYOUT_CONFIG.leftNewsCount).map(s => ({ ...s, slug: "sample-slug" }));
+  console.log(data?.home_left);
 
-  const featuredStories = data?.feature_news && data.feature_news.length > 0
-    ? data.feature_news.map(item => ({
-        image: item.feature_image_url,
-        category: item.category?.title || "জাতীয়",
-        title: item.title,
-        excerpt: item.excerpt,
-        time: formatBengaliRelativeTime(item.publish_at),
-        slug: item.slug
-      }))
-    : heroStoriesPool.slice(0, HOME_LAYOUT_CONFIG.heroCardCount).map(s => ({ ...s, slug: "sample-slug" }));
+  const leftStories =
+    data?.home_left && data.home_left.length > 0
+      ? data.home_left.map((item) => ({
+          image: item.feature_image_url,
+          title: item.title,
+          time: formatBengaliRelativeTime(item.publish_at),
+          slug: item.slug,
+        }))
+      : []
+          .slice(0, HOME_LAYOUT_CONFIG.leftNewsCount)
+          .map((s) => ({ ...s, slug: "sample-slug" }));
 
-  const centerGridStories = centerGridStoriesPool.slice(0, HOME_LAYOUT_CONFIG.centerGridCount);
+  const featuredStories =
+    data?.feature_news && data.feature_news.length > 0
+      ? data.feature_news.map((item) => ({
+          image: item.feature_image_url,
+          category: item.category?.title || "জাতীয়",
+          title: item.title,
+          excerpt: item.excerpt,
+          time: formatBengaliRelativeTime(item.publish_at),
+          slug: item.slug,
+        }))
+      : []
+          .slice(0, HOME_LAYOUT_CONFIG.heroCardCount)
+          .map((s) => ({ ...s, slug: "sample-slug" }));
+
+  const centerGridStories = centerGridStoriesPool.slice(
+    0,
+    HOME_LAYOUT_CONFIG.centerGridCount,
+  );
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
       {/* Left Column: Card-styled trend list */}
-    <aside className="hidden flex-col gap-3 lg:flex">
+      <aside className="hidden flex-col gap-3 lg:flex">
         {leftStories.map((story, i) => (
-          <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-            <Link href={`/news/${story.slug}`} className="flex flex-col gap-2 p-2">
+          <article
+            key={i}
+            className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+          >
+            <Link
+              href={`/news/${story.slug}`}
+              className="flex flex-col gap-2 p-2"
+            >
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
                   src={story.image}
@@ -230,8 +212,14 @@ export function HeroSection({ data }: HeroSectionProps) {
         {/* Dual Highlight Area */}
         <div className="grid gap-5 sm:grid-cols-2">
           {featuredStories.map((story, i) => (
-            <article key={i} className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
-              <Link href={`/news/${story.slug}`} className="flex flex-col h-full">
+            <article
+              key={i}
+              className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl"
+            >
+              <Link
+                href={`/news/${story.slug}`}
+                className="flex flex-col h-full"
+              >
                 <div className="relative overflow-hidden shrink-0">
                   <Image
                     src={story.image}
@@ -242,31 +230,33 @@ export function HeroSection({ data }: HeroSectionProps) {
                     className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.05]"
                   />
                   <div className="absolute inset-x-0 bottom-0 flex justify-center p-3">
-                     <span className="rounded-full bg-white/95 px-4 py-1 text-[11px] font-black uppercase tracking-widest text-slate-900 shadow-lg backdrop-blur-sm ring-1 ring-slate-200/50">
-                        {story.category}
-                     </span>
+                    <span className="rounded-full bg-white/95 px-4 py-1 text-[11px] font-black uppercase tracking-widest text-slate-900 shadow-lg backdrop-blur-sm ring-1 ring-slate-200/50">
+                      {story.category}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-1 flex-col items-center text-center gap-3 p-5 lg:p-6 pb-4">
                   <h2 className="text-lg font-black leading-tight tracking-tight text-slate-900 group-hover:text-[#b38716] transition-colors md:text-xl lg:text-[22px] line-clamp-2 px-1">
                     {story.title}
                   </h2>
-                  
+
                   <div className="flex items-center gap-3 justify-center">
-                     <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
-                     <div className="h-1 w-1 rounded-full bg-[#c79a1d]" />
-                     <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
+                    <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
+                    <div className="h-1 w-1 rounded-full bg-[#c79a1d]" />
+                    <div className="h-[1.5px] w-5 rounded-full bg-slate-100" />
                   </div>
 
                   <p className="line-clamp-2 text-[13px] md:text-[14px] leading-relaxed text-slate-600 font-medium">
                     {story.excerpt}
                   </p>
-                  
+
                   <div className="mt-auto pt-2">
                     <div className="flex items-center gap-1.5 justify-center bg-slate-50 px-3 py-1 rounded-full ring-1 ring-slate-100">
                       <Clock className="h-3 w-3 text-slate-400" />
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{story.time}</p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {story.time}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -277,67 +267,102 @@ export function HeroSection({ data }: HeroSectionProps) {
 
         {/* Themed Topic Highlight Block (Iran-Israel Theme) */}
         <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
-           {/* Block Header */}
-           <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
-                <span className="text-[14px] font-black tracking-tight">{topicStories.title}</span>
-              </div>
-              <button className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
-                 সব খবর
-              </button>
-           </div>
+          {/* Block Header */}
+          <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
+            <div className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
+              <span className="text-[14px] font-black tracking-tight">
+                {topicStories.title}
+              </span>
+            </div>
+            <button className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
+              সব খবর
+            </button>
+          </div>
 
-           {/* Block Grid */}
-           <div className="grid gap-4 p-4 lg:grid-cols-[1.2fr_2fr_1.2fr]">
-              {/* Left Column */}
-              <div className="flex flex-col gap-4">
-                 {topicStories.left.map((item, i) => (
-                    <article key={i} className="group flex flex-col gap-2">
-                       <Link href="/news/sample-slug" className="relative aspect-video overflow-hidden rounded-lg">
-                          <Image fill src={item.image} alt="" className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                       </Link>
-                       <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">{item.title}</h4>
-                    </article>
-                 ))}
-              </div>
+          {/* Block Grid */}
+          <div className="grid gap-4 p-4 lg:grid-cols-[1.2fr_2fr_1.2fr]">
+            {/* Left Column */}
+            <div className="flex flex-col gap-4">
+              {topicStories.left.map((item, i) => (
+                <article key={i} className="group flex flex-col gap-2">
+                  <Link
+                    href="/news/sample-slug"
+                    className="relative aspect-video overflow-hidden rounded-lg"
+                  >
+                    <Image
+                      fill
+                      src={item.image}
+                      alt=""
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </Link>
+                  <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
+                    {item.title}
+                  </h4>
+                </article>
+              ))}
+            </div>
 
-              {/* Middle (Main Focus) */}
-              <article className="group flex flex-col text-center">
-                 <Link href="/news/sample-slug" className="flex flex-col h-full gap-4">
-                    <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-slate-100">
-                       <Image fill src={topicStories.main.image} alt="" className="object-cover group-hover:scale-[1.03] transition-transform duration-700" />
-                    </div>
-                    <div className="space-y-1.5 px-2">
-                       <h3 className="text-[17px] font-black leading-tight text-slate-950 group-hover:text-red-600 transition-colors">
-                          {topicStories.main.title}
-                       </h3>
-                       <div className="flex items-center justify-center gap-2 pt-1">
-                          <div className="h-1 w-1 rounded-full bg-red-600" />
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{topicStories.main.time}</p>
-                       </div>
-                    </div>
-                 </Link>
-              </article>
+            {/* Middle (Main Focus) */}
+            <article className="group flex flex-col text-center">
+              <Link
+                href="/news/sample-slug"
+                className="flex flex-col h-full gap-4"
+              >
+                <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-slate-100">
+                  <Image
+                    fill
+                    src={topicStories.main.image}
+                    alt=""
+                    className="object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                  />
+                </div>
+                <div className="space-y-1.5 px-2">
+                  <h3 className="text-[17px] font-black leading-tight text-slate-950 group-hover:text-red-600 transition-colors">
+                    {topicStories.main.title}
+                  </h3>
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <div className="h-1 w-1 rounded-full bg-red-600" />
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      {topicStories.main.time}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            </article>
 
-              {/* Right Column */}
-              <div className="flex flex-col gap-4">
-                 {topicStories.right.map((item, i) => (
-                    <article key={i} className="group flex flex-col gap-2">
-                       <Link href="/news/sample-slug" className="relative aspect-video overflow-hidden rounded-lg">
-                         <Image fill src={item.image} alt="" className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                       </Link>
-                       <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">{item.title}</h4>
-                    </article>
-                 ))}
-              </div>
-           </div>
+            {/* Right Column */}
+            <div className="flex flex-col gap-4">
+              {topicStories.right.map((item, i) => (
+                <article key={i} className="group flex flex-col gap-2">
+                  <Link
+                    href="/news/sample-slug"
+                    className="relative aspect-video overflow-hidden rounded-lg"
+                  >
+                    <Image
+                      fill
+                      src={item.image}
+                      alt=""
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </Link>
+                  <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
+                    {item.title}
+                  </h4>
+                </article>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* 2-Column Grid of mini-stories (Remaining) */}
         <div className="grid gap-4 sm:grid-cols-2">
           {centerGridStories.map((story, i) => (
-            <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
+            <article
+              key={i}
+              className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
+            >
               <Link href="/news/sample-slug" className="flex gap-3 p-2.5">
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
@@ -360,44 +385,58 @@ export function HeroSection({ data }: HeroSectionProps) {
       {/* Right Column: Service Utility Hub */}
       <aside className="flex flex-col gap-4">
         <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
-           {/* Hub Header */}
-           <div className="bg-slate-900 px-5 py-4 text-center">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">Hub & Services</h4>
-              <p className="text-[13px] font-bold text-white mt-0.5">প্রয়োজনীয় লিংক ও সেবা</p>
-           </div>
+          {/* Hub Header */}
+          <div className="bg-slate-900 px-5 py-4 text-center">
+            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">
+              Hub & Services
+            </h4>
+            <p className="text-[13px] font-bold text-white mt-0.5">
+              প্রয়োজনীয় লিংক ও সেবা
+            </p>
+          </div>
 
-           <div className="flex flex-col p-2 gap-2">
-              {utilitySections.map((section, idx) => (
-                 <div key={idx} className="flex flex-col gap-1.5">
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${section.color} transition-all`}>
-                       <span className="text-[13px] font-black tracking-tight">{section.name}</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-1 px-1 mb-2">
-                       {section.links.map((link, lIdx) => (
-                          <Link 
-                            key={lIdx} 
-                            href={link.href}
-                            className="group flex items-center justify-between px-3 py-2 rounded-lg text-[12.5px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100"
-                          >
-                             <span className="line-clamp-1">{link.label}</span>
-                             <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-all group-hover:translate-x-0.5" />
-                          </Link>
-                       ))}
-                    </div>
-                 </div>
-              ))}
-           </div>
-           
-           {/* Hub Footer */}
-           <div className="border-t border-slate-50 bg-slate-50/50 p-4 text-center">
-              <p className="text-[10px] font-bold text-slate-400">আপডেট পেতে সাথে থাকুন</p>
-           </div>
+          <div className="flex flex-col p-2 gap-2">
+            {utilitySections.map((section, idx) => (
+              <div key={idx} className="flex flex-col gap-1.5">
+                <div
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${section.color} transition-all`}
+                >
+                  <span className="text-[13px] font-black tracking-tight">
+                    {section.name}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-1 px-1 mb-2">
+                  {section.links.map((link, lIdx) => (
+                    <Link
+                      key={lIdx}
+                      href={link.href}
+                      className="group flex items-center justify-between px-3 py-2 rounded-lg text-[12.5px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100"
+                    >
+                      <span className="line-clamp-1">{link.label}</span>
+                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-all group-hover:translate-x-0.5" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Hub Footer */}
+          <div className="border-t border-slate-50 bg-slate-50/50 p-4 text-center">
+            <p className="text-[10px] font-bold text-slate-400">
+              আপডেট পেতে সাথে থাকুন
+            </p>
+          </div>
         </div>
 
         {/* Small Ad Slot at the bottom of Hub */}
         <div className="relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100 p-4 shadow-inner flex flex-col items-center justify-center min-h-[100px] group transition-all hover:bg-white hover:shadow-md">
-           <span className="absolute top-2 right-3 text-[8px] font-black uppercase tracking-widest text-slate-300">Space available</span>
-           <p className="text-[10px] font-bold text-slate-400">বিজ্ঞাপন দিতে যোগাযোগ করুন</p>
+          <span className="absolute top-2 right-3 text-[8px] font-black uppercase tracking-widest text-slate-300">
+            Space available
+          </span>
+          <p className="text-[10px] font-bold text-slate-400">
+            বিজ্ঞাপন দিতে যোগাযোগ করুন
+          </p>
         </div>
       </aside>
     </section>

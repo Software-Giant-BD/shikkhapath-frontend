@@ -318,14 +318,17 @@ export async function getHeroNews(): Promise<HeroNewsResponse> {
       return { feature_news: [], home_left: [] };
     }
 
-    const data = payload?.data || payload;
+    console.log(payload);
+    const data = payload?.resources || payload;
 
     const normalizeHeroItem = (item: any): HeroNewsItem => ({
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
       excerpt: asString(item.excerpt),
-      feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
       publish_at: asString(item.publish_at ?? item.publishAt),
       category: normalizeRelationCategory(item.category),
     });
