@@ -11,7 +11,12 @@ import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { getCategoriesByParentAction } from "@/lib/api/category-actions";
 import { createNewsAction, updateNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
@@ -30,6 +35,7 @@ type NewsFormValues = {
   author_name: string;
   source_name: string;
   source_url: string;
+  feature_image_id: string;
   feature_image_url: string;
   status: "draft" | "published" | "scheduled";
   publish_at: string;
@@ -65,6 +71,7 @@ const defaultValues: NewsFormValues = {
   author_name: "",
   source_name: "",
   source_url: "",
+  feature_image_id: "",
   feature_image_url: "",
   status: "draft",
   publish_at: "",
@@ -94,7 +101,9 @@ function toDateTimeLocal(value: string) {
   return normalized.length >= 16 ? normalized.slice(0, 16) : normalized;
 }
 
-function buildInitialFormValues(initialValues?: NewsFormInitialValues): NewsFormValues {
+function buildInitialFormValues(
+  initialValues?: NewsFormInitialValues,
+): NewsFormValues {
   if (!initialValues) return defaultValues;
 
   return {
@@ -112,13 +121,17 @@ export function NewsForm({
   newsId,
   initialValues,
 }: NewsFormProps) {
-  const [form, setForm] = useState<NewsFormValues>(() => buildInitialFormValues(initialValues));
+  const [form, setForm] = useState<NewsFormValues>(() =>
+    buildInitialFormValues(initialValues),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [featureImageError, setFeatureImageError] = useState("");
-  const [subCategoryOptions, setSubCategoryOptions] = useState<Array<{ id: string; title: string }>>([]);
+  const [subCategoryOptions, setSubCategoryOptions] = useState<
+    Array<{ id: string; title: string }>
+  >([]);
   const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
@@ -160,7 +173,9 @@ export function NewsForm({
         return;
       }
 
-      setSubCategoryOptions(result.items.map((item) => ({ id: item.id, title: item.title })));
+      setSubCategoryOptions(
+        result.items.map((item) => ({ id: item.id, title: item.title })),
+      );
       setIsSubCategoryLoading(false);
     }
 
@@ -195,7 +210,9 @@ export function NewsForm({
 
       const result = await uploadImageAction(payload);
       if (!result.ok || !result.item?.url) {
-        setFeatureImageError(result.message || "Failed to upload feature image.");
+        setFeatureImageError(
+          result.message || "Failed to upload feature image.",
+        );
         return;
       }
 
@@ -211,7 +228,11 @@ export function NewsForm({
       ];
 
       saveMediaItems(nextItems);
-      setForm((prev) => ({ ...prev, feature_image_url: result.item?.url || "" }));
+      setForm((prev) => ({
+        ...prev,
+        feature_image_url: result.item?.url || "",
+        feature_image_id: result.item?.id?.toString() || "",
+      }));
     } catch {
       setFeatureImageError("Failed to upload feature image.");
     } finally {
@@ -243,12 +264,16 @@ export function NewsForm({
           author_name: form.author_name || undefined,
           source_name: form.source_name || undefined,
           source_url: form.source_url || undefined,
-          feature_image_url: form.feature_image_url || undefined,
+          feature_image_id: form.feature_image_id
+            ? parseInt(form.feature_image_id, 10)
+            : undefined,
           status: form.status,
           publish_at: form.publish_at || undefined,
           tags: form.tags || undefined,
           language: form.language || undefined,
-          read_time_minutes: form.read_time_minutes ? parseInt(form.read_time_minutes, 10) : undefined,
+          read_time_minutes: form.read_time_minutes
+            ? parseInt(form.read_time_minutes, 10)
+            : undefined,
           is_featured: form.is_featured === "1",
           is_breaking: form.is_breaking === "1",
           allow_comments: form.allow_comments === "1",
@@ -257,9 +282,10 @@ export function NewsForm({
           meta_keywords: form.meta_keywords || undefined,
         };
 
-        const result = isEditMode && newsId
-          ? await updateNewsAction(newsId, payload)
-          : await createNewsAction(payload);
+        const result =
+          isEditMode && newsId
+            ? await updateNewsAction(newsId, payload)
+            : await createNewsAction(payload);
 
         setIsSubmitting(false);
 
@@ -277,7 +303,9 @@ export function NewsForm({
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             {headerTitle ? (
-              <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+              <h2 className="text-2xl font-bold text-slate-800">
+                {headerTitle}
+              </h2>
             ) : (
               <CardTitle>Headline & Story</CardTitle>
             )}
@@ -302,7 +330,11 @@ export function NewsForm({
               }}
               required
             />
-            {fieldErrors.title ? <p className="text-xs font-medium text-rose-600">{fieldErrors.title[0]}</p> : null}
+            {fieldErrors.title ? (
+              <p className="text-xs font-medium text-rose-600">
+                {fieldErrors.title[0]}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
@@ -314,11 +346,18 @@ export function NewsForm({
                 placeholder="headline-url-slug"
                 onChange={(event) => {
                   setSlugEdited(true);
-                  setForm((prev) => ({ ...prev, slug: slugify(event.target.value) }));
+                  setForm((prev) => ({
+                    ...prev,
+                    slug: slugify(event.target.value),
+                  }));
                 }}
                 required
               />
-              {fieldErrors.slug ? <p className="text-xs font-medium text-rose-600">{fieldErrors.slug[0]}</p> : null}
+              {fieldErrors.slug ? (
+                <p className="text-xs font-medium text-rose-600">
+                  {fieldErrors.slug[0]}
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -327,7 +366,11 @@ export function NewsForm({
                 id="category_id"
                 value={form.category_id}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, category_id: event.target.value, sub_category_id: "" }))
+                  setForm((prev) => ({
+                    ...prev,
+                    category_id: event.target.value,
+                    sub_category_id: "",
+                  }))
                 }
               >
                 <option value="">Select Category</option>
@@ -337,7 +380,11 @@ export function NewsForm({
                   </option>
                 ))}
               </Select>
-              {fieldErrors.category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.category_id[0]}</p> : null}
+              {fieldErrors.category_id ? (
+                <p className="text-xs font-medium text-rose-600">
+                  {fieldErrors.category_id[0]}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -346,7 +393,12 @@ export function NewsForm({
             <Select
               id="sub_category_id"
               value={form.sub_category_id}
-              onChange={(event) => setForm((prev) => ({ ...prev, sub_category_id: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  sub_category_id: event.target.value,
+                }))
+              }
               disabled={!form.category_id || isSubCategoryLoading}
             >
               <option value="">
@@ -362,7 +414,11 @@ export function NewsForm({
                 </option>
               ))}
             </Select>
-            {fieldErrors.sub_category_id ? <p className="text-xs font-medium text-rose-600">{fieldErrors.sub_category_id[0]}</p> : null}
+            {fieldErrors.sub_category_id ? (
+              <p className="text-xs font-medium text-rose-600">
+                {fieldErrors.sub_category_id[0]}
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -373,9 +429,13 @@ export function NewsForm({
               maxLength={250}
               value={form.excerpt}
               placeholder="2-3 line summary for cards and social preview"
-              onChange={(event) => setForm((prev) => ({ ...prev, excerpt: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, excerpt: event.target.value }))
+              }
             />
-            <p className="text-xs text-slate-500">{form.excerpt.length}/250 characters</p>
+            <p className="text-xs text-slate-500">
+              {form.excerpt.length}/250 characters
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -397,8 +457,9 @@ export function NewsForm({
           <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
             <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-slate-800">Feature Media</h3>
-               
+                <h3 className="text-base font-semibold text-slate-800">
+                  Feature Media
+                </h3>
               </div>
 
               <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
@@ -414,7 +475,9 @@ export function NewsForm({
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
                       <ImageIcon size={18} />
                     </span>
-                    <p className="text-sm font-medium">No feature image selected</p>
+                    <p className="text-sm font-medium">
+                      No feature image selected
+                    </p>
                   </div>
                 )}
 
@@ -451,7 +514,13 @@ export function NewsForm({
                         type="button"
                         variant="secondary"
                         className="h-9 text-rose-600 hover:text-rose-700"
-                        onClick={() => setForm((prev) => ({ ...prev, feature_image_url: "" }))}
+                        onClick={() =>
+                          setForm((prev) => ({
+                            ...prev,
+                            feature_image_url: "",
+                            feature_image_id: "",
+                          }))
+                        }
                       >
                         Remove
                       </Button>
@@ -460,23 +529,38 @@ export function NewsForm({
                 </div>
               </div>
 
-              {featureImageError ? <p className="text-xs font-medium text-rose-600">{featureImageError}</p> : null}
+              {featureImageError ? (
+                <p className="text-xs font-medium text-rose-600">
+                  {featureImageError}
+                </p>
+              ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="source_name" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <Label
+                    htmlFor="source_name"
+                    className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
+                  >
                     Source Name
                   </Label>
                   <Input
                     id="source_name"
                     value={form.source_name}
                     placeholder="e.g. Shikkhapath Daily"
-                    onChange={(event) => setForm((prev) => ({ ...prev, source_name: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        source_name: event.target.value,
+                      }))
+                    }
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="source_url" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <Label
+                    htmlFor="source_url"
+                    className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
+                  >
                     Source URL
                   </Label>
                   <Input
@@ -484,7 +568,12 @@ export function NewsForm({
                     type="url"
                     value={form.source_url}
                     placeholder="https://example.com/source"
-                    onChange={(event) => setForm((prev) => ({ ...prev, source_url: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        source_url: event.target.value,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -494,11 +583,18 @@ export function NewsForm({
               <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="space-y-4">
                   <div>
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Language Settings</p>
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Language Settings
+                    </p>
                     <Select
                       id="language"
                       value={form.language}
-                      onChange={(event) => setForm((prev) => ({ ...prev, language: event.target.value }))}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          language: event.target.value,
+                        }))
+                      }
                     >
                       <option value="bn">Bangla</option>
                       <option value="en">English</option>
@@ -506,12 +602,19 @@ export function NewsForm({
                   </div>
 
                   <div>
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Reporter / Author</p>
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Reporter / Author
+                    </p>
                     <Input
                       id="author_name"
                       value={form.author_name}
                       placeholder="Reporter name"
-                      onChange={(event) => setForm((prev) => ({ ...prev, author_name: event.target.value }))}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          author_name: event.target.value,
+                        }))
+                      }
                     />
                   </div>
                 </div>
@@ -532,7 +635,12 @@ export function NewsForm({
               <Select
                 id="status"
                 value={form.status}
-                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value as NewsFormValues["status"] }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    status: event.target.value as NewsFormValues["status"],
+                  }))
+                }
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
@@ -546,10 +654,19 @@ export function NewsForm({
                 id="publish_at"
                 type="datetime-local"
                 value={form.publish_at}
-                onChange={(event) => setForm((prev) => ({ ...prev, publish_at: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    publish_at: event.target.value,
+                  }))
+                }
                 required
               />
-              {fieldErrors.publish_at ? <p className="text-xs font-medium text-rose-600">{fieldErrors.publish_at[0]}</p> : null}
+              {fieldErrors.publish_at ? (
+                <p className="text-xs font-medium text-rose-600">
+                  {fieldErrors.publish_at[0]}
+                </p>
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -559,7 +676,12 @@ export function NewsForm({
                 type="number"
                 min={1}
                 value={form.read_time_minutes}
-                onChange={(event) => setForm((prev) => ({ ...prev, read_time_minutes: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    read_time_minutes: event.target.value,
+                  }))
+                }
               />
             </div>
           </div>
@@ -570,7 +692,12 @@ export function NewsForm({
               <Select
                 id="is_featured"
                 value={form.is_featured}
-                onChange={(event) => setForm((prev) => ({ ...prev, is_featured: event.target.value as "1" | "0" }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    is_featured: event.target.value as "1" | "0",
+                  }))
+                }
               >
                 <option value="1">Yes</option>
                 <option value="0">No</option>
@@ -582,7 +709,12 @@ export function NewsForm({
               <Select
                 id="is_breaking"
                 value={form.is_breaking}
-                onChange={(event) => setForm((prev) => ({ ...prev, is_breaking: event.target.value as "1" | "0" }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    is_breaking: event.target.value as "1" | "0",
+                  }))
+                }
               >
                 <option value="1">Yes</option>
                 <option value="0">No</option>
@@ -594,7 +726,12 @@ export function NewsForm({
               <Select
                 id="allow_comments"
                 value={form.allow_comments}
-                onChange={(event) => setForm((prev) => ({ ...prev, allow_comments: event.target.value as "1" | "0" }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    allow_comments: event.target.value as "1" | "0",
+                  }))
+                }
               >
                 <option value="1">Yes</option>
                 <option value="0">No</option>
@@ -608,7 +745,9 @@ export function NewsForm({
               id="tags"
               value={form.tags}
               placeholder="education, exam, dhaka"
-              onChange={(event) => setForm((prev) => ({ ...prev, tags: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, tags: event.target.value }))
+              }
             />
             {tagPreview.length > 0 ? (
               <div className="flex flex-wrap gap-2 pt-1">
@@ -637,7 +776,9 @@ export function NewsForm({
               id="meta_title"
               value={form.meta_title}
               placeholder="SEO title for search engines"
-              onChange={(event) => setForm((prev) => ({ ...prev, meta_title: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, meta_title: event.target.value }))
+              }
             />
           </div>
 
@@ -649,9 +790,16 @@ export function NewsForm({
               maxLength={170}
               value={form.meta_description}
               placeholder="SEO description (up to 160-170 chars)"
-              onChange={(event) => setForm((prev) => ({ ...prev, meta_description: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({
+                  ...prev,
+                  meta_description: event.target.value,
+                }))
+              }
             />
-            <p className="text-xs text-slate-500">{form.meta_description.length}/170 characters</p>
+            <p className="text-xs text-slate-500">
+              {form.meta_description.length}/170 characters
+            </p>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
@@ -661,11 +809,14 @@ export function NewsForm({
                 id="meta_keywords"
                 value={form.meta_keywords}
                 placeholder="keyword one, keyword two"
-                onChange={(event) => setForm((prev) => ({ ...prev, meta_keywords: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    meta_keywords: event.target.value,
+                  }))
+                }
               />
             </div>
-
-          
           </div>
         </CardContent>
       </Card>
@@ -692,7 +843,11 @@ export function NewsForm({
 
         <Button type="submit" disabled={isSubmitting}>
           <Save size={16} />
-          {isSubmitting ? "Saving..." : isEditMode ? "Update News" : "Save News"}
+          {isSubmitting
+            ? "Saving..."
+            : isEditMode
+              ? "Update News"
+              : "Save News"}
         </Button>
       </div>
 
@@ -701,8 +856,14 @@ export function NewsForm({
         mediaType="image"
         onClose={() => setIsMediaPickerOpen(false)}
         onSelect={(item) => {
+          console.log("before item");
+          console.log(item);
           setFeatureImageError("");
-          setForm((prev) => ({ ...prev, feature_image_url: item.url }));
+          setForm((prev) => ({
+            ...prev,
+            feature_image_url: item.url,
+            feature_image_id: item.id.toString(),
+          }));
           setIsMediaPickerOpen(false);
         }}
       />

@@ -38,7 +38,9 @@ function toParentId(value: string | null | undefined): string {
   return value ? value : "";
 }
 
-export async function getFoldersAction(folder_id = ""): Promise<GetFoldersActionResult> {
+export async function getFoldersAction(
+  folder_id = "",
+): Promise<GetFoldersActionResult> {
   try {
     const result = await getFolders(folder_id);
 
@@ -60,7 +62,10 @@ export async function getFoldersAction(folder_id = ""): Promise<GetFoldersAction
   }
 }
 
-export async function createFolderAction(name: string, parent_id: string | null): Promise<FolderActionResult> {
+export async function createFolderAction(
+  name: string,
+  parent_id: string | null,
+): Promise<FolderActionResult> {
   try {
     const payload = new FormData();
     payload.append("name", name);
@@ -128,7 +133,9 @@ export async function updateFolderAction(
   }
 }
 
-export async function deleteFolderAction(folderId: string): Promise<FolderActionResult> {
+export async function deleteFolderAction(
+  folderId: string,
+): Promise<FolderActionResult> {
   try {
     const response = await fetchApi(`/admin/folders/${folderId}`, {
       method: "DELETE",

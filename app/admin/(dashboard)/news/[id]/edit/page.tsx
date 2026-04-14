@@ -55,6 +55,7 @@ export default async function EditNewsPage({
           author_name: news.author_name,
           source_name: news.source_name,
           source_url: news.source_url,
+          feature_image_id: news.feature_image_id,
           feature_image_url: news.feature_image_url,
           status: news.status,
           publish_at: news.publish_at,

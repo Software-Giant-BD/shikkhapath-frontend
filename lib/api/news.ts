@@ -21,6 +21,7 @@ export type NewsApiModel = {
   author_name: string;
   source_name: string;
   source_url: string;
+  feature_image_id: string;
   feature_image_url: string;
   status: NewsStatus;
   publish_at: string;
@@ -109,6 +110,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     author_name: asString(item.author_name ?? item.authorName),
     source_name: asString(item.source_name ?? item.sourceName),
     source_url: asString(item.source_url ?? item.sourceUrl),
+    feature_image_id: asString(item.feature_image_id ?? item.featureImageId),
     feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
     status: normalizeStatus(item.status),
     publish_at: asString(item.publish_at ?? item.publishAt),

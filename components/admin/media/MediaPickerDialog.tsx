@@ -2,11 +2,22 @@
 
 import type { ChangeEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRight, FolderOpen, Image as ImageIcon, Upload, Video, X } from "lucide-react";
+import {
+  ChevronRight,
+  FolderOpen,
+  Image as ImageIcon,
+  Upload,
+  Video,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
-import type { MediaFolder, MediaItem, MediaType } from "@/lib/admin/media-library";
+import type {
+  MediaFolder,
+  MediaItem,
+  MediaType,
+} from "@/lib/admin/media-library";
 import {
   addMediaFiles,
   getMediaItems,
@@ -29,9 +40,15 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: MediaPickerDialogProps) {
+export function MediaPickerDialog({
+  isOpen,
+  mediaType,
+  onClose,
+  onSelect,
+}: MediaPickerDialogProps) {
   const [folders, setFolders] = useState<MediaFolder[]>([]);
   const [items, setItems] = useState<MediaItem[]>([]);
+  const [hierarchy, setHierarchy] = useState<Array<{ id: string; name: string }>>([]);
   const [query, setQuery] = useState("");
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -39,15 +56,17 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const isVideoType = mediaType === "video";
 
+
   useEffect(() => {
     if (!isOpen) {
+      setCurrentFolderId(null);
       return;
     }
 
     let cancelled = false;
 
-    async function hydrateFolders() {
-      const result = await getFoldersAction();
+    async function hydrate() {
+      const result = await getFoldersAction(currentFolderId ?? "");
 
       if (cancelled) {
         return;
@@ -55,22 +74,36 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
 
       if (!result.ok) {
         setFolders([]);
-        setError(result.message || "Failed to load folders.");
+        setItems([]);
+        setHierarchy([]);
+        setError(result.message || "Failed to load content.");
         return;
       }
 
       setFolders(result.items);
+      setHierarchy(result.parent_hierarchy);
+      
+      const apiItems: MediaItem[] = result.images.map((img) => ({
+        id: img.id,
+        type: "image",
+        name: img.file_name,
+        url: img.original_url,
+        mime_type: img.mime_type,
+        size: img.size,
+        created_at: img.created_at,
+        folder_id: img.folder_id,
+      }));
+
+      setItems(apiItems);
       setError("");
     }
 
-    void hydrateFolders();
-    setItems(getMediaItems());
-    setCurrentFolderId(null);
+    void hydrate();
 
     return () => {
       cancelled = true;
     };
-  }, [isOpen]);
+  }, [isOpen, currentFolderId]);
 
   useEffect(() => {
     if (isVideoType) {
@@ -117,39 +150,20 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
     const lowerQuery = query.trim().toLowerCase();
 
     return folders.filter((folder) => {
-      if (folder.parent_id !== currentFolderId) {
-        return false;
-      }
-
       if (!lowerQuery) {
         return true;
       }
 
       return folder.name.toLowerCase().includes(lowerQuery);
     });
-  }, [currentFolderId, folders, query]);
+  }, [folders, query]);
 
   const breadcrumbs = useMemo(() => {
-    if (!currentFolderId) {
-      return [{ id: null as string | null, name: "Home" }];
-    }
-
-    const byId = new Map(folders.map((folder) => [folder.id, folder]));
-    const chain: MediaFolder[] = [];
-
-    let activeId: string | null = currentFolderId;
-    while (activeId) {
-      const currentFolder = byId.get(activeId);
-      if (!currentFolder) {
-        break;
-      }
-
-      chain.push(currentFolder);
-      activeId = currentFolder.parent_id;
-    }
-
-    return [{ id: null as string | null, name: "Home" }, ...chain.reverse()];
-  }, [currentFolderId, folders]);
+    return [
+      { id: null as string | null, name: "Home" },
+      ...hierarchy.map((node) => ({ id: node.id as string | null, name: node.name })),
+    ];
+  }, [hierarchy]);
 
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(event.target.files || []);
@@ -193,7 +207,10 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
           const existingItems = getMediaItems();
           const nextItems = [
             ...uploadedItems,
-            ...existingItems.filter((item) => !uploadedItems.some((uploaded) => uploaded.id === item.id)),
+            ...existingItems.filter(
+              (item) =>
+                !uploadedItems.some((uploaded) => uploaded.id === item.id),
+            ),
           ];
 
           saveMediaItems(nextItems);
@@ -234,9 +251,12 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
       <div className="relative z-10 w-full max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-xl font-semibold text-slate-800">Select from Media Center</h3>
+            <h3 className="text-xl font-semibold text-slate-800">
+              Select from Media Center
+            </h3>
             <p className="text-sm text-slate-500">
-              Showing {mediaType === "image" ? "images" : "videos"} for the current editor action.
+              Showing {mediaType === "image" ? "images" : "videos"} for the
+              current editor action.
             </p>
           </div>
 
@@ -278,7 +298,9 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
           </Button>
         </div>
 
-        {error ? <p className="mb-3 text-sm font-medium text-rose-600">{error}</p> : null}
+        {error ? (
+          <p className="mb-3 text-sm font-medium text-rose-600">{error}</p>
+        ) : null}
 
         {!isVideoType ? (
           <>
@@ -290,20 +312,28 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
                   onClick={() => setCurrentFolderId(crumb.id)}
                   className={cn(
                     "inline-flex items-center gap-2 text-slate-600 hover:text-slate-900",
-                    index === breadcrumbs.length - 1 ? "font-semibold text-slate-800" : "",
+                    index === breadcrumbs.length - 1
+                      ? "font-semibold text-slate-800"
+                      : "",
                   )}
                 >
                   {index === 0 ? <FolderOpen size={14} /> : null}
                   {crumb.name}
-                  {index < breadcrumbs.length - 1 ? <ChevronRight size={14} /> : null}
+                  {index < breadcrumbs.length - 1 ? (
+                    <ChevronRight size={14} />
+                  ) : null}
                 </button>
               ))}
             </div>
 
             <div className="mb-4 space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Folders</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Folders
+              </p>
               {visibleFolders.length === 0 ? (
-                <p className="text-sm text-slate-500">No folder found in this location.</p>
+                <p className="text-sm text-slate-500">
+                  No folder found in this location.
+                </p>
               ) : (
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   {visibleFolders.map((folder) => (
@@ -342,16 +372,34 @@ export function MediaPickerDialog({ isOpen, mediaType, onClose, onSelect }: Medi
                 <div className="aspect-video w-full bg-slate-100">
                   {item.type === "image" ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={item.url} alt={item.name} className="h-full w-full object-cover" />
+                    <img
+                      src={item.url}
+                      alt={item.name}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <video src={item.url} className="h-full w-full object-cover" />
+                    <video
+                      src={item.url}
+                      className="h-full w-full object-cover"
+                    />
                   )}
                 </div>
                 <div className="space-y-1 p-3">
-                  <p className="truncate text-xs font-semibold text-slate-800" title={item.name}>{item.name}</p>
-                  <p className="text-[11px] text-slate-500">{formatSize(item.size)}</p>
+                  <p
+                    className="truncate text-xs font-semibold text-slate-800"
+                    title={item.name}
+                  >
+                    {item.name}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {formatSize(item.size)}
+                  </p>
                   <div className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                    {item.type === "image" ? <ImageIcon size={12} /> : <Video size={12} />}
+                    {item.type === "image" ? (
+                      <ImageIcon size={12} />
+                    ) : (
+                      <Video size={12} />
+                    )}
                     {item.type}
                   </div>
                 </div>
