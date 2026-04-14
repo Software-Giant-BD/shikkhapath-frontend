@@ -25,7 +25,7 @@ export type NewsApiModel = {
   feature_image_url: string;
   status: NewsStatus;
   publish_at: string;
-  tags: string;
+  tags: string[];
   language: string;
   read_time_minutes: number;
   is_featured: boolean;
@@ -119,7 +119,12 @@ function normalizeNews(value: unknown): NewsApiModel {
     feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
     status: normalizeStatus(item.status),
     publish_at: asString(item.publish_at ?? item.publishAt),
-    tags: asString(item.tags),
+    tags: Array.isArray(item.tags)
+      ? item.tags.map(String)
+      : asString(item.tags)
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
     language: asString(item.language, "bn"),
     read_time_minutes: Math.max(
       0,

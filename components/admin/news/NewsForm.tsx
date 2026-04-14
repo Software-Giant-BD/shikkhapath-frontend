@@ -39,7 +39,7 @@ type NewsFormValues = {
   feature_image_url: string;
   status: "draft" | "published" | "scheduled";
   publish_at: string;
-  tags: string;
+  tags: string[];
   language: string;
   read_time_minutes: string;
   is_featured: "1" | "0";
@@ -76,7 +76,7 @@ const defaultValues: NewsFormValues = {
   feature_image_url: "",
   status: "draft",
   publish_at: "",
-  tags: "",
+  tags: [],
   language: "bn",
   read_time_minutes: "5",
   is_featured: "0",
@@ -111,6 +111,12 @@ function buildInitialFormValues(
   return {
     ...defaultValues,
     ...initialValues,
+    tags: Array.isArray(initialValues.tags)
+      ? initialValues.tags
+      : (initialValues.tags as unknown as string ?? "")
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
     publish_at: toDateTimeLocal(initialValues.publish_at ?? ""),
   };
 }
@@ -189,52 +195,34 @@ export function NewsForm({
     };
   }, [form.category_id]);
 
-  const tagPreview = useMemo(() => {
-    return form.tags
-      .split(",")
-      .map((tag) => tag.trim())
-      .filter(Boolean);
-  }, [form.tags]);
+
 
   const addTag = (tag: string) => {
     const trimmed = tag.trim().replace(/,/g, "");
     if (!trimmed) return;
 
-    const tags = form.tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-    if (tags.includes(trimmed)) {
+    if (form.tags.includes(trimmed)) {
       setTagInput("");
       return;
     }
 
-    const nextTags = [...tags, trimmed].join(", ");
-    setForm((prev) => ({ ...prev, tags: nextTags }));
+    setForm((prev) => ({ ...prev, tags: [...prev.tags, trimmed] }));
     setTagInput("");
   };
 
   const removeTag = (tagToRemove: string) => {
-    const nextTags = form.tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t && t !== tagToRemove)
-      .join(", ");
-    setForm((prev) => ({ ...prev, tags: nextTags }));
+    setForm((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tagToRemove),
+    }));
   };
 
   const onTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag(tagInput);
-    } else if (e.key === "Backspace" && !tagInput && form.tags) {
-      const tags = form.tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-      if (tags.length > 0) {
-        removeTag(tags[tags.length - 1]);
-      }
+    } else if (e.key === "Backspace" && !tagInput && form.tags.length > 0) {
+      removeTag(form.tags[form.tags.length - 1]);
     }
   };
 
@@ -313,7 +301,7 @@ export function NewsForm({
             : undefined,
           status: form.status,
           publish_at: form.publish_at || undefined,
-          tags: form.tags || undefined,
+          tags: form.tags,
           language: form.language || undefined,
           read_time_minutes: form.read_time_minutes
             ? parseInt(form.read_time_minutes, 10)
@@ -805,7 +793,7 @@ export function NewsForm({
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
             <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
-              {tagPreview.map((tag) => (
+              {form.tags.map((tag) => (
                 <span
                   key={tag}
                   className="flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
@@ -822,7 +810,7 @@ export function NewsForm({
               ))}
               <input
                 className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-slate-400"
-                placeholder={tagPreview.length === 0 ? "Add tags..." : ""}
+                placeholder={form.tags.length === 0 ? "Add tags..." : ""}
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={onTagInputKeyDown}

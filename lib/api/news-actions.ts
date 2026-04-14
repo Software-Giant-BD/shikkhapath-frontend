@@ -35,7 +35,7 @@ export type CreateNewsPayload = {
   feature_image_url?: string;
   status?: string;
   publish_at?: string;
-  tags?: string;
+  tags?: string[];
   language?: string;
   read_time_minutes?: number;
   is_featured?: boolean;
