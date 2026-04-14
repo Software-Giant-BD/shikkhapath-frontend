@@ -3,7 +3,7 @@
 import type { ChangeEvent } from "react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Image as ImageIcon, Save } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Save, X } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
@@ -138,6 +138,7 @@ export function NewsForm({
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [tagInput, setTagInput] = useState("");
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const router = useRouter();
@@ -192,9 +193,50 @@ export function NewsForm({
     return form.tags
       .split(",")
       .map((tag) => tag.trim())
-      .filter(Boolean)
-      .slice(0, 10);
+      .filter(Boolean);
   }, [form.tags]);
+
+  const addTag = (tag: string) => {
+    const trimmed = tag.trim().replace(/,/g, "");
+    if (!trimmed) return;
+
+    const tags = form.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (tags.includes(trimmed)) {
+      setTagInput("");
+      return;
+    }
+
+    const nextTags = [...tags, trimmed].join(", ");
+    setForm((prev) => ({ ...prev, tags: nextTags }));
+    setTagInput("");
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    const nextTags = form.tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t && t !== tagToRemove)
+      .join(", ");
+    setForm((prev) => ({ ...prev, tags: nextTags }));
+  };
+
+  const onTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && form.tags) {
+      const tags = form.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (tags.length > 0) {
+        removeTag(tags[tags.length - 1]);
+      }
+    }
+  };
 
   const onUploadFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0] || null;
@@ -762,26 +804,33 @@ export function NewsForm({
 
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
-            <Input
-              id="tags"
-              value={form.tags}
-              placeholder="education, exam, dhaka"
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, tags: event.target.value }))
-              }
-            />
-            {tagPreview.length > 0 ? (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {tagPreview.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
+            <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
+              {tagPreview.map((tag) => (
+                <span
+                  key={tag}
+                  className="flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="hover:text-indigo-900"
                   >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              <input
+                className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-slate-400"
+                placeholder={tagPreview.length === 0 ? "Add tags..." : ""}
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={onTagInputKeyDown}
+              />
+            </div>
+            <p className="text-[10px] text-slate-400">
+              Press Enter or comma to add tags
+            </p>
           </div>
         </CardContent>
       </Card>
