@@ -16,7 +16,6 @@ export default async function HomePageCategoriesPage() {
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
-        title="Home Page Categories"
         breadcrumbs={[
           { label: "Home", href: "/admin" },
           { label: "Categories", href: "/admin/categories/list" },
