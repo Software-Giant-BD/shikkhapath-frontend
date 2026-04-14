@@ -39,6 +39,7 @@ export type CreateNewsPayload = {
   language?: string;
   read_time_minutes?: number;
   is_featured?: boolean;
+  show_in_home_left?: boolean;
   is_breaking?: boolean;
   allow_comments?: boolean;
   meta_title?: string;
@@ -46,7 +47,9 @@ export type CreateNewsPayload = {
   meta_keywords?: string;
 };
 
-export async function createNewsAction(payload: CreateNewsPayload): Promise<NewsActionResult> {
+export async function createNewsAction(
+  payload: CreateNewsPayload,
+): Promise<NewsActionResult> {
   try {
     const response = await fetchApi("/admin/news", {
       method: "POST",

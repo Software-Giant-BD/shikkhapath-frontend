@@ -29,6 +29,7 @@ export type NewsApiModel = {
   language: string;
   read_time_minutes: number;
   is_featured: boolean;
+  show_in_home_left: boolean;
   is_breaking: boolean;
   allow_comments: boolean;
   meta_title: string;
@@ -50,7 +51,9 @@ export type NewsListResult = {
 };
 
 function asObject(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -83,7 +86,9 @@ function normalizeStatus(value: unknown): NewsStatus {
   return "draft";
 }
 
-function normalizeRelationCategory(value: unknown): NewsRelationCategory | undefined {
+function normalizeRelationCategory(
+  value: unknown,
+): NewsRelationCategory | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
@@ -116,15 +121,24 @@ function normalizeNews(value: unknown): NewsApiModel {
     publish_at: asString(item.publish_at ?? item.publishAt),
     tags: asString(item.tags),
     language: asString(item.language, "bn"),
-    read_time_minutes: Math.max(0, asNumber(item.read_time_minutes ?? item.readTimeMinutes, 0)),
+    read_time_minutes: Math.max(
+      0,
+      asNumber(item.read_time_minutes ?? item.readTimeMinutes, 0),
+    ),
     is_featured: asBoolean(item.is_featured ?? item.isFeatured, false),
+    show_in_home_left: asBoolean(
+      item.show_in_home_left ?? item.show_in_home_left,
+      false,
+    ),
     is_breaking: asBoolean(item.is_breaking ?? item.isBreaking, false),
     allow_comments: asBoolean(item.allow_comments ?? item.allowComments, true),
     meta_title: asString(item.meta_title ?? item.metaTitle),
     meta_description: asString(item.meta_description ?? item.metaDescription),
     meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
     category: normalizeRelationCategory(item.category),
-    sub_category: normalizeRelationCategory(item.sub_category ?? item.subCategory),
+    sub_category: normalizeRelationCategory(
+      item.sub_category ?? item.subCategory,
+    ),
     created_at: asString(item.created_at ?? item.createdAt),
   };
 }
@@ -140,7 +154,13 @@ function extractList(payload: unknown): unknown[] {
   }
 
   const resources = asObject(root.resources);
-  const candidates = [resources.news, resources.items, resources.data, root.news, root.data];
+  const candidates = [
+    resources.news,
+    resources.items,
+    resources.data,
+    root.news,
+    root.data,
+  ];
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
@@ -172,7 +192,11 @@ function extractOne(payload: unknown): unknown | null {
   ];
 
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      !Array.isArray(candidate)
+    ) {
       return candidate;
     }
   }
@@ -180,7 +204,9 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getNewsList(params?: GetNewsParams): Promise<NewsListResult> {
+export async function getNewsList(
+  params?: GetNewsParams,
+): Promise<NewsListResult> {
   const fallbackPage = params?.page ?? 1;
   const fallbackPerPage = params?.per_page ?? 20;
 
@@ -195,12 +221,17 @@ export async function getNewsList(params?: GetNewsParams): Promise<NewsListResul
       query.set("per_page", String(params.per_page));
     }
 
-    const path = query.toString() ? `/admin/news?${query.toString()}` : "/admin/news";
+    const path = query.toString()
+      ? `/admin/news?${query.toString()}`
+      : "/admin/news";
     const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error((payload as Record<string, unknown>)?.message as string || "Failed to load news list.");
+      throw new Error(
+        ((payload as Record<string, unknown>)?.message as string) ||
+          "Failed to load news list.",
+      );
     }
 
     return {
@@ -222,7 +253,9 @@ export async function getNewsList(params?: GetNewsParams): Promise<NewsListResul
   }
 }
 
-export async function getNewsById(newsId: string): Promise<NewsApiModel | null> {
+export async function getNewsById(
+  newsId: string,
+): Promise<NewsApiModel | null> {
   try {
     const response = await fetchApi(`/admin/news/${newsId}`);
     const payload = await response.json().catch(() => null);
@@ -232,7 +265,10 @@ export async function getNewsById(newsId: string): Promise<NewsApiModel | null> 
     }
 
     if (!response.ok) {
-      throw new Error((payload as Record<string, unknown>)?.message as string || "Failed to load news item.");
+      throw new Error(
+        ((payload as Record<string, unknown>)?.message as string) ||
+          "Failed to load news item.",
+      );
     }
 
     const item = extractOne(payload);

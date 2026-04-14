@@ -63,6 +63,7 @@ export default async function EditNewsPage({
           language: news.language || "bn",
           read_time_minutes: String(news.read_time_minutes || ""),
           is_featured: news.is_featured ? "1" : "0",
+          show_in_home_left: news.show_in_home_left ? "1" : "0",
           is_breaking: news.is_breaking ? "1" : "0",
           allow_comments: news.allow_comments ? "1" : "0",
           meta_title: news.meta_title,
@@ -70,14 +71,14 @@ export default async function EditNewsPage({
           meta_keywords: news.meta_keywords,
         }}
         headerTitle="Edit News"
-        headerAction={(
+        headerAction={
           <Link href="/admin/news/list">
             <Button variant="secondary">
               <List size={16} />
               News List
             </Button>
           </Link>
-        )}
+        }
       />
     </div>
   );

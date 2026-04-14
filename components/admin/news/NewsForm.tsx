@@ -43,6 +43,7 @@ type NewsFormValues = {
   language: string;
   read_time_minutes: string;
   is_featured: "1" | "0";
+  show_in_home_left: "1" | "0";
   is_breaking: "1" | "0";
   allow_comments: "1" | "0";
   meta_title: string;
@@ -79,6 +80,7 @@ const defaultValues: NewsFormValues = {
   language: "bn",
   read_time_minutes: "5",
   is_featured: "0",
+  show_in_home_left: "0",
   is_breaking: "0",
   allow_comments: "1",
   meta_title: "",
@@ -275,6 +277,7 @@ export function NewsForm({
             ? parseInt(form.read_time_minutes, 10)
             : undefined,
           is_featured: form.is_featured === "1",
+          show_in_home_left: form.show_in_home_left === "1",
           is_breaking: form.is_breaking === "1",
           allow_comments: form.allow_comments === "1",
           meta_title: form.meta_title || undefined,
@@ -617,6 +620,23 @@ export function NewsForm({
                       }
                     />
                   </div>
+                  <div>
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Read Time (minutes)
+                    </p>
+                    <Input
+                      id="read_time_minutes"
+                      type="number"
+                      min={1}
+                      value={form.read_time_minutes}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          read_time_minutes: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -670,19 +690,20 @@ export function NewsForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="read_time_minutes">Read Time (minutes)</Label>
-              <Input
-                id="read_time_minutes"
-                type="number"
-                min={1}
-                value={form.read_time_minutes}
+              <Label htmlFor="allow_comments">Allow Comments</Label>
+              <Select
+                id="allow_comments"
+                value={form.allow_comments}
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
-                    read_time_minutes: event.target.value,
+                    allow_comments: event.target.value as "1" | "0",
                   }))
                 }
-              />
+              >
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </Select>
             </div>
           </div>
 
@@ -705,14 +726,14 @@ export function NewsForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="is_breaking">Breaking News</Label>
+              <Label htmlFor="show_in_home_left">Show in Home Left</Label>
               <Select
-                id="is_breaking"
-                value={form.is_breaking}
+                id="show_in_home_left"
+                value={form.show_in_home_left}
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
-                    is_breaking: event.target.value as "1" | "0",
+                    show_in_home_left: event.target.value as "1" | "0",
                   }))
                 }
               >
@@ -722,14 +743,14 @@ export function NewsForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="allow_comments">Allow Comments</Label>
+              <Label htmlFor="is_breaking">Breaking News</Label>
               <Select
-                id="allow_comments"
-                value={form.allow_comments}
+                id="is_breaking"
+                value={form.is_breaking}
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
-                    allow_comments: event.target.value as "1" | "0",
+                    is_breaking: event.target.value as "1" | "0",
                   }))
                 }
               >
