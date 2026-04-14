@@ -135,18 +135,18 @@ function normalizeNews(value: unknown): NewsApiModel {
     id: asString(item.id),
     title: asString(item.title),
     slug: asString(item.slug),
-    url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
+    url_slug: asString(item.url_slug ?? null),
     excerpt: asString(item.excerpt),
     content: asString(item.content),
-    category_id: asString(item.category_id ?? item.categoryId),
-    sub_category_id: asString(item.sub_category_id ?? item.subCategoryId),
-    author_name: asString(item.author_name ?? item.authorName),
-    source_name: asString(item.source_name ?? item.sourceName),
-    source_url: asString(item.source_url ?? item.sourceUrl),
-    feature_image_id: asString(item.feature_image_id ?? item.featureImageId),
-    feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+    category_id: asString(item.category_id ?? null),
+    sub_category_id: asString(item.sub_category_id ?? null),
+    author_name: asString(item.author_name ?? null),
+    source_name: asString(item.source_name ?? null),
+    source_url: asString(item.source_url ?? null),
+    feature_image_id: asString(item.feature_image_id ?? null),
+    feature_image_url: asString(item.feature_image_url ?? null),
     status: normalizeStatus(item.status),
-    publish_at: asString(item.publish_at ?? item.publishAt),
+    publish_at: asString(item.publish_at ?? null),
     tags: Array.isArray(item.tags)
       ? item.tags.map(String)
       : asString(item.tags)
@@ -154,25 +154,17 @@ function normalizeNews(value: unknown): NewsApiModel {
           .map((t) => t.trim())
           .filter(Boolean),
     language: asString(item.language, "bn"),
-    read_time_minutes: Math.max(
-      0,
-      asNumber(item.read_time_minutes ?? item.readTimeMinutes, 0),
-    ),
-    is_featured: asBoolean(item.is_featured ?? item.isFeatured, false),
-    show_in_home_left: asBoolean(
-      item.show_in_home_left ?? item.show_in_home_left,
-      false,
-    ),
-    is_breaking: asBoolean(item.is_breaking ?? item.isBreaking, false),
-    allow_comments: asBoolean(item.allow_comments ?? item.allowComments, true),
-    meta_title: asString(item.meta_title ?? item.metaTitle),
-    meta_description: asString(item.meta_description ?? item.metaDescription),
-    meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
+    read_time_minutes: Math.max(0, asNumber(item.read_time_minutes ?? 0, 0)),
+    is_featured: asBoolean(item.is_featured ?? false, false),
+    show_in_home_left: asBoolean(item.show_in_home_left ?? false, false),
+    is_breaking: asBoolean(item.is_breaking ?? false, false),
+    allow_comments: asBoolean(item.allow_comments ?? true, true),
+    meta_title: asString(item.meta_title ?? null),
+    meta_description: asString(item.meta_description ?? null),
+    meta_keywords: asString(item.meta_keywords ?? null),
     category: normalizeRelationCategory(item.category),
-    sub_category: normalizeRelationCategory(
-      item.sub_category ?? item.subCategory,
-    ),
-    created_at: asString(item.created_at ?? item.createdAt),
+    sub_category: normalizeRelationCategory(item.sub_category ?? null),
+    created_at: asString(item.created_at ?? null),
   };
 }
 
@@ -217,9 +209,11 @@ function extractOne(payload: unknown): unknown | null {
 
   const candidates = [
     root.resources,
+    resources.main_news,
     resources.news,
     resources.item,
     resources.data,
+    root.main_news,
     root.news,
     root.data,
   ];
@@ -334,7 +328,7 @@ export async function getHeroNews(): Promise<HeroNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
       excerpt: asString(item.excerpt),
       feature_image_url: asString(
         item.feature_image_url ?? item.featureImageUrl,
@@ -375,7 +369,7 @@ export async function getPopularNews(): Promise<PopularNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
       excerpt: asString(item.excerpt),
       feature_image_url: asString(
         item.feature_image_url ?? item.featureImageUrl,
@@ -408,9 +402,11 @@ export async function getLatestNews(): Promise<LatestNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
       excerpt: asString(item.excerpt),
-      feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
       publish_at: asString(item.publish_at ?? item.publishAt),
       category: normalizeRelationCategory(item.category),
     });
@@ -439,9 +435,11 @@ export async function getTabNews(): Promise<TabNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
       excerpt: asString(item.excerpt),
-      feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
       publish_at: asString(item.publish_at ?? item.publishAt),
       category: normalizeRelationCategory(item.category),
     });
@@ -450,5 +448,41 @@ export async function getTabNews(): Promise<TabNewsResponse> {
   } catch (error) {
     console.error("Failed to fetch tab news:", error);
     return [];
+  }
+}
+
+export async function getNewsDetails(urlSlug: string) {
+  try {
+    console.log(urlSlug);
+    const response = await fetchApi(`/news/${urlSlug}`, undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      return null;
+    }
+    const resources = payload?.resources;
+    const main_news = resources?.main_news;
+    const item = extractOne(main_news);
+    if (!item) {
+      return null;
+    }
+
+    const category_news = resources?.category_news;
+    const category_hierarchy = resources?.category_hierarchy;
+
+    return {
+      main_news: normalizeNews(item),
+      category_news: category_news,
+      category_hierarchy: category_hierarchy,
+    };
+  } catch (error) {
+    console.error(`Failed to fetch news details ${urlSlug}:`, error);
+    return null;
   }
 }

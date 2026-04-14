@@ -1,7 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
-import type { HeroNewsResponse, PopularNewsResponse, LatestNewsResponse } from "@/lib/api/news";
+import type {
+  HeroNewsResponse,
+  PopularNewsResponse,
+  LatestNewsResponse,
+} from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
 const HOME_LAYOUT_CONFIG = {
@@ -9,53 +13,6 @@ const HOME_LAYOUT_CONFIG = {
   heroCardCount: 2,
   centerGridCount: 8,
 } as const;
-
-// Data for the Themed Topic Block (Iran-Israel Theme)
-const topicStories = {
-  title: "ইরান-ইসরায়েল সংঘর্ষ",
-  main: {
-    image: "https://picsum.photos/seed/t-main/800/500",
-    title:
-      "হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান, পাল্টা হুঁশিয়ারি ইসরায়েলের",
-    time: "২ ঘণ্টা আগে",
-    slug: "sample-slug",
-    url_slug: "sample-slug",
-  },
-  left: [
-    {
-      image: "https://picsum.photos/seed/tl1/300/200",
-      title: "তেহরানে বড় হামলার পরিকল্পনা করছে ইসরায়েল",
-      time: "৫ মিনিট আগে",
-      slug: "sample-slug",
-      url_slug: "sample-slug",
-    },
-    {
-      image: "https://picsum.photos/seed/tl2/300/200",
-      title: "ইরানি ড্রোন ভূপাতিত করার দাবি মার্কিন বাহিনীর",
-      time: "১৫ মিনিট আগে",
-      slug: "sample-slug",
-      url_slug: "sample-slug",
-    },
-  ],
-  right: [
-    {
-      image: "https://picsum.photos/seed/tr1/300/200",
-      title: "ইসরায়েলে হামলায় ব্যালিস্টিক মিসাইল ব্যবহার করবে ইরান",
-      time: "৩০ মিনিট আগে",
-      slug: "sample-slug",
-      url_slug: "sample-slug",
-    },
-    {
-      image: "https://picsum.photos/seed/tr2/300/200",
-      title: "যেকোনো পরিস্থিতির জন্য প্রস্তুত থাকার নির্দেশ হামাসের",
-      time: "১ ঘণ্টা আগে",
-      slug: "sample-slug",
-      url_slug: "sample-slug",
-    },
-  ],
-};
-
-
 
 // Service Utility Hub Data
 const utilitySections = [
@@ -119,7 +76,11 @@ interface HeroSectionProps {
   latestNews?: LatestNewsResponse;
 }
 
-export function HeroSection({ data, popularNews, latestNews }: HeroSectionProps) {
+export function HeroSection({
+  data,
+  popularNews,
+  latestNews,
+}: HeroSectionProps) {
   console.log(data?.home_left);
 
   const leftStories =
@@ -152,40 +113,45 @@ export function HeroSection({ data, popularNews, latestNews }: HeroSectionProps)
 
   const centerGridStories =
     popularNews && popularNews.length > 0
-      ? popularNews.slice(0, HOME_LAYOUT_CONFIG.centerGridCount).map((item) => ({
-          image: item.feature_image_url,
-          title: item.title,
-          slug: item.slug,
-          url_slug: item.url_slug,
-        }))
-      : [].slice(0, HOME_LAYOUT_CONFIG.centerGridCount).map(s => ({ ...s, slug: "sample-slug", url_slug: "sample-slug" }));
+      ? popularNews
+          .slice(0, HOME_LAYOUT_CONFIG.centerGridCount)
+          .map((item) => ({
+            image: item.feature_image_url,
+            title: item.title,
+            slug: item.slug,
+            url_slug: item.url_slug,
+          }))
+      : []
+          .slice(0, HOME_LAYOUT_CONFIG.centerGridCount)
+          .map((s) => ({ ...s, slug: "sample-slug", url_slug: "sample-slug" }));
 
-  const topicData = latestNews && latestNews.length > 0
-    ? {
-        title: latestNews[0].title,
-        main: {
-          image: latestNews[0].feature_image_url,
+  const topicData =
+    latestNews && latestNews.length > 0
+      ? {
           title: latestNews[0].title,
-          time: formatBengaliRelativeTime(latestNews[0].publish_at),
-          slug: latestNews[0].slug,
-          url_slug: latestNews[0].url_slug
-        },
-        left: latestNews.slice(1, 3).map(item => ({
-          image: item.feature_image_url,
-          title: item.title,
-          time: formatBengaliRelativeTime(item.publish_at),
-          slug: item.slug,
-          url_slug: item.url_slug
-        })),
-        right: latestNews.slice(3, 5).map(item => ({
-          image: item.feature_image_url,
-          title: item.title,
-          time: formatBengaliRelativeTime(item.publish_at),
-          slug: item.slug,
-          url_slug: item.url_slug
-        }))
-      }
-    : topicStories;
+          main: {
+            image: latestNews[0].feature_image_url,
+            title: latestNews[0].title,
+            time: formatBengaliRelativeTime(latestNews[0].publish_at),
+            slug: latestNews[0].slug,
+            url_slug: latestNews[0].url_slug,
+          },
+          left: latestNews.slice(1, 3).map((item) => ({
+            image: item.feature_image_url,
+            title: item.title,
+            time: formatBengaliRelativeTime(item.publish_at),
+            slug: item.slug,
+            url_slug: item.url_slug,
+          })),
+          right: latestNews.slice(3, 5).map((item) => ({
+            image: item.feature_image_url,
+            title: item.title,
+            time: formatBengaliRelativeTime(item.publish_at),
+            slug: item.slug,
+            url_slug: item.url_slug,
+          })),
+        }
+      : [];
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
@@ -287,7 +253,10 @@ export function HeroSection({ data, popularNews, latestNews }: HeroSectionProps)
                 {topicData.title}
               </span>
             </div>
-            <Link href="/news" className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
+            <Link
+              href="/news"
+              className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95"
+            >
               সব খবর
             </Link>
           </div>
@@ -375,7 +344,10 @@ export function HeroSection({ data, popularNews, latestNews }: HeroSectionProps)
               key={i}
               className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
             >
-              <Link href={`/news/${story.url_slug}`} className="flex gap-3 p-2.5">
+              <Link
+                href={`/news/${story.url_slug}`}
+                className="flex gap-3 p-2.5"
+              >
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
                     src={story.image}
