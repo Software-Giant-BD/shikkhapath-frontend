@@ -69,6 +69,8 @@ export type HeroNewsResponse = {
   home_left: HeroNewsItem[];
 };
 
+export type PopularNewsResponse = HeroNewsItem[];
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object"
     ? (value as Record<string, unknown>)
@@ -344,5 +346,38 @@ export async function getHeroNews(): Promise<HeroNewsResponse> {
   } catch (error) {
     console.error("Failed to fetch hero news:", error);
     return { feature_news: [], home_left: [] };
+  }
+}
+
+export async function getPopularNews(): Promise<PopularNewsResponse> {
+  try {
+    const response = await fetchApi("/popular-news", undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const resources = payload?.resources || payload;
+    const items = Array.isArray(resources) ? resources : resources.data || [];
+
+    const normalizeHeroItem = (item: any): HeroNewsItem => ({
+      id: asString(item.id),
+      title: asString(item.title),
+      slug: asString(item.slug),
+      excerpt: asString(item.excerpt),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
+      publish_at: asString(item.publish_at ?? item.publishAt),
+      category: normalizeRelationCategory(item.category),
+    });
+
+    return Array.isArray(items) ? items.map(normalizeHeroItem) : [];
+  } catch (error) {
+    console.error("Failed to fetch popular news:", error);
+    return [];
   }
 }

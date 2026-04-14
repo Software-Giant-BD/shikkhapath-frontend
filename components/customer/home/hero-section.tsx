@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
-import type { HeroNewsResponse } from "@/lib/api/news";
+import type { HeroNewsResponse, PopularNewsResponse } from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
 const HOME_LAYOUT_CONFIG = {
@@ -45,41 +45,7 @@ const topicStories = {
   ],
 };
 
-const centerGridStoriesPool = [
-  {
-    image: "https://picsum.photos/seed/c1/300/200",
-    title: "ঢাকা লিগে এবারও থাকছে না বিদেশি ক্রিকেটার",
-  },
-  {
-    image: "https://picsum.photos/seed/c2/300/200",
-    title:
-      "ভুটান ব্যবসাকে কেন্দ্র করে দুই গ্রুপের সংঘর্ষে মাদরাসাছাত্র গুলিবিদ্ধ",
-  },
-  {
-    image: "https://picsum.photos/seed/c3/300/200",
-    title: "পৌর নির্বাচনে থাকছে না দলীয় প্রতীক",
-  },
-  {
-    image: "https://picsum.photos/seed/c4/300/200",
-    title: "লেবাননের সঙ্গে সরাসরি আলোচনার নির্দেশ দিলেন নেতানিয়াহু",
-  },
-  {
-    image: "https://picsum.photos/seed/c5/300/200",
-    title: "রাজধানীর যে দুই পাশে চালু হল 'কুরেল বাস'",
-  },
-  {
-    image: "https://picsum.photos/seed/c6/300/200",
-    title: "দেশের ১৯ জেলায় ঝড়ের আভাস",
-  },
-  {
-    image: "https://picsum.photos/seed/c7/300/200",
-    title: "পশ্চিম তীরে ইতিহাসে সবচেয়ে বড় বসতি স্থাপনের অনুমোদন দিল ইসরায়েল",
-  },
-  {
-    image: "https://picsum.photos/seed/c8/300/200",
-    title: "সংরক্ষিত নারী আসনে বিএনপির মনোনয়নপত্র বিক্রয় শুরু কাল",
-  },
-];
+
 
 // Service Utility Hub Data
 const utilitySections = [
@@ -139,9 +105,10 @@ const utilitySections = [
 
 interface HeroSectionProps {
   data?: HeroNewsResponse;
+  popularNews?: PopularNewsResponse;
 }
 
-export function HeroSection({ data }: HeroSectionProps) {
+export function HeroSection({ data, popularNews }: HeroSectionProps) {
   console.log(data?.home_left);
 
   const leftStories =
@@ -170,10 +137,14 @@ export function HeroSection({ data }: HeroSectionProps) {
           .slice(0, HOME_LAYOUT_CONFIG.heroCardCount)
           .map((s) => ({ ...s, slug: "sample-slug" }));
 
-  const centerGridStories = centerGridStoriesPool.slice(
-    0,
-    HOME_LAYOUT_CONFIG.centerGridCount,
-  );
+  const centerGridStories =
+    popularNews && popularNews.length > 0
+      ? popularNews.slice(0, HOME_LAYOUT_CONFIG.centerGridCount).map((item) => ({
+          image: item.feature_image_url,
+          title: item.title,
+          slug: item.slug,
+        }))
+      : [].slice(0, HOME_LAYOUT_CONFIG.centerGridCount).map(s => ({ ...s, slug: "sample-slug" }));
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
@@ -363,7 +334,7 @@ export function HeroSection({ data }: HeroSectionProps) {
               key={i}
               className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
             >
-              <Link href="/news/sample-slug" className="flex gap-3 p-2.5">
+              <Link href={`/news/${story.slug}`} className="flex gap-3 p-2.5">
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
                     src={story.image}
