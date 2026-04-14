@@ -12,6 +12,7 @@ interface Props {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
+  const popular_news = [];
   
   // Mock title transformation (slug to Title)
   const categoryName = slug === 'entertainment' ? 'বিনোদন' : 
@@ -40,7 +41,7 @@ export default async function CategoryPage({ params }: Props) {
 
         {/* Sidebar Area */}
         <div className="flex flex-col pt-24">
-           <NewsSidebar />
+           <NewsSidebar popular_news={popular_news} />
         </div>
       </div>
     </main>

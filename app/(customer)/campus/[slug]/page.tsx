@@ -36,6 +36,7 @@ const TypeIcon = ({ type }: { type: string }) => {
 export default async function CampusDetailsPage({ params }: Props) {
   const { slug } = await params;
   const news = await getCampusNewsBySlug(slug);
+  const popular_news =  [];
 
   if (!news) {
     notFound();
@@ -118,7 +119,7 @@ export default async function CampusDetailsPage({ params }: Props) {
         </div>
 
         {/* Sidebar Area */}
-        <NewsSidebar />
+        <NewsSidebar popular_news={popular_news} />
       </div>
 
       {/* Recommended Section */}
