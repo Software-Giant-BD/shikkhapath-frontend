@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
+import type { HeroNewsResponse } from "@/lib/api/news";
+import { formatBengaliRelativeTime } from "@/lib/formatters";
 
 const HOME_LAYOUT_CONFIG = {
   leftNewsCount: 6,
@@ -170,18 +172,40 @@ const utilitySections = [
   },
 ];
 
-export function HeroSection() {
-  const leftStories = leftStoriesPool.slice(0, HOME_LAYOUT_CONFIG.leftNewsCount);
-  const featuredStories = heroStoriesPool.slice(0, HOME_LAYOUT_CONFIG.heroCardCount);
+interface HeroSectionProps {
+  data?: HeroNewsResponse;
+}
+
+export function HeroSection({ data }: HeroSectionProps) {
+  const leftStories = data?.home_left && data.home_left.length > 0 
+    ? data.home_left.map(item => ({
+        image: item.feature_image_url,
+        title: item.title,
+        time: formatBengaliRelativeTime(item.publish_at),
+        slug: item.slug
+      }))
+    : leftStoriesPool.slice(0, HOME_LAYOUT_CONFIG.leftNewsCount).map(s => ({ ...s, slug: "sample-slug" }));
+
+  const featuredStories = data?.feature_news && data.feature_news.length > 0
+    ? data.feature_news.map(item => ({
+        image: item.feature_image_url,
+        category: item.category?.title || "জাতীয়",
+        title: item.title,
+        excerpt: item.excerpt,
+        time: formatBengaliRelativeTime(item.publish_at),
+        slug: item.slug
+      }))
+    : heroStoriesPool.slice(0, HOME_LAYOUT_CONFIG.heroCardCount).map(s => ({ ...s, slug: "sample-slug" }));
+
   const centerGridStories = centerGridStoriesPool.slice(0, HOME_LAYOUT_CONFIG.centerGridCount);
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
       {/* Left Column: Card-styled trend list */}
-      <aside className="hidden flex-col gap-3 lg:flex">
+    <aside className="hidden flex-col gap-3 lg:flex">
         {leftStories.map((story, i) => (
           <article key={i} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-            <Link href="/news/sample-slug" className="flex flex-col gap-2 p-2">
+            <Link href={`/news/${story.slug}`} className="flex flex-col gap-2 p-2">
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
                   src={story.image}
@@ -207,7 +231,7 @@ export function HeroSection() {
         <div className="grid gap-5 sm:grid-cols-2">
           {featuredStories.map((story, i) => (
             <article key={i} className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl">
-              <Link href="/news/sample-slug" className="flex flex-col h-full">
+              <Link href={`/news/${story.slug}`} className="flex flex-col h-full">
                 <div className="relative overflow-hidden shrink-0">
                   <Image
                     src={story.image}

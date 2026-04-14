@@ -50,6 +50,25 @@ export type NewsListResult = {
   pagination: BasePagination;
 };
 
+export type HeroNewsItem = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  feature_image_url: string;
+  publish_at: string;
+  category?: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+};
+
+export type HeroNewsResponse = {
+  feature_news: HeroNewsItem[];
+  home_left: HeroNewsItem[];
+};
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object"
     ? (value as Record<string, unknown>)
@@ -285,5 +304,42 @@ export async function getNewsById(
   } catch (error) {
     console.error(`Failed to fetch news ${newsId}:`, error);
     return null;
+  }
+}
+
+export async function getHeroNews(): Promise<HeroNewsResponse> {
+  try {
+    const response = await fetchApi("/hero-news", undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return { feature_news: [], home_left: [] };
+    }
+
+    const data = payload?.data || payload;
+
+    const normalizeHeroItem = (item: any): HeroNewsItem => ({
+      id: asString(item.id),
+      title: asString(item.title),
+      slug: asString(item.slug),
+      excerpt: asString(item.excerpt),
+      feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+      publish_at: asString(item.publish_at ?? item.publishAt),
+      category: normalizeRelationCategory(item.category),
+    });
+
+    return {
+      feature_news: Array.isArray(data?.feature_news)
+        ? data.feature_news.map(normalizeHeroItem)
+        : [],
+      home_left: Array.isArray(data?.home_left)
+        ? data.home_left.map(normalizeHeroItem)
+        : [],
+    };
+  } catch (error) {
+    console.error("Failed to fetch hero news:", error);
+    return { feature_news: [], home_left: [] };
   }
 }
