@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 
-import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
 import { HeroSection } from "@/components/customer/home/hero-section"
 import { AdBanner } from "@/components/customer/home/ad-banner"
 import { SECTION_DATA, type NewsSectionKey } from "@/components/customer/home/home-content.data"
@@ -71,7 +70,6 @@ export default async function Home() {
           className="my-4"
           heightClass="h-24 sm:h-28"
         />
-        <BreakingTicker />
 
         <HeroSection />
 
