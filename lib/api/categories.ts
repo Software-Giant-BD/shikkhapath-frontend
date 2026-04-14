@@ -27,6 +27,7 @@ export type CategoryApiModel = {
   show_on_home: boolean;
   featured: boolean;
   og_image_url?: string;
+  children_count?: number;
 };
 
 export type GetCategoriesParams = {
@@ -98,6 +99,7 @@ function normalizeCategory(value: unknown): CategoryApiModel {
     show_on_home: asBoolean(item.show_on_home ?? item.showOnHome ?? item.featured, false),
     featured: asBoolean(item.featured, false),
     og_image_url: asString(item.og_image_url ?? item.ogImageUrl) || undefined,
+    children_count: Number(item.children_count ?? 0),
   };
 }
 
@@ -230,5 +232,22 @@ export async function getCategoryById(catId: string): Promise<CategoryApiModel |
   } catch (error) {
     console.error(`Failed to fetch category ${catId}:`, error);
     return null;
+  }
+}
+
+export async function getMenuCategories(): Promise<CategoryApiModel[]> {
+  try {
+    const response = await fetchApi("/menu-categories", { cache: "no-store" }, { includeAuth: false });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error((payload as any)?.message || "Failed to load menu categories.");
+    }
+
+    const items = extractList(payload);
+    return items.map(normalizeCategory);
+  } catch (error) {
+    console.error("Failed to fetch menu categories:", error);
+    return [];
   }
 }

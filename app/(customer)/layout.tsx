@@ -14,31 +14,29 @@ const sourceSerif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: "Shikkhapath | Modern News Portal",
-  description:
-    "A modern, component-based company website for Shikkhapath.",
+  description: "A modern, component-based company website for Shikkhapath.",
 };
 
 import { SiteHeader } from "@/components/customer/common/site-header";
 import { SiteFooter } from "@/components/customer/common/footer-sections";
-import { getCategories } from "@/lib/api/categories";
+import { getMenuCategories } from "@/lib/api/categories";
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const categories = await getCategories();
+  const categories = await getMenuCategories();
+
   const menuCategoryLinks = categories
-    .filter((category) => category.show_in_menu && !category.parent_id)
     .sort((a, b) => Number(a.sort_order || "0") - Number(b.sort_order || "0"))
     .map((category) => ({
       label: category.title,
       href: `/category/${category.slug}`,
+      hasDropdown: (category.children_count ?? 0) > 0,
     }));
 
-  const navLinks = menuCategoryLinks.length > 0
-    ? [{ label: "সর্বশেষ", href: "/category/latest" }, ...menuCategoryLinks]
-    : undefined;
+  const navLinks = menuCategoryLinks;
 
   return (
     <html lang="en">
