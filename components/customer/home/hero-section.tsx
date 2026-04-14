@@ -123,7 +123,7 @@ const utilitySections = [
     name: "💳 Services",
     color: "bg-blue-50 text-blue-600 border-blue-100",
     links: [
-      { label: "Train 🚆", href: "#" },
+      { label: "Train 🚆", href: "/trains" },
     ],
   },
   {
@@ -132,8 +132,7 @@ const utilitySections = [
     links: [
       { label: "Campus", href: "#" },
       { label: "Jobs", href: "#" },
-      { label: "SSC (রুটিন | রেজাল্ট)", href: "#" },
-      { label: "HSC (রুটিন | রেজাল্ট)", href: "#" },
+      { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "#" },
       { label: "Admission", href: "#" },
     ],
   },
