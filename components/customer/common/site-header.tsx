@@ -23,7 +23,7 @@ const defaultNavLinks: SiteNavLink[] = [
   { label: "খেলাধুলা", href: "/category/sports" },
   { label: "অর্থনীতি", href: "/category/economy" },
   { label: "জাতীয়", href: "/category/national", hasDropdown: true },
-  { label: "আরও", href: "/category/national", hasDropdown: true },
+  { label: "আরও", href: "#", hasDropdown: true },
 ];
 
 export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavLink[] }) {
@@ -229,11 +229,11 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
 
             {/* Nav Menu */}
             <nav className={`flex min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto no-scrollbar transition-all duration-300 ${isCompact ? "pl-[140px]" : "pl-0"}`}>
-              {navLinks.map((link) => {
+              {navLinks.map((link, i) => {
                 const isActive = pathname === link.href;
                 return (
                   <Link
-                    key={link.href}
+                    key={`${link.href}-${i}`}
                     href={link.href}
                     className={`relative inline-flex shrink-0 items-center gap-1 px-4 py-3.5 text-[16px] font-semibold transition-all duration-300 ${
                       isActive ? "text-[#b38716]" : "text-slate-900 hover:text-[#b38716]"

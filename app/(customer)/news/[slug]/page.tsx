@@ -1,6 +1,5 @@
 import { NewsArticleContent } from "@/components/customer/news/news-article-content";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
-import { NewsComments } from "@/components/customer/news/news-comments";
 
 interface Props {
   params: {
@@ -15,7 +14,6 @@ export default function NewsDetailsPage({ params }: Props) {
         {/* Main Content Area */}
         <div className="flex flex-col">
           <NewsArticleContent />
-          <NewsComments />
         </div>
 
         {/* Sidebar Area */}

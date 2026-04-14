@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 
-import { BreakingTicker } from "@/components/customer/home/breaking-ticker"
 import { HeroSection } from "@/components/customer/home/hero-section"
 import { AdBanner } from "@/components/customer/home/ad-banner"
 import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
@@ -79,7 +78,6 @@ export default async function Home() {
           className="my-4"
           heightClass="h-24 sm:h-28"
         />
-        <BreakingTicker />
 
         <HeroSection />
 
