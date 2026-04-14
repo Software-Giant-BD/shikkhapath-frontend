@@ -14,6 +14,7 @@ export type NewsApiModel = {
   id: string;
   title: string;
   slug: string;
+  url_slug: string;
   excerpt: string;
   content: string;
   category_id: string;
@@ -54,6 +55,7 @@ export type HeroNewsItem = {
   id: string;
   title: string;
   slug: string;
+  url_slug: string;
   excerpt: string;
   feature_image_url: string;
   publish_at: string;
@@ -131,6 +133,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     id: asString(item.id),
     title: asString(item.title),
     slug: asString(item.slug),
+    url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
     excerpt: asString(item.excerpt),
     content: asString(item.content),
     category_id: asString(item.category_id ?? item.categoryId),
@@ -329,6 +332,7 @@ export async function getHeroNews(): Promise<HeroNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
       excerpt: asString(item.excerpt),
       feature_image_url: asString(
         item.feature_image_url ?? item.featureImageUrl,
@@ -369,6 +373,7 @@ export async function getPopularNews(): Promise<PopularNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
       excerpt: asString(item.excerpt),
       feature_image_url: asString(
         item.feature_image_url ?? item.featureImageUrl,
@@ -401,6 +406,7 @@ export async function getLatestNews(): Promise<LatestNewsResponse> {
       id: asString(item.id),
       title: asString(item.title),
       slug: asString(item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug),
       excerpt: asString(item.excerpt),
       feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
       publish_at: asString(item.publish_at ?? item.publishAt),
