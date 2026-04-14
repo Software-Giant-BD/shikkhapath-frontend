@@ -11,7 +11,7 @@ import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
 } from "@/lib/api/home-page-category-news"
-import { getHeroNews, getPopularNews, getLatestNews } from "@/lib/api/news"
+import { getHeroNews, getPopularNews, getLatestNews, getTabNews } from "@/lib/api/news"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
@@ -31,12 +31,13 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [categories, categoryNewsSections, heroNews, popularNews, latestNews] = await Promise.all([
+  const [categories, categoryNewsSections, heroNews, popularNews, latestNews, tabNews] = await Promise.all([
     getCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
     getPopularNews(),
     getLatestNews(),
+    getTabNews(),
   ])
 
   const categoryNewsBySlug = new Map(
@@ -100,7 +101,7 @@ export default async function Home() {
 
         <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" />
 
-        <TabSectionBlock />
+        <TabSectionBlock data={tabNews} />
 
         {highlightSection ? <NewsSectionBlock sectionData={highlightSection} /> : null}
 
