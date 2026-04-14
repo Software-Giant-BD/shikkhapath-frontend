@@ -11,7 +11,7 @@ import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
 } from "@/lib/api/home-page-category-news"
-import { getHeroNews, getPopularNews } from "@/lib/api/news"
+import { getHeroNews, getPopularNews, getLatestNews } from "@/lib/api/news"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
@@ -31,11 +31,12 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [categories, categoryNewsSections, heroNews, popularNews] = await Promise.all([
+  const [categories, categoryNewsSections, heroNews, popularNews, latestNews] = await Promise.all([
     getCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
     getPopularNews(),
+    getLatestNews(),
   ])
 
   const categoryNewsBySlug = new Map(
@@ -82,7 +83,7 @@ export default async function Home() {
           heightClass="h-24 sm:h-28"
         />
 
-        <HeroSection data={heroNews} popularNews={popularNews} />
+        <HeroSection data={heroNews} popularNews={popularNews} latestNews={latestNews} />
 
         {primarySections.map((section) => (
           <NewsSectionBlock key={section.category.id} sectionData={section} />

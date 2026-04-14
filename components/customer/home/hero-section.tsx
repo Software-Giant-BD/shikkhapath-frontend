@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
-import type { HeroNewsResponse, PopularNewsResponse } from "@/lib/api/news";
+import type { HeroNewsResponse, PopularNewsResponse, LatestNewsResponse } from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
 const HOME_LAYOUT_CONFIG = {
@@ -18,17 +18,20 @@ const topicStories = {
     title:
       "হরমুজ প্রণালীতে নতুন নিয়ম আরোপ করল ইরান, পাল্টা হুঁশিয়ারি ইসরায়েলের",
     time: "২ ঘণ্টা আগে",
+    slug: "sample-slug",
   },
   left: [
     {
       image: "https://picsum.photos/seed/tl1/300/200",
       title: "তেহরানে বড় হামলার পরিকল্পনা করছে ইসরায়েল",
       time: "৫ মিনিট আগে",
+      slug: "sample-slug",
     },
     {
       image: "https://picsum.photos/seed/tl2/300/200",
       title: "ইরানি ড্রোন ভূপাতিত করার দাবি মার্কিন বাহিনীর",
       time: "১৫ মিনিট আগে",
+      slug: "sample-slug",
     },
   ],
   right: [
@@ -36,11 +39,13 @@ const topicStories = {
       image: "https://picsum.photos/seed/tr1/300/200",
       title: "ইসরায়েলে হামলায় ব্যালিস্টিক মিসাইল ব্যবহার করবে ইরান",
       time: "৩০ মিনিট আগে",
+      slug: "sample-slug",
     },
     {
       image: "https://picsum.photos/seed/tr2/300/200",
       title: "যেকোনো পরিস্থিতির জন্য প্রস্তুত থাকার নির্দেশ হামাসের",
       time: "১ ঘণ্টা আগে",
+      slug: "sample-slug",
     },
   ],
 };
@@ -106,9 +111,10 @@ const utilitySections = [
 interface HeroSectionProps {
   data?: HeroNewsResponse;
   popularNews?: PopularNewsResponse;
+  latestNews?: LatestNewsResponse;
 }
 
-export function HeroSection({ data, popularNews }: HeroSectionProps) {
+export function HeroSection({ data, popularNews, latestNews }: HeroSectionProps) {
   console.log(data?.home_left);
 
   const leftStories =
@@ -145,6 +151,30 @@ export function HeroSection({ data, popularNews }: HeroSectionProps) {
           slug: item.slug,
         }))
       : [].slice(0, HOME_LAYOUT_CONFIG.centerGridCount).map(s => ({ ...s, slug: "sample-slug" }));
+
+  const topicData = latestNews && latestNews.length > 0
+    ? {
+        title: latestNews[0].title,
+        main: {
+          image: latestNews[0].feature_image_url,
+          title: latestNews[0].title,
+          time: formatBengaliRelativeTime(latestNews[0].publish_at),
+          slug: latestNews[0].slug
+        },
+        left: latestNews.slice(1, 3).map(item => ({
+          image: item.feature_image_url,
+          title: item.title,
+          time: formatBengaliRelativeTime(item.publish_at),
+          slug: item.slug
+        })),
+        right: latestNews.slice(3, 5).map(item => ({
+          image: item.feature_image_url,
+          title: item.title,
+          time: formatBengaliRelativeTime(item.publish_at),
+          slug: item.slug
+        }))
+      }
+    : topicStories;
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
@@ -242,23 +272,23 @@ export function HeroSection({ data, popularNews }: HeroSectionProps) {
           <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
             <div className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
-              <span className="text-[14px] font-black tracking-tight">
-                {topicStories.title}
+              <span className="text-[14px] font-black tracking-tight line-clamp-1">
+                {topicData.title}
               </span>
             </div>
-            <button className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
+            <Link href="/news" className="rounded bg-red-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-red-700 active:scale-95">
               সব খবর
-            </button>
+            </Link>
           </div>
 
           {/* Block Grid */}
           <div className="grid gap-4 p-4 lg:grid-cols-[1.2fr_2fr_1.2fr]">
             {/* Left Column */}
             <div className="flex flex-col gap-4">
-              {topicStories.left.map((item, i) => (
+              {topicData.left.map((item, i) => (
                 <article key={i} className="group flex flex-col gap-2">
                   <Link
-                    href="/news/sample-slug"
+                    href={`/news/${item.slug}`}
                     className="relative aspect-video overflow-hidden rounded-lg"
                   >
                     <Image
@@ -278,25 +308,25 @@ export function HeroSection({ data, popularNews }: HeroSectionProps) {
             {/* Middle (Main Focus) */}
             <article className="group flex flex-col text-center">
               <Link
-                href="/news/sample-slug"
+                href={`/news/${topicData.main.slug}`}
                 className="flex flex-col h-full gap-4"
               >
                 <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-slate-100">
                   <Image
                     fill
-                    src={topicStories.main.image}
+                    src={topicData.main.image}
                     alt=""
                     className="object-cover group-hover:scale-[1.03] transition-transform duration-700"
                   />
                 </div>
                 <div className="space-y-1.5 px-2">
                   <h3 className="text-[17px] font-black leading-tight text-slate-950 group-hover:text-red-600 transition-colors">
-                    {topicStories.main.title}
+                    {topicData.main.title}
                   </h3>
                   <div className="flex items-center justify-center gap-2 pt-1">
                     <div className="h-1 w-1 rounded-full bg-red-600" />
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      {topicStories.main.time}
+                      {topicData.main.time}
                     </p>
                   </div>
                 </div>
@@ -305,10 +335,10 @@ export function HeroSection({ data, popularNews }: HeroSectionProps) {
 
             {/* Right Column */}
             <div className="flex flex-col gap-4">
-              {topicStories.right.map((item, i) => (
+              {topicData.right.map((item, i) => (
                 <article key={i} className="group flex flex-col gap-2">
                   <Link
-                    href="/news/sample-slug"
+                    href={`/news/${item.slug}`}
                     className="relative aspect-video overflow-hidden rounded-lg"
                   >
                     <Image

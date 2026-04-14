@@ -71,6 +71,8 @@ export type HeroNewsResponse = {
 
 export type PopularNewsResponse = HeroNewsItem[];
 
+export type LatestNewsResponse = HeroNewsItem[];
+
 function asObject(value: unknown): Record<string, unknown> {
   return value && typeof value === "object"
     ? (value as Record<string, unknown>)
@@ -378,6 +380,36 @@ export async function getPopularNews(): Promise<PopularNewsResponse> {
     return Array.isArray(items) ? items.map(normalizeHeroItem) : [];
   } catch (error) {
     console.error("Failed to fetch popular news:", error);
+    return [];
+  }
+}
+
+export async function getLatestNews(): Promise<LatestNewsResponse> {
+  try {
+    const response = await fetchApi("/latest-news", undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const resources = payload?.resources || payload;
+
+    const normalizeHeroItem = (item: any): HeroNewsItem => ({
+      id: asString(item.id),
+      title: asString(item.title),
+      slug: asString(item.slug),
+      excerpt: asString(item.excerpt),
+      feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
+      publish_at: asString(item.publish_at ?? item.publishAt),
+      category: normalizeRelationCategory(item.category),
+    });
+
+    return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
+  } catch (error) {
+    console.error("Failed to fetch latest news:", error);
     return [];
   }
 }
