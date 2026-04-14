@@ -10,11 +10,13 @@ interface Props {
   };
 }
 
-export default function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+  
   // Mock title transformation (slug to Title)
-  const categoryName = params.slug === 'entertainment' ? 'বিনোদন' : 
-                       params.slug === 'education' ? 'শিক্ষাঙ্গন' : 
-                       params.slug === 'admission' ? 'ভর্তি পরীক্ষা' : 'জাতীয় সংবাদ';
+  const categoryName = slug === 'entertainment' ? 'বিনোদন' : 
+                       slug === 'education' ? 'শিক্ষাঙ্গন' : 
+                       slug === 'admission' ? 'ভর্তি পরীক্ষা' : 'জাতীয় সংবাদ';
 
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5 py-4">

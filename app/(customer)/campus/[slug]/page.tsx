@@ -8,13 +8,14 @@ import { NewsSidebar } from "@/components/customer/news/news-sidebar";
 import { SocialShare } from "@/components/customer/news/social-share";
 
 interface Props {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const news = await getCampusNewsBySlug(params.slug);
+  const { slug } = await params;
+  const news = await getCampusNewsBySlug(slug);
   if (!news) return { title: "News Not Found" };
 
   return {
@@ -33,7 +34,8 @@ const TypeIcon = ({ type }: { type: string }) => {
 };
 
 export default async function CampusDetailsPage({ params }: Props) {
-  const news = await getCampusNewsBySlug(params.slug);
+  const { slug } = await params;
+  const news = await getCampusNewsBySlug(slug);
 
   if (!news) {
     notFound();

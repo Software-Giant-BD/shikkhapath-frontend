@@ -29,7 +29,10 @@ const TypeColor = (type: string) => {
 
 export function CampusCard({ news }: CampusCardProps) {
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+    <Link 
+      href={`/campus/${news.slug}`}
+      className="group relative flex flex-col overflow-hidden rounded-[32px] bg-white border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1"
+    >
       {/* Image Section */}
       <div className="relative aspect-[16/10] overflow-hidden">
         <Image
@@ -72,15 +75,12 @@ export function CampusCard({ news }: CampusCardProps) {
         </div>
 
         <div className="mt-auto pt-4 border-t border-slate-50">
-          <Link 
-            href={`/campus/${news.slug}`}
-            className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 transition-all hover:gap-3"
-          >
+          <div className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-blue-600 transition-all group-hover:gap-3">
             Read More
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
