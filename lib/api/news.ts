@@ -475,11 +475,13 @@ export async function getNewsDetails(urlSlug: string) {
 
     const category_news = resources?.category_news;
     const category_hierarchy = resources?.category_hierarchy;
+    const popular_news = resources?.popular_news;
 
     return {
       main_news: normalizeNews(item),
       category_news: category_news,
       category_hierarchy: category_hierarchy,
+      popular_news: popular_news,
     };
   } catch (error) {
     console.error(`Failed to fetch news details ${urlSlug}:`, error);

@@ -29,7 +29,7 @@ export default async function NewsDetailsPage({ params }: Props) {
         </div>
 
         {/* Sidebar Area */}
-        <NewsSidebar />
+        <NewsSidebar popular_news={news_details.popular_news} />
       </div>
 
       {/* Bottom Full-Width Ad or Section */}
