@@ -18,6 +18,10 @@ module.exports = {
         hostname: "images.unsplash.com",
       },
       {
+        protocol: "https",
+        hostname: "api.shikkhapath.com",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "8000",
