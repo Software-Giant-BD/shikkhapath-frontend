@@ -27,11 +27,7 @@ const utilitySections = [
       { label: "Doctor 🏥", href: "/doctors" },
     ],
   },
-  {
-    name: "💳 Services",
-    color: "bg-blue-50 text-blue-600 border-blue-100",
-    links: [{ label: "Train 🚆", href: "/trains" }],
-  },
+
   {
     name: "🎓 Education",
     color: "bg-amber-50 text-amber-600 border-amber-100",
@@ -47,7 +43,6 @@ const utilitySections = [
     color: "bg-green-50 text-green-600 border-green-100",
     links: [
       { label: "University Events", href: "/university-events" },
-      { label: "Medical News", href: "#" },
     ],
   },
   {
