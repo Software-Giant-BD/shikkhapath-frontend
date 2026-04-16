@@ -14,6 +14,17 @@ const HOME_LAYOUT_CONFIG = {
   centerGridCount: 8,
 } as const;
 
+const btnGradients = [
+  "from-orange-400 to-orange-500",
+  "from-teal-400 to-emerald-500",
+  "from-blue-500 to-cyan-500",
+  "from-rose-500 to-pink-500",
+  "from-emerald-500 to-green-600",
+  "from-violet-500 to-purple-500",
+  "from-pink-500 to-rose-400",
+  "from-slate-600 to-slate-800",
+];
+
 // Service Utility Hub Data
 const utilitySections = [
   {
@@ -364,17 +375,28 @@ export function HeroSection({
                     {section.name}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 gap-1 px-1 mb-2">
-                  {section.links.map((link, lIdx) => (
-                    <Link
-                      key={lIdx}
-                      href={link.href}
-                      className="group flex items-center justify-between px-3 py-2 rounded-lg text-[12.5px] font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all border border-transparent hover:border-slate-100"
-                    >
-                      <span className="line-clamp-1">{link.label}</span>
-                      <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-40 transition-all group-hover:translate-x-0.5" />
-                    </Link>
-                  ))}
+                <div className="grid grid-cols-2 gap-2 px-1 mb-3">
+                  {section.links.map((link, lIdx) => {
+                    const gradient = btnGradients[(idx * 5 + lIdx) % btnGradients.length];
+                    return (
+                      <Link
+                        key={lIdx}
+                        href={link.href}
+                        className={`group relative flex items-center justify-between px-2.5 py-2.5 rounded-full overflow-hidden shadow text-white transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-95 bg-gradient-to-r ${gradient}`}
+                      >
+                        {/* Glossy top reflection */}
+                        <div className="absolute top-0 inset-x-0 h-[45%] bg-gradient-to-b from-white/40 to-transparent pointer-events-none rounded-t-full"></div>
+                        
+                        <span className="relative z-10 text-[9px] sm:text-[9.5px] font-black uppercase tracking-wider pl-1 truncate leading-tight drop-shadow-sm flex-1">
+                          {link.label}
+                        </span>
+                        
+                        <div className="relative z-10 shrink-0 bg-white/20 rounded-full p-[2px] ml-1 group-hover:bg-white/30 transition-colors shadow-inner">
+                           <Play className="h-2 w-2 sm:h-2.5 sm:w-2.5 fill-white text-white drop-shadow-sm" />
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
