@@ -1,9 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
+import { type HeroNewsItem } from "@/lib/api/news";
 
-export function NewsSidebar({ popular_news }) {
-  popular_news = popular_news ?? [];
+interface Props {
+  popular_news?: HeroNewsItem[];
+}
+
+export function NewsSidebar({ popular_news = [] }: Props) {
   return (
     <aside className="flex flex-col gap-6">
       {/* Sidebar Ad 1 */}

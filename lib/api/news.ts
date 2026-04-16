@@ -488,3 +488,89 @@ export async function getNewsDetails(urlSlug: string) {
     return null;
   }
 }
+
+export type CategoryPageResponse = {
+  category: {
+    id: string;
+    title: string;
+    slug: string;
+  };
+  sub_categories: Array<{
+    id: string;
+    title: string;
+    slug: string;
+  }>;
+  popular_news: HeroNewsItem[];
+  selective_news: HeroNewsItem[];
+  paginated_news: {
+    data: HeroNewsItem[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+};
+
+export async function getCategoryPageData(
+  slug: string,
+  page: number = 1,
+): Promise<CategoryPageResponse | null> {
+  try {
+    const response = await fetchApi(`/category/${slug}?page=${page}`, undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const resources = payload?.resources || payload;
+
+    const normalizeHeroItem = (item: any): HeroNewsItem => ({
+      id: asString(item.id),
+      title: asString(item.title),
+      slug: asString(item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
+      excerpt: asString(item.excerpt),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
+      publish_at: asString(item.publish_at ?? item.publishAt),
+      category: normalizeRelationCategory(item.category),
+    });
+
+    return {
+      category: {
+        id: asString(resources.category?.id),
+        title: asString(resources.category?.title),
+        slug: asString(resources.category?.slug),
+      },
+      sub_categories: Array.isArray(resources.sub_categories)
+        ? resources.sub_categories.map((c: any) => ({
+            id: asString(c.id),
+            title: asString(c.title),
+            slug: asString(c.slug),
+          }))
+        : [],
+      popular_news: Array.isArray(resources.popular_news)
+        ? resources.popular_news.map(normalizeHeroItem)
+        : [],
+      selective_news: Array.isArray(resources.selective_news)
+        ? resources.selective_news.map(normalizeHeroItem)
+        : [],
+      paginated_news: {
+        data: Array.isArray(resources.paginated_news?.data)
+          ? resources.paginated_news.data.map(normalizeHeroItem)
+          : [],
+        current_page: asNumber(resources.paginated_news?.current_page),
+        last_page: asNumber(resources.paginated_news?.last_page),
+        per_page: asNumber(resources.paginated_news?.per_page),
+        total: asNumber(resources.paginated_news?.total),
+      },
+    };
+  } catch (error) {
+    console.error(`Failed to fetch category data for ${slug}:`, error);
+    return null;
+  }
+}
