@@ -55,7 +55,7 @@ const utilitySections = [
     color: "bg-purple-50 text-purple-600 border-purple-100",
     links: [
       { label: "CGPA Calculator", href: "/cgpa-calculator" },
-      { label: "নামাজের সময়", href: "#" },
+      { label: "নামাজের সময়", href: "/prayer-times" },
     ],
   },
   {
