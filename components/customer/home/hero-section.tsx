@@ -58,16 +58,6 @@ const utilitySections = [
       { label: "নামাজের সময়", href: "/prayer-times" },
     ],
   },
-  {
-    name: "📰 জাতীয় খবর",
-    color: "bg-slate-50 text-slate-600 border-slate-100",
-    links: [
-      { label: "Breaking News", href: "#" },
-      { label: "সর্বশেষ খবর", href: "#" },
-      { label: "দেশের পরিস্থিতি", href: "#" },
-      { label: " রাজনীতি", href: "#" },
-    ],
-  },
 ];
 
 interface HeroSectionProps {
