@@ -119,7 +119,7 @@ export default async function CampusDetailsPage({ params }: Props) {
         </div>
 
         {/* Sidebar Area */}
-        <NewsSidebar popular_news={popular_news} />
+        <NewsSidebar title="জনপ্রিয় খবর" news={popular_news} />
       </div>
 
       {/* Recommended Section */}

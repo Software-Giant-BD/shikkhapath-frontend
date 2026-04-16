@@ -477,11 +477,26 @@ export async function getNewsDetails(urlSlug: string) {
     const category_hierarchy = resources?.category_hierarchy;
     const popular_news = resources?.popular_news;
 
+    const normalizeHeroItem = (item: any): HeroNewsItem => ({
+      id: asString(item.id),
+      title: asString(item.title),
+      slug: asString(item.slug),
+      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
+      excerpt: asString(item.excerpt),
+      feature_image_url: asString(
+        item.feature_image_url ?? item.featureImageUrl,
+      ),
+      publish_at: asString(item.publish_at ?? item.publishAt),
+      category: normalizeRelationCategory(item.category),
+    });
+
     return {
       main_news: normalizeNews(item),
       category_news: category_news,
       category_hierarchy: category_hierarchy,
-      popular_news: popular_news,
+      popular_news: Array.isArray(popular_news)
+        ? popular_news.map(normalizeHeroItem)
+        : [],
     };
   } catch (error) {
     console.error(`Failed to fetch news details ${urlSlug}:`, error);
