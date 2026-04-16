@@ -40,13 +40,7 @@ const utilitySections = [
       { label: "CGPA Calculator", href: "/cgpa-calculator" },
     ],
   },
-  {
-    name: "🛠 Tools",
-    color: "bg-purple-50 text-purple-600 border-purple-100",
-    links: [
-      { label: "নামাজের সময়", href: "/prayer-times" },
-    ],
-  },
+
 ];
 
 interface HeroSectionProps {
