@@ -3,44 +3,66 @@ import { CategoryHero } from "@/components/customer/category/category-hero";
 import { CategoryListGrid } from "@/components/customer/category/category-list-grid";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
 import { AdBanner } from "@/components/customer/home/ad-banner";
+import { SelectedNewsSlider } from "@/components/customer/category/selected-news-slider";
+import { getCategoryPageData } from "@/lib/api/news";
+import { notFound } from "next/navigation";
 
 interface Props {
   params: {
     slug: string;
   };
+  searchParams?: {
+    page?: string;
+  };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  
-  // Mock title transformation (slug to Title)
-  const categoryName = slug === 'entertainment' ? 'বিনোদন' : 
-                       slug === 'education' ? 'শিক্ষাঙ্গন' : 
-                       slug === 'admission' ? 'ভর্তি পরীক্ষা' : 'জাতীয় সংবাদ';
+  const page = parseInt((await searchParams)?.page || "1");
+
+  const data = await getCategoryPageData(slug, page);
+
+  if (!data) {
+    notFound();
+  }
 
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5 py-4">
       {/* Top Banner Ad Site-wide already in layout? No, local to page usually */}
       <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="mb-6 h-[90px]" />
-      
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px] w-full max-w-full overflow-hidden">
         {/* Main Content Area */}
-        <div className="flex flex-col">
-          <CategoryHeader title={categoryName} />
-          
-          <CategoryHero />
-          
-          <CategoryListGrid title="নির্বাচিত" />
+        <div className="flex flex-col min-w-0">
+          <CategoryHeader
+            title={data.category.title}
+            subCategories={data.sub_categories}
+          />
+
+          <CategoryHero news={data.latest_news.slice(0, 5)} />
+
+          <SelectedNewsSlider title="নির্বাচিত" news={data.selective_news} />
+
+          <div className="my-8">
+            <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" />
+          </div>
+
+          <CategoryListGrid
+            title={`আরও ${data.category.title}`}
+            news={data.paginated_news}
+            pagination={data.meta}
+            categorySlug={slug}
+          />
 
           {/* Bottom Ad in main area */}
           <div className="my-8">
-             <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" />
+            <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" />
           </div>
         </div>
 
         {/* Sidebar Area */}
         <div className="flex flex-col pt-24">
-           <NewsSidebar />
+          <NewsSidebar title="সর্বশেষ" news={data.latest_news} />
         </div>
       </div>
     </main>

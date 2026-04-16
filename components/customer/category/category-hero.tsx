@@ -1,52 +1,41 @@
 import Image from "next/image";
 import Link from "next/link";
+import { type HeroNewsItem } from "@/lib/api/news";
+import { formatBengaliRelativeTime } from "@/lib/formatters";
 
-const heroStories = [
-  {
-    image: "https://picsum.photos/seed/cat1/800/600",
-    title: "পরপরের সঙ্গে ব্রিলিয়ান্ট স্মৃতির সম্পর্ক নিয়ে নতুন গুঞ্জন",
-    time: "৫২ মিনিট আগে",
-    isLarge: true,
-  },
-  {
-    image: "https://picsum.photos/seed/cat2/400/300",
-    title: "অক্ষয় 'টয়লেট ২' নিয়ে আশাবাদী: প্রীতি জিনতার সাথে দীর্ঘ দিন পর ফিরছেন",
-    excerpt: "তৈরি হতে চলছে 'টয়লেট: এক প্রেম কথা'র সিক্যুয়েল। অনেক দিন পরে পর্দায় ফিরতে পারেন বলিউডের এই সুপারহিট জুটি।",
-    time: "১ ঘণ্টা আগে",
-  },
-];
+interface Props {
+  news: HeroNewsItem[];
+}
 
-const smallGridStories = [
-  {
-    image: "https://picsum.photos/seed/cs1/300/200",
-    title: "একটি যুদ্ধ আমাদের এক একর করে দিয়েছে",
-    time: "৩ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/cs2/300/200",
-    title: "মৌসুমী- ওমর সানির প্রেম আজও অম্লান: ৩০ বছর আগের অপ্রকাশিত ছবি",
-    time: "৫ ঘণ্টা আগে",
-  },
-  {
-    image: "https://picsum.photos/seed/cs3/300/200",
-    title: "এক বছরের ছোট গায়িকা মাহিনের সাথে প্রেম করছেন গায়ক মাঈনুল",
-    time: "৬ ঘণ্টা আগে",
-  },
-];
+export function CategoryHero({ news }: Props) {
+  if (!news || news.length === 0) return null;
 
-export function CategoryHero() {
-  const main = heroStories[0];
-  const secondary = heroStories[1];
+  const main = news[0];
+  const secondary = news[1];
+  const remaining = news.slice(2, 5);
+  const sideRemaining = news.slice(2, 5); // Just to follow the existing structure if possible
+
+  // The existing structure had:
+  // main (left top)
+  // smallGridStories.slice(0, 2) (left bottom grid)
+  // secondary (right top)
+  // smallGridStories.slice(2) (right bottom list)
+  
+  // Let's adapt:
+  // main: news[0]
+  // left grid: news[3], news[4]
+  // secondary: news[1]
+  // right list: news[2]
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
       {/* Left Highlight */}
       <div className="flex flex-col gap-6">
         <article className="group relative overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-lg">
-          <Link href="/news/sample-slug" className="flex flex-col">
+          <Link href={`/news/${main.url_slug}`} className="flex flex-col">
             <div className="relative aspect-[16/10] overflow-hidden">
               <Image
-                src={main.image}
+                src={main.feature_image_url || "https://picsum.photos/seed/cat1/800/600"}
                 alt={main.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -56,21 +45,21 @@ export function CategoryHero() {
                 <h2 className="text-2xl font-black leading-tight text-white md:text-3xl lg:text-4xl group-hover:text-amber-400 transition-colors">
                   {main.title}
                 </h2>
-                <p className="mt-2 text-xs font-bold text-white/70 uppercase tracking-widest">{main.time}</p>
+                <p className="mt-2 text-xs font-bold text-white/70 uppercase tracking-widest">{formatBengaliRelativeTime(main.publish_at)}</p>
               </div>
             </div>
           </Link>
         </article>
 
         <div className="grid gap-6 sm:grid-cols-2">
-           {smallGridStories.slice(0, 2).map((item, i) => (
-             <article key={i} className="group flex flex-col gap-3">
-               <Link href="/news/sample-slug" className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
-                  <Image fill src={item.image} alt="" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+           {news.slice(3, 5).map((item) => (
+             <article key={item.id} className="group flex flex-col gap-3">
+               <Link href={`/news/${item.url_slug}`} className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
+                  <Image fill src={item.feature_image_url || "https://picsum.photos/seed/cs1/300/200"} alt={item.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
                </Link>
                <div>
                   <h3 className="text-[15px] font-bold leading-snug line-clamp-2 group-hover:text-[#c00000] transition-colors">{item.title}</h3>
-                  <p className="mt-1 text-[10px] font-bold text-slate-400">{item.time}</p>
+                  <p className="mt-1 text-[10px] font-bold text-slate-400">{formatBengaliRelativeTime(item.publish_at)}</p>
                </div>
              </article>
            ))}
@@ -79,26 +68,28 @@ export function CategoryHero() {
 
       {/* Right List Area */}
       <div className="flex flex-col gap-6">
-        <article className="group flex flex-col gap-4 border-b border-slate-100 pb-6">
-          <Link href="/news/sample-slug" className="relative aspect-video overflow-hidden rounded-xl">
-             <Image fill src={secondary.image} alt="" className="object-cover transition-transform duration-500 group-hover:scale-105" />
-          </Link>
-          <div className="space-y-2">
-            <h3 className="text-lg font-bold leading-tight group-hover:text-[#c00000] transition-colors">{secondary.title}</h3>
-            <p className="text-[13px] leading-relaxed text-slate-500 line-clamp-2">{secondary.excerpt}</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{secondary.time}</p>
-          </div>
-        </article>
+        {secondary && (
+          <article className="group flex flex-col gap-4 border-b border-slate-100 pb-6">
+            <Link href={`/news/${secondary.url_slug}`} className="relative aspect-video overflow-hidden rounded-xl">
+               <Image fill src={secondary.feature_image_url || "https://picsum.photos/seed/cat2/400/300"} alt={secondary.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+            </Link>
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold leading-tight group-hover:text-[#c00000] transition-colors">{secondary.title}</h3>
+              <p className="text-[13px] leading-relaxed text-slate-500 line-clamp-2">{secondary.excerpt}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{formatBengaliRelativeTime(secondary.publish_at)}</p>
+            </div>
+          </article>
+        )}
         
         <div className="flex flex-col gap-4">
-           {smallGridStories.slice(2).map((item, i) => (
-             <article key={i} className="group flex gap-3 items-center">
+           {news.slice(2, 3).map((item) => (
+             <article key={item.id} className="group flex gap-3 items-center">
                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
-                  <Image fill src={item.image} alt="" className="object-cover" />
+                  <Image fill src={item.feature_image_url || "https://picsum.photos/seed/cs3/300/200"} alt={item.title} className="object-cover" />
                </div>
                <div>
                   <h4 className="text-[13px] font-bold leading-tight line-clamp-2 group-hover:text-[#c00000]">{item.title}</h4>
-                  <p className="mt-1 text-[10px] font-bold text-slate-400">{item.time}</p>
+                  <p className="mt-1 text-[10px] font-bold text-slate-400">{formatBengaliRelativeTime(item.publish_at)}</p>
                </div>
              </article>
            ))}

@@ -68,18 +68,18 @@ export async function getRoutines(params?: GetFilters): Promise<RoutineListResul
          ...item,
          id: item.id?.toString() || Math.random().toString()
       })),
-      pagination: extractPagination(json),
+      pagination: extractPagination(json, params?.page || 1, params?.limit || 15),
     };
   } catch (err) {
     console.error("API Mock fallback for getRoutines", err);
     // Return mock data if backend isn't ready
     return {
       items: [
-        { id: "r1", exam_type: "SSC", year: 2026, subject_name: "Bangla 1st Paper", exam_date: "2026-03-10", start_time: "10:00", end_time: "13:00", created_at: new Date().toISOString() },
-        { id: "r2", exam_type: "SSC", year: 2026, subject_name: "English 1st Paper", exam_date: "2026-03-12", start_time: "10:00", end_time: "13:00", created_at: new Date().toISOString() },
-        { id: "r3", exam_type: "HSC", year: 2026, subject_name: "Physics 1st Paper", exam_date: "2026-06-15", start_time: "14:00", end_time: "17:00", created_at: new Date().toISOString() },
+        { id: "r1", exam_type: "SSC" as ExamType, year: 2026, subject_name: "Bangla 1st Paper", exam_date: "2026-03-10", start_time: "10:00", end_time: "13:00", created_at: new Date().toISOString() },
+        { id: "r2", exam_type: "SSC" as ExamType, year: 2026, subject_name: "English 1st Paper", exam_date: "2026-03-12", start_time: "10:00", end_time: "13:00", created_at: new Date().toISOString() },
+        { id: "r3", exam_type: "HSC" as ExamType, year: 2026, subject_name: "Physics 1st Paper", exam_date: "2026-06-15", start_time: "14:00", end_time: "17:00", created_at: new Date().toISOString() },
       ].filter(r => (!params?.exam_type || r.exam_type === params.exam_type) && (!params?.year || r.year === params.year)),
-      pagination: { current_page: 1, last_page: 1, per_page: 15, total: 3 },
+      pagination: { currentPage: 1, lastPage: 1, perPage: 15, total: 3 },
     };
   }
 }
@@ -118,7 +118,7 @@ export async function getResults(params?: ResultSearchFilters): Promise<ResultLi
          ...item,
          id: item.id?.toString() || Math.random().toString()
       })),
-      pagination: extractPagination(json),
+      pagination: extractPagination(json, params?.page || 1, params?.limit || 15),
     };
   } catch (err) {
     console.error("API Mock fallback for getResults", err);
@@ -136,7 +136,7 @@ export async function getResults(params?: ResultSearchFilters): Promise<ResultLi
 
     return {
       items: mockData,
-      pagination: { current_page: 1, last_page: 1, per_page: 15, total: mockData.length },
+      pagination: { currentPage: 1, lastPage: 1, perPage: 15, total: mockData.length },
     };
   }
 }

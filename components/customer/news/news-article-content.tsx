@@ -9,11 +9,13 @@ import type { NewsApiModel } from "@/lib/api/news";
 interface NewsArticleContentProps {
   news: NewsApiModel;
   category_news: NewsApiModel[];
+  category_hierarchy: { id: number; name: string; slug: string }[];
 }
 
 export function NewsArticleContent({
   news,
   category_news,
+  category_hierarchy,
 }: NewsArticleContentProps) {
   return (
     <div className="flex flex-col gap-6">
@@ -38,12 +40,20 @@ export function NewsArticleContent({
           হোম
         </Link>
         <ChevronRight className="h-3 w-3" />
-        <Link
-          href={`/category/${news.category?.slug}`}
-          className="text-[#b38716] hover:text-[#b38716]/80 transition-colors"
-        >
-          {news.category?.title || "জাতীয়"}
-        </Link>
+        {category_hierarchy?.map((category, index) => (
+          <>
+            <Link
+              key={category.id}
+              href={`/category/${category.slug}`}
+              className="text-[#b38716] hover:text-[#b38716]/80 transition-colors"
+            >
+              {category.name}
+            </Link>
+            {index < category_hierarchy.length - 1 && (
+              <ChevronRight className="h-3 w-3" />
+            )}
+          </>
+        ))}
       </nav>
 
       {/* Main Headline */}

@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${job.title} at ${job.company_name} | Shikkhapath Jobs`,
-    description: job.excerpt || job.description?.substring(0, 160) || "Apply for this job on Shikkhapath",
+    description: job.description?.substring(0, 160) || "Apply for this job on Shikkhapath",
   };
 }
 
