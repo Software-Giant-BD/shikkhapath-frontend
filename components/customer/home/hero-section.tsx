@@ -36,20 +36,14 @@ const utilitySections = [
       { label: "Jobs", href: "/jobs" },
       { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "/ssc-hsc" },
       { label: "Admission", href: "/admission" },
-    ],
-  },
-  {
-    name: "🏫 Uni & Medical",
-    color: "bg-green-50 text-green-600 border-green-100",
-    links: [
       { label: "University Events", href: "/university-events" },
+      { label: "CGPA Calculator", href: "/cgpa-calculator" },
     ],
   },
   {
     name: "🛠 Tools",
     color: "bg-purple-50 text-purple-600 border-purple-100",
     links: [
-      { label: "CGPA Calculator", href: "/cgpa-calculator" },
       { label: "নামাজের সময়", href: "/prayer-times" },
     ],
   },
