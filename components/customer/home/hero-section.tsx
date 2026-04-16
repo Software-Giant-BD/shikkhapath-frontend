@@ -38,8 +38,8 @@ const utilitySections = [
     color: "bg-amber-50 text-amber-600 border-amber-100",
     links: [
       { label: "Campus", href: "/campus" },
-      { label: "Jobs", href: "#" },
-      { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "#" },
+      { label: "Jobs", href: "/jobs" },
+      { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "/ssc-hsc" },
       { label: "Admission", href: "#" },
     ],
   },
@@ -55,18 +55,8 @@ const utilitySections = [
     name: "🛠 Tools",
     color: "bg-purple-50 text-purple-600 border-purple-100",
     links: [
-      { label: "CGPA Calculator", href: "#" },
-      { label: "নামাজের সময়", href: "#" },
-    ],
-  },
-  {
-    name: "📰 জাতীয় খবর",
-    color: "bg-slate-50 text-slate-600 border-slate-100",
-    links: [
-      { label: "Breaking News", href: "#" },
-      { label: "সর্বশেষ খবর", href: "#" },
-      { label: "দেশের পরিস্থিতি", href: "#" },
-      { label: " রাজনীতি", href: "#" },
+      { label: "CGPA Calculator", href: "/cgpa-calculator" },
+      { label: "নামাজের সময়", href: "/prayer-times" },
     ],
   },
 ];
