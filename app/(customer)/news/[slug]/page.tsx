@@ -25,6 +25,7 @@ export default async function NewsDetailsPage({ params }: Props) {
           <NewsArticleContent
             news={news_details.main_news}
             category_news={news_details.category_news}
+            category_hierarchy={news_details.category_hierarchy}
           />
         </div>
 
