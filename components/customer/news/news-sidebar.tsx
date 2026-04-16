@@ -4,10 +4,11 @@ import { formatBengaliRelativeTime } from "@/lib/formatters";
 import { type HeroNewsItem } from "@/lib/api/news";
 
 interface Props {
-  popular_news?: HeroNewsItem[];
+  title?: string;
+  news?: HeroNewsItem[];
 }
 
-export function NewsSidebar({ popular_news = [] }: Props) {
+export function NewsSidebar({ title = "আরও পড়ুন", news = [] }: Props) {
   return (
     <aside className="flex flex-col gap-6">
       {/* Sidebar Ad 1 */}
@@ -29,33 +30,33 @@ export function NewsSidebar({ popular_news = [] }: Props) {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1.5 pt-1">
           <h3 className="text-lg font-bold tracking-tight text-slate-900">
-            আরও পড়ুন
+            {title}
           </h3>
         </div>
         <div className="flex flex-col gap-3">
-          {popular_news.map((news, i) => (
+          {news.map((item, i) => (
             <article
               key={i}
               className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
             >
               <Link
-                href={`/news/${news.url_slug}`}
+                href={`/news/${item.url_slug}`}
                 className="flex gap-3 p-2.5"
               >
                 <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <Image
-                    src={news.feature_image_url}
-                    alt="{news.title}"
+                    src={item.feature_image_url}
+                    alt={item.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
                 <div className="flex flex-col justify-center gap-1 min-w-0">
                   <h4 className="line-clamp-2 text-[13px] font-bold leading-tight text-slate-800 group-hover:text-[#b38716] transition-colors">
-                    {news.title}
+                    {item.title}
                   </h4>
                   <p className="text-[10px] font-bold text-slate-400">
-                    {formatBengaliRelativeTime(news.publish_at)}
+                    {formatBengaliRelativeTime(item.publish_at)}
                   </p>
                 </div>
               </Link>

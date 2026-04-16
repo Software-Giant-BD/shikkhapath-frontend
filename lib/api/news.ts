@@ -501,9 +501,10 @@ export type CategoryPageResponse = {
     slug: string;
   }>;
   popular_news: HeroNewsItem[];
+  latest_news: HeroNewsItem[];
   selective_news: HeroNewsItem[];
-  paginated_news: {
-    data: HeroNewsItem[];
+  paginated_news: HeroNewsItem[];
+  meta: {
     current_page: number;
     last_page: number;
     per_page: number;
@@ -516,9 +517,13 @@ export async function getCategoryPageData(
   page: number = 1,
 ): Promise<CategoryPageResponse | null> {
   try {
-    const response = await fetchApi(`/category/${slug}?page=${page}`, undefined, {
-      includeAuth: false,
-    });
+    const response = await fetchApi(
+      `/category/${slug}?page=${page}`,
+      undefined,
+      {
+        includeAuth: false,
+      },
+    );
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -556,17 +561,21 @@ export async function getCategoryPageData(
       popular_news: Array.isArray(resources.popular_news)
         ? resources.popular_news.map(normalizeHeroItem)
         : [],
+      latest_news: Array.isArray(resources.latest_news)
+        ? resources.latest_news.map(normalizeHeroItem)
+        : [],
       selective_news: Array.isArray(resources.selective_news)
         ? resources.selective_news.map(normalizeHeroItem)
         : [],
-      paginated_news: {
-        data: Array.isArray(resources.paginated_news?.data)
-          ? resources.paginated_news.data.map(normalizeHeroItem)
-          : [],
-        current_page: asNumber(resources.paginated_news?.current_page),
-        last_page: asNumber(resources.paginated_news?.last_page),
-        per_page: asNumber(resources.paginated_news?.per_page),
-        total: asNumber(resources.paginated_news?.total),
+
+      paginated_news: Array.isArray(resources.paginated_news)
+        ? resources.paginated_news.map(normalizeHeroItem)
+        : [],
+      meta: {
+        current_page: asNumber(resources.meta?.current_page),
+        last_page: asNumber(resources.meta?.last_page),
+        per_page: asNumber(resources.meta?.per_page),
+        total: asNumber(resources.meta?.total),
       },
     };
   } catch (error) {

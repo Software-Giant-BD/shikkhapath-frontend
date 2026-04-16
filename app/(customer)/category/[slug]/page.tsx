@@ -3,6 +3,7 @@ import { CategoryHero } from "@/components/customer/category/category-hero";
 import { CategoryListGrid } from "@/components/customer/category/category-list-grid";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
 import { AdBanner } from "@/components/customer/home/ad-banner";
+import { SelectedNewsSlider } from "@/components/customer/category/selected-news-slider";
 import { getCategoryPageData } from "@/lib/api/news";
 import { notFound } from "next/navigation";
 
@@ -30,17 +31,26 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       {/* Top Banner Ad Site-wide already in layout? No, local to page usually */}
       <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="mb-6 h-[90px]" />
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px] w-full max-w-full overflow-hidden">
         {/* Main Content Area */}
-        <div className="flex flex-col">
-          <CategoryHeader title={data.category.title} subCategories={data.sub_categories} />
+        <div className="flex flex-col min-w-0">
+          <CategoryHeader
+            title={data.category.title}
+            subCategories={data.sub_categories}
+          />
 
-          <CategoryHero news={data.selective_news} />
+          <CategoryHero news={data.latest_news.slice(0, 5)} />
+
+          <SelectedNewsSlider title="নির্বাচিত" news={data.selective_news} />
+
+          <div className="my-8">
+            <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" />
+          </div>
 
           <CategoryListGrid
-            title="আরও খবর"
-            news={data.paginated_news.data}
-            pagination={data.paginated_news}
+            title={`আরও ${data.category.title}`}
+            news={data.paginated_news}
+            pagination={data.meta}
             categorySlug={slug}
           />
 
@@ -52,7 +62,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
         {/* Sidebar Area */}
         <div className="flex flex-col pt-24">
-          <NewsSidebar popular_news={data.popular_news} />
+          <NewsSidebar title="সর্বশেষ" news={data.latest_news} />
         </div>
       </div>
     </main>
