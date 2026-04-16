@@ -28,8 +28,8 @@ export async function loginUser(email: string, password: string) {
     const cookieStore = await cookies();
     cookieStore.set("admin_token", data.resources.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax", // Using lax for better compatibility
+      secure: false, 
+      sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 30, // 30 days
     });

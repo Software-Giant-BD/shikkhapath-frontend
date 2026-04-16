@@ -20,7 +20,7 @@ export default function AddJobPage() {
         headerTitle="Add New Job Circular"
         headerAction={(
           <Link href="/admin/jobs/list">
-            <Button variant="outline" className="gap-2">
+            <Button variant="secondary" className="gap-2">
               <List size={16} />
               Jobs List
             </Button>
