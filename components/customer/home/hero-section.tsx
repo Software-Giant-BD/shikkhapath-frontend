@@ -46,7 +46,7 @@ const utilitySections = [
     name: "🏫 Uni & Medical",
     color: "bg-green-50 text-green-600 border-green-100",
     links: [
-      { label: "University Events", href: "#" },
+      { label: "University Events", href: "/university-events" },
       { label: "Medical News", href: "#" },
     ],
   },
