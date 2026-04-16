@@ -37,7 +37,7 @@ const utilitySections = [
     color: "bg-amber-50 text-amber-600 border-amber-100",
     links: [
       { label: "Campus", href: "/campus" },
-      { label: "Jobs", href: "#" },
+      { label: "Jobs", href: "/jobs" },
       { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "#" },
       { label: "Admission", href: "#" },
     ],
