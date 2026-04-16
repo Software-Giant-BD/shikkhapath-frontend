@@ -39,7 +39,7 @@ const utilitySections = [
       { label: "Campus", href: "/campus" },
       { label: "Jobs", href: "/jobs" },
       { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "/ssc-hsc" },
-      { label: "Admission", href: "#" },
+      { label: "Admission", href: "/admission" },
     ],
   },
   {
