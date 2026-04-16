@@ -151,7 +151,7 @@ export function HeroSection({
             url_slug: item.url_slug,
           })),
         }
-      : [];
+      : null;
 
   return (
     <section className="mt-4 grid gap-5 lg:grid-cols-[240px_1fr_280px]">
@@ -244,6 +244,7 @@ export function HeroSection({
         </div>
 
         {/* Themed Topic Highlight Block (Iran-Israel Theme) */}
+        {topicData && (
         <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
           {/* Block Header */}
           <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
@@ -336,6 +337,7 @@ export function HeroSection({
             </div>
           </div>
         </div>
+        )}
 
         {/* 2-Column Grid of mini-stories (Remaining) */}
         <div className="grid gap-4 sm:grid-cols-2">
