@@ -1,0 +1,11 @@
+app/admin/(dashboard)/jobs/add/page.tsx(23,21): error TS2322: Type '"outline"' is not assignable to type '"secondary" | "ghost" | "primary" | "danger"'.
+app/admin/(dashboard)/jobs/list/page.tsx(87,33): error TS2322: Type '"outline"' is not assignable to type '"secondary" | "ghost" | "primary" | "danger"'.
+app/admin/(dashboard)/jobs/list/page.tsx(91,31): error TS2322: Type '"outline"' is not assignable to type '"secondary" | "ghost" | "primary" | "danger"'.
+lib/api/ssc-hsc.ts(71,19): error TS2554: Expected 3 arguments, but got 1.
+lib/api/ssc-hsc.ts(77,7): error TS2322: Type '{ id: string; exam_type: string; year: number; subject_name: string; exam_date: string; start_time: string; end_time: string; created_at: string; }[]' is not assignable to type 'RoutineModel[]'.
+  Type '{ id: string; exam_type: string; year: number; subject_name: string; exam_date: string; start_time: string; end_time: string; created_at: string; }' is not assignable to type 'RoutineModel'.
+    Types of property 'exam_type' are incompatible.
+      Type 'string' is not assignable to type 'ExamType'.
+lib/api/ssc-hsc.ts(82,21): error TS2561: Object literal may only specify known properties, but 'current_page' does not exist in type 'BasePagination'. Did you mean to write 'currentPage'?
+lib/api/ssc-hsc.ts(121,19): error TS2554: Expected 3 arguments, but got 1.
+lib/api/ssc-hsc.ts(139,21): error TS2561: Object literal may only specify known properties, but 'current_page' does not exist in type 'BasePagination'. Did you mean to write 'currentPage'?
