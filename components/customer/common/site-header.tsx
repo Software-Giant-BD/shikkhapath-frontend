@@ -145,8 +145,11 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
               />
             </Link>
 
-            <div className="flex items-center gap-8 text-sm text-slate-700">
-              <span className="font-semibold text-slate-500">{currentDate || "লোড হচ্ছে..."}</span>
+            <div className="flex items-center gap-6 text-sm text-slate-700">
+              <Link href="/prayer-times" className="hidden sm:flex items-center gap-2 font-bold text-amber-600 hover:text-amber-700 transition-colors bg-amber-50 px-3 py-1.5 rounded-full ring-1 ring-amber-100">
+                🕌 নামাজের সময়
+              </Link>
+              <span className="hidden sm:inline font-semibold text-slate-500">{currentDate || "লোড হচ্ছে..."}</span>
               <div className="flex items-center gap-4 bg-slate-50 rounded-full px-5 py-2 ring-1 ring-slate-100">
                 <button 
                   onClick={() => setIsSearchOpen(!isSearchOpen)}

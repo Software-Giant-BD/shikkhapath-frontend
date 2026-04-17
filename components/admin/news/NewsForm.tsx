@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { getCategoriesByParentAction } from "@/lib/api/category-actions";
+import { getCitiesAction } from "@/lib/api/location-actions";
 import { createNewsAction, updateNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
 import {
@@ -31,10 +32,15 @@ type NewsFormValues = {
   excerpt: string;
   content: string;
   category_id: string;
-  sub_category_id: string;
+          sub_category_id: string;
   author_name: string;
   source_name: string;
   source_url: string;
+  type: "standard" | "video" | "campus";
+  youtube_video_url: string;
+  institution_type: string;
+  institution_name: string;
+  location: string;
   feature_image_id: string;
   feature_image_url: string;
   status: "draft" | "published" | "scheduled";
@@ -72,6 +78,11 @@ const defaultValues: NewsFormValues = {
   author_name: "",
   source_name: "",
   source_url: "",
+  type: "standard",
+  youtube_video_url: "",
+  institution_type: "",
+  institution_name: "",
+  location: "",
   feature_image_id: "",
   feature_image_url: "",
   status: "draft",
@@ -145,6 +156,8 @@ export function NewsForm({
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [cityOptions, setCityOptions] = useState<Array<{ id: string; name: string }>>([]);
+  const [isCityLoading, setIsCityLoading] = useState(false);
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const router = useRouter();
@@ -194,6 +207,18 @@ export function NewsForm({
       active = false;
     };
   }, [form.category_id]);
+
+  useEffect(() => {
+    async function loadCities() {
+      setIsCityLoading(true);
+      const result = await getCitiesAction();
+      if (result.ok) {
+        setCityOptions(result.items);
+      }
+      setIsCityLoading(false);
+    }
+    void loadCities();
+  }, []);
 
 
 
@@ -296,7 +321,12 @@ export function NewsForm({
           author_name: form.author_name || undefined,
           source_name: form.source_name || undefined,
           source_url: form.source_url || undefined,
-          feature_image_id: form.feature_image_id
+          type: form.type,
+          youtube_video_url: form.type === "video" ? form.youtube_video_url : undefined,
+          institution_type: form.type === "campus" ? form.institution_type : undefined,
+          institution_name: form.type === "campus" ? form.institution_name : undefined,
+          location: form.type === "campus" ? form.location : undefined,
+          feature_image_id: (form.type === "standard" || form.type === "campus") && form.feature_image_id
             ? parseInt(form.feature_image_id, 10)
             : undefined,
           status: form.status,
@@ -306,9 +336,9 @@ export function NewsForm({
           read_time_minutes: form.read_time_minutes
             ? parseInt(form.read_time_minutes, 10)
             : undefined,
-          is_featured: form.is_featured === "1",
-          show_in_home_left: form.show_in_home_left === "1",
-          is_breaking: form.is_breaking === "1",
+          is_featured: form.type === "standard" ? form.is_featured === "1" : false,
+          show_in_home_left: form.type === "standard" ? form.show_in_home_left === "1" : false,
+          is_breaking: form.type === "standard" ? form.is_breaking === "1" : false,
           allow_comments: form.allow_comments === "1",
           meta_title: form.meta_title || undefined,
           meta_description: form.meta_description || undefined,
@@ -489,11 +519,34 @@ export function NewsForm({
         <CardContent className="space-y-5 rounded-b-xl bg-slate-50/50">
           <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
             <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-slate-800">
-                  Feature Media
-                </h3>
-              </div>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="news_type">News Type</Label>
+                  <Select
+                    id="news_type"
+                    value={form.type}
+                    onChange={(event) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        type: event.target.value as "standard" | "video" | "campus",
+                      }))
+                    }
+                  >
+                    <option value="standard">Standard Article</option>
+                    <option value="campus">Campus News</option>
+                    <option value="video">Video News</option>
+                  </Select>
+                </div>
+
+                <div className="h-px w-full bg-slate-100 my-4" />
+
+                {(form.type === "standard" || form.type === "campus") && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-semibold text-slate-800">
+                        Feature Media
+                      </h3>
+                    </div>
 
               <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
                 {form.feature_image_url ? (
@@ -562,11 +615,95 @@ export function NewsForm({
                 </div>
               </div>
 
-              {featureImageError ? (
-                <p className="text-xs font-medium text-rose-600">
-                  {featureImageError}
-                </p>
-              ) : null}
+                  {featureImageError ? (
+                    <p className="text-xs font-medium text-rose-600">
+                      {featureImageError}
+                    </p>
+                  ) : null}
+                </>
+                )}
+
+                {form.type === "campus" && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="institution_type" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Institution Type
+                      </Label>
+                      <Select
+                        id="institution_type"
+                        value={form.institution_type}
+                        onChange={(event) =>
+                          setForm((prev) => ({ ...prev, institution_type: event.target.value }))
+                        }
+                      >
+                        <option value="">Select Type</option>
+                        <option value="university">University</option>
+                        <option value="college">College</option>
+                        <option value="school">School</option>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="institution_name" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Institution Name
+                      </Label>
+                      <Input
+                        id="institution_name"
+                        value={form.institution_name}
+                        placeholder="e.g. Dhaka University"
+                        onChange={(event) =>
+                          setForm((prev) => ({ ...prev, institution_name: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="location" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        Location
+                      </Label>
+                      <Select
+                        id="location"
+                        value={form.location}
+                        onChange={(event) =>
+                          setForm((prev) => ({ ...prev, location: event.target.value }))
+                        }
+                        disabled={isCityLoading}
+                      >
+                        <option value="">
+                          {isCityLoading ? "Loading cities..." : "Select City"}
+                        </option>
+                        {cityOptions.map((city) => (
+                          <option key={city.id} value={city.id}>
+                            {city.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
+                {form.type === "video" && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-slate-800">
+                      YouTube Video URL
+                    </h3>
+                  </div>
+                  <Input
+                    id="youtube_video_url"
+                    type="url"
+                    value={form.youtube_video_url}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, youtube_video_url: event.target.value }))
+                    }
+                  />
+                  {fieldErrors.youtube_video_url ? (
+                    <p className="text-xs font-medium text-rose-600">
+                      {fieldErrors.youtube_video_url[0]}
+                    </p>
+                  ) : null}
+                </div>
+              )}
+              </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5">
@@ -737,58 +874,60 @@ export function NewsForm({
             </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="is_featured">Featured Story</Label>
-              <Select
-                id="is_featured"
-                value={form.is_featured}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    is_featured: event.target.value as "1" | "0",
-                  }))
-                }
-              >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </Select>
-            </div>
+          {form.type === "standard" && (
+            <div className="grid gap-5 md:grid-cols-3">
+              <div className="space-y-2">
+                <Label htmlFor="is_featured">Featured Story</Label>
+                <Select
+                  id="is_featured"
+                  value={form.is_featured}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      is_featured: event.target.value as "1" | "0",
+                    }))
+                  }
+                >
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="show_in_home_left">Show in Home Left</Label>
-              <Select
-                id="show_in_home_left"
-                value={form.show_in_home_left}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    show_in_home_left: event.target.value as "1" | "0",
-                  }))
-                }
-              >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="show_in_home_left">Show in Home Left</Label>
+                <Select
+                  id="show_in_home_left"
+                  value={form.show_in_home_left}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      show_in_home_left: event.target.value as "1" | "0",
+                    }))
+                  }
+                >
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="is_breaking">Breaking News</Label>
-              <Select
-                id="is_breaking"
-                value={form.is_breaking}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    is_breaking: event.target.value as "1" | "0",
-                  }))
-                }
-              >
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </Select>
+              <div className="space-y-2">
+                <Label htmlFor="is_breaking">Breaking News</Label>
+                <Select
+                  id="is_breaking"
+                  value={form.is_breaking}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      is_breaking: event.target.value as "1" | "0",
+                    }))
+                  }
+                >
+                  <option value="1">Yes</option>
+                  <option value="0">No</option>
+                </Select>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="tags">Tags</Label>
