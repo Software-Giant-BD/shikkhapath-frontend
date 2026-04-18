@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Calculator, RefreshCw, GraduationCap, School } from "lucide-react";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 type CalcMode = "uni" | "sschsc";
 
@@ -214,6 +215,10 @@ export function CgpaCalculatorClient() {
             ? "Calculate your university semester CGPA. Add subjects, select your earned grades and specify credits to get an instant standard 4.0 scale result."
             : "Calculate your SSC or HSC GPA instantly. Type in your subject marks (0-100) and we'll automatically map the grade out of a 5.0 scale."}
         </p>
+      </div>
+
+      <div className="mb-8 max-w-4xl mx-auto">
+        <ServiceAdBanner label="[ Academic Tools Sponsor ]" />
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">

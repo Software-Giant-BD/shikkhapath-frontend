@@ -6,6 +6,7 @@ import type { JobApiModel, GetJobsParams } from "@/lib/api/jobs";
 import { fetchJobsAction } from "@/lib/api/jobs-actions";
 import { JobCard } from "./job-card";
 import { CandidateCard, type Candidate } from "./candidate-card";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 const MOCK_CANDIDATES: Candidate[] = [
   {
@@ -101,6 +102,10 @@ export function JobsPageClient() {
         <p className="text-slate-500 font-medium md:text-lg">
           Whether you are looking for your dream job, or searching for top talent to join your team - you are in the right place.
         </p>
+      </div>
+
+      <div className="mb-8 max-w-4xl mx-auto">
+        <ServiceAdBanner label="[ Career Platform Sponsor ]" />
       </div>
 
       {/* Tabs */}
