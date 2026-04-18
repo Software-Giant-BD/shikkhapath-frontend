@@ -43,11 +43,9 @@ const utilitySections = [
     name: "🎓 Education",
     color: "bg-amber-50 text-amber-600 border-amber-100",
     links: [
-      { label: "Campus", href: "/campus" },
       { label: "Jobs", href: "/jobs" },
       { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "/ssc-hsc" },
       { label: "Admission", href: "/admission" },
-      { label: "University Events", href: "/university-events" },
       { label: "CGPA Calculator", href: "/cgpa-calculator" },
     ],
   },
