@@ -52,7 +52,7 @@ export function PrayerTimesClient() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=Bangladesh`);
+        const response = await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${city}&country=Bangladesh&method=1`);
         const data = await response.json();
         
         if (data.code === 200) {

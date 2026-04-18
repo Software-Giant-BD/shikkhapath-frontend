@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Phone, MapPin, Calendar, Clock, Stethoscope, Hospital, Activity } from "lucide-react";
+import { ShieldCheck, MapPin, Calendar, Clock, Stethoscope, Hospital, Activity } from "lucide-react";
 import { type DoctorProfile } from "@/lib/api/doctors";
 import {
   Card,
@@ -18,10 +18,6 @@ interface DoctorCardProps {
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
-  const handleCall = () => {
-    window.location.href = `tel:${doctor.phone_number}`;
-  };
-
   return (
     <Card className="ase-fade-up group relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 border-slate-100">
       <div className="relative aspect-square w-full overflow-hidden sm:aspect-[4/3]">
@@ -53,6 +49,10 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
               <Hospital className="h-3.5 w-3.5 text-blue-500" />
               {doctor.hospital}
+            </div>
+            <div className="mt-2 flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded shadow-sm border border-emerald-100">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              BM&DC Registered Verified
             </div>
           </div>
         </div>
@@ -87,17 +87,9 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex-none grid grid-cols-2 gap-2 p-4 pt-0">
+      <CardFooter className="flex-none w-full p-4 pt-0">
         <Button 
-          onClick={handleCall}
-          variant="outline"
-          className="rounded-xl border-blue-100 font-bold text-blue-600 transition-all hover:bg-blue-50 active:scale-95"
-        >
-          <Phone className="mr-2 h-4 w-4" />
-          Call
-        </Button>
-        <Button 
-          className="rounded-xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98"
+          className="w-full rounded-xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98"
         >
           <Calendar className="mr-2 h-4 w-4" />
           Book
