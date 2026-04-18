@@ -66,7 +66,7 @@ export function AdmissionClient() {
           <University className="h-8 w-8 text-indigo-600" />
         </div>
         <h1 className="text-3xl font-black md:text-5xl text-slate-900 tracking-tight mb-4">
-          Admission <span className="text-indigo-600">News & Intel</span>
+          Admission <span className="text-indigo-600">News</span>
         </h1>
         <p className="text-slate-500 font-medium max-w-2xl mx-auto">
           Get the latest university circulars. Enter your HSC and SSC statistics to automatically discover which universities you are eligible to apply for.
