@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { ShieldCheck, MapPin, Calendar, Clock, Stethoscope, Hospital, Activity } from "lucide-react";
+import { ShieldCheck, MapPin, Calendar, Clock, Stethoscope, Hospital, Activity, X } from "lucide-react";
 import { type DoctorProfile } from "@/lib/api/doctors";
 import {
   Card,
@@ -18,8 +19,22 @@ interface DoctorCardProps {
 }
 
 export function DoctorCard({ doctor }: DoctorCardProps) {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Simulate booking API call
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsSuccess(false);
+      setIsBookingOpen(false);
+    }, 2000);
+  };
+
   return (
-    <Card className="ase-fade-up group relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 border-slate-100">
+    <>
+      <Card className="ase-fade-up group relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 border-slate-100">
       <div className="relative aspect-square w-full overflow-hidden sm:aspect-[4/3]">
         {doctor.image_url ? (
           <Image
@@ -89,6 +104,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
 
       <CardFooter className="flex-none w-full p-4 pt-0">
         <Button 
+          onClick={() => setIsBookingOpen(true)}
           className="w-full rounded-xl bg-blue-600 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98"
         >
           <Calendar className="mr-2 h-4 w-4" />
@@ -96,5 +112,76 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         </Button>
       </CardFooter>
     </Card>
+
+    {isBookingOpen && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-in fade-in zoom-in duration-200">
+          <button 
+            type="button"
+            onClick={() => setIsBookingOpen(false)}
+            className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-1.5 rounded-full transition-colors z-10"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          
+          {isSuccess ? (
+            <div className="p-10 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="h-20 w-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2">
+                <ShieldCheck className="h-10 w-10" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-2xl font-black text-slate-800">Booking Successful!</h3>
+                <p className="text-slate-500 font-medium">Your appointment request has been submitted.</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="bg-slate-50 border-b border-slate-100 p-6 text-center">
+                <h3 className="text-xl font-black text-slate-800 tracking-tight">Book Appointment</h3>
+                <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-wider">{doctor.name}</p>
+              </div>
+              <form onSubmit={handleBookingSubmit} className="p-6 space-y-4">
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Full Name</label>
+                    <input required type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400" placeholder="Enter your name" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Age</label>
+                      <input required type="number" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400" placeholder="Years" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Phone Number</label>
+                      <input required type="tel" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400" placeholder="01XXX" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Address (City/Area)</label>
+                    <input required type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400" placeholder="Your address" />
+                  </div>
+                </div>
+
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3.5 flex gap-3 items-start mt-2">
+                  <div className="h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <Clock className="h-3 w-3" />
+                  </div>
+                  <p className="text-xs font-bold text-amber-800 leading-snug pt-0.5">
+                    Payment is not required right now, but it will be made mandatory for booking in the future.
+                  </p>
+                </div>
+
+                <div className="pt-2">
+                  <Button type="submit" className="w-full rounded-xl bg-blue-600 py-6 text-base font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98">
+                    Confirm Booking Without Payment
+                  </Button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
