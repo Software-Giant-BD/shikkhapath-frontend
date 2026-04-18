@@ -47,9 +47,9 @@ const utilitySections = [
       { label: "SSC/HSC (রুটিন | রেজাল্ট)", href: "/ssc-hsc" },
       { label: "Admission", href: "/admission" },
       { label: "CGPA Calculator", href: "/cgpa-calculator" },
+      { label: "✍️ Write & Submit Article", href: "/submit-article" },
     ],
   },
-
 ];
 
 interface HeroSectionProps {
