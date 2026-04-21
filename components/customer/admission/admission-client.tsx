@@ -5,6 +5,7 @@ import { University, Search, CheckCircle2, XCircle, ChevronRight, CalendarDays, 
 import { fetchAdmissionsAction } from "@/lib/api/admission-actions";
 import type { AdmissionUniversityModel } from "@/lib/api/admission";
 import Link from "next/link";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 interface FilterState {
   hasChecked: boolean;
@@ -66,11 +67,15 @@ export function AdmissionClient() {
           <University className="h-8 w-8 text-indigo-600" />
         </div>
         <h1 className="text-3xl font-black md:text-5xl text-slate-900 tracking-tight mb-4">
-          Admission <span className="text-indigo-600">News & Intel</span>
+          Admission <span className="text-indigo-600">News</span>
         </h1>
         <p className="text-slate-500 font-medium max-w-2xl mx-auto">
           Get the latest university circulars. Enter your HSC and SSC statistics to automatically discover which universities you are eligible to apply for.
         </p>
+      </div>
+
+      <div className="mb-8 max-w-4xl mx-auto">
+        <ServiceAdBanner label="[ Admission Directory Sponsor ]" />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">

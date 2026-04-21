@@ -47,7 +47,7 @@ export async function getUniversityEvents(params?: EventFilters): Promise<EventL
     const json = await res.json();
     return {
       items: json.data || [],
-      pagination: extractPagination(json, params?.page || 1, params?.limit || 15),
+      pagination: extractPagination(json),
     };
   } catch (err) {
     console.error("API Mock fallback for getUniversityEvents", err);
@@ -133,7 +133,7 @@ export async function getUniversityEvents(params?: EventFilters): Promise<EventL
 
     return {
       items: mockData,
-      pagination: { currentPage: 1, lastPage: 1, perPage: 15, total: mockData.length },
+      pagination: { current_page: 1, last_page: 1, per_page: 15, total: mockData.length },
     };
   }
 }

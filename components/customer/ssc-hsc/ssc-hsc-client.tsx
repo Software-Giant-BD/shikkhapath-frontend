@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Search, GraduationCap, CalendarDays, FileText, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
 import { fetchRoutinesAction, fetchResultsAction } from "@/lib/api/ssc-hsc-actions";
 import type { RoutineModel, ResultModel } from "@/lib/api/ssc-hsc";
+import { ServiceAdBanner } from "../common/service-ad-banner";
 
 type TabMode = "routine" | "result";
 
@@ -118,6 +119,10 @@ export function SscHscClient() {
             Find Result
           </button>
         </div>
+      </div>
+
+      <div className="mb-8 max-w-4xl mx-auto">
+        <ServiceAdBanner label="[ Education Portal Sponsor ]" />
       </div>
 
       {/* Routine Tab Interface */}
