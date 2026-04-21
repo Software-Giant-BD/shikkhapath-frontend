@@ -48,7 +48,7 @@ export async function getAdmissions(params?: GetFilters): Promise<AdmissionListR
          ...item,
          id: item.id?.toString() || Math.random().toString()
       })),
-      pagination: extractPagination(json),
+      pagination: extractPagination(json, params?.page || 1, params?.limit || 15),
     };
   } catch (err) {
     console.error("API Mock fallback for getAdmissions", err);
@@ -184,7 +184,7 @@ export async function getAdmissions(params?: GetFilters): Promise<AdmissionListR
 
     return {
       items: mockData,
-      pagination: { current_page: 1, last_page: 1, per_page: 15, total: mockData.length },
+      pagination: { currentPage: 1, lastPage: 1, perPage: 15, total: mockData.length },
     };
   }
 }
