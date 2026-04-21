@@ -310,7 +310,47 @@ export function WebsiteMenuCategoryManager({ allCategories, initialMenuCategorie
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1.8fr)]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.8fr)_320px]">
+        <div className="space-y-4">
+          {orderedCategories.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-indigo-200 bg-white px-8 py-16 text-center shadow-[0_14px_44px_rgba(99,102,241,0.08)]">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500">
+                <LayoutTemplate size={24} />
+              </div>
+              <h3 className="mt-4 text-lg font-bold text-slate-900">No menu categories yet</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                Add categories from the right panel to build the website menu.
+              </p>
+            </div>
+          ) : (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
+                <div className="space-y-4">
+                  {orderedCategories.map((category, index) => (
+                    <SortableCategoryCard
+                      key={category.id}
+                      category={category}
+                      index={index}
+                      total={orderedCategories.length}
+                      onMove={moveItem}
+                      onRemove={removeItem}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+
+          <div className="flex min-h-32 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-6 py-10 text-center shadow-[0_10px_30px_rgba(15,23,42,0.03)]">
+            <div>
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                <Plus size={18} />
+              </div>
+              <p className="mt-3 text-sm font-medium text-slate-400">Add more categories from the right panel</p>
+            </div>
+          </div>
+        </div>
+
         <div className="space-y-4">
           <Card className="rounded-3xl border border-indigo-100/70 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)]">
             <CardHeader className="pb-4">
@@ -366,46 +406,6 @@ export function WebsiteMenuCategoryManager({ allCategories, initialMenuCategorie
               {submitMessage}
             </div>
           ) : null}
-        </div>
-
-        <div className="space-y-4">
-          {orderedCategories.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-indigo-200 bg-white px-8 py-16 text-center shadow-[0_14px_44px_rgba(99,102,241,0.08)]">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-500">
-                <LayoutTemplate size={24} />
-              </div>
-              <h3 className="mt-4 text-lg font-bold text-slate-900">No menu categories yet</h3>
-              <p className="mt-2 text-sm text-slate-500">
-                Add categories from the left panel to build the website menu.
-              </p>
-            </div>
-          ) : (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
-                <div className="space-y-4">
-                  {orderedCategories.map((category, index) => (
-                    <SortableCategoryCard
-                      key={category.id}
-                      category={category}
-                      index={index}
-                      total={orderedCategories.length}
-                      onMove={moveItem}
-                      onRemove={removeItem}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          )}
-
-          <div className="flex min-h-32 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-6 py-10 text-center shadow-[0_10px_30px_rgba(15,23,42,0.03)]">
-            <div>
-              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                <Plus size={18} />
-              </div>
-              <p className="mt-3 text-sm font-medium text-slate-400">Add more categories from the left panel</p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
