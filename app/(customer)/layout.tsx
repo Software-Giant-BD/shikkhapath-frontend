@@ -15,6 +15,10 @@ const sourceSerif = Source_Serif_4({
 export const metadata: Metadata = {
   title: "Shikkhapath | Modern News Portal",
   description: "A modern, component-based company website for Shikkhapath.",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 import { SiteHeader } from "@/components/customer/common/site-header";
