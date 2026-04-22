@@ -15,7 +15,7 @@ export type NewsApiModel = {
   title: string;
   slug: string;
   url_slug: string;
-  type: "standard" | "video" | "campus";
+  type: "standard" | "video" ;
   youtube_video_url: string;
   institution_type: string;
   institution_name: string;
@@ -143,7 +143,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     title: asString(item.title),
     slug: asString(item.slug),
     url_slug: asString(item.url_slug ?? null),
-    type: (asString(item.type, "standard") as "standard" | "video" | "campus"),
+    type: (asString(item.type, "standard") as "standard" | "video" ),
     youtube_video_url: asString(item.youtube_video_url ?? null),
     institution_type: asString(item.institution_type ?? null),
     institution_name: asString(item.institution_name ?? null),

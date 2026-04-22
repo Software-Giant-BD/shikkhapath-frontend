@@ -32,11 +32,11 @@ type NewsFormValues = {
   excerpt: string;
   content: string;
   category_id: string;
-          sub_category_id: string;
+  sub_category_id: string;
   author_name: string;
   source_name: string;
   source_url: string;
-  type: "standard" | "video" | "campus";
+  type: "standard" | "video";
   youtube_video_url: string;
   institution_type: string;
   institution_name: string;
@@ -124,7 +124,7 @@ function buildInitialFormValues(
     ...initialValues,
     tags: Array.isArray(initialValues.tags)
       ? initialValues.tags
-      : (initialValues.tags as unknown as string ?? "")
+      : ((initialValues.tags as unknown as string) ?? "")
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
@@ -156,7 +156,9 @@ export function NewsForm({
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
-  const [cityOptions, setCityOptions] = useState<Array<{ id: string; name: string }>>([]);
+  const [cityOptions, setCityOptions] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [isCityLoading, setIsCityLoading] = useState(false);
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -219,8 +221,6 @@ export function NewsForm({
     }
     void loadCities();
   }, []);
-
-
 
   const addTag = (tag: string) => {
     const trimmed = tag.trim().replace(/,/g, "");
@@ -322,13 +322,14 @@ export function NewsForm({
           source_name: form.source_name || undefined,
           source_url: form.source_url || undefined,
           type: form.type,
-          youtube_video_url: form.type === "video" ? form.youtube_video_url : undefined,
-          institution_type: form.type === "campus" ? form.institution_type : undefined,
-          institution_name: form.type === "campus" ? form.institution_name : undefined,
-          location: form.type === "campus" ? form.location : undefined,
-          feature_image_id: (form.type === "standard" || form.type === "campus") && form.feature_image_id
-            ? parseInt(form.feature_image_id, 10)
-            : undefined,
+          youtube_video_url:
+            form.type === "video" ? form.youtube_video_url : undefined,
+         
+          feature_image_id:
+            (form.type === "standard" ) &&
+            form.feature_image_id
+              ? parseInt(form.feature_image_id, 10)
+              : undefined,
           status: form.status,
           publish_at: form.publish_at || undefined,
           tags: form.tags,
@@ -336,9 +337,12 @@ export function NewsForm({
           read_time_minutes: form.read_time_minutes
             ? parseInt(form.read_time_minutes, 10)
             : undefined,
-          is_featured: form.type === "standard" ? form.is_featured === "1" : false,
-          show_in_home_left: form.type === "standard" ? form.show_in_home_left === "1" : false,
-          is_breaking: form.type === "standard" ? form.is_breaking === "1" : false,
+          is_featured:
+            form.type === "standard" ? form.is_featured === "1" : false,
+          show_in_home_left:
+            form.type === "standard" ? form.show_in_home_left === "1" : false,
+          is_breaking:
+            form.type === "standard" ? form.is_breaking === "1" : false,
           allow_comments: form.allow_comments === "1",
           meta_title: form.meta_title || undefined,
           meta_description: form.meta_description || undefined,
@@ -528,19 +532,18 @@ export function NewsForm({
                     onChange={(event) =>
                       setForm((prev) => ({
                         ...prev,
-                        type: event.target.value as "standard" | "video" | "campus",
+                        type: event.target.value as "standard" | "video",
                       }))
                     }
                   >
                     <option value="standard">Standard Article</option>
-                    <option value="campus">Campus News</option>
                     <option value="video">Video News</option>
                   </Select>
                 </div>
 
                 <div className="h-px w-full bg-slate-100 my-4" />
 
-                {(form.type === "standard" || form.type === "campus") && (
+                {(form.type === "standard" ) && (
                   <>
                     <div className="flex items-center justify-between">
                       <h3 className="text-base font-semibold text-slate-800">
@@ -548,161 +551,113 @@ export function NewsForm({
                       </h3>
                     </div>
 
-              <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-                {form.feature_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={form.feature_image_url}
-                    alt="Selected feature"
-                    className="h-56 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-56 flex-col items-center justify-center gap-2 bg-linear-to-br from-slate-100 via-slate-50 to-slate-100 text-slate-500">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
-                      <ImageIcon size={18} />
-                    </span>
-                    <p className="text-sm font-medium">
-                      No feature image selected
-                    </p>
-                  </div>
-                )}
+                    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                      {form.feature_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={form.feature_image_url}
+                          alt="Selected feature"
+                          className="h-56 w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-56 flex-col items-center justify-center gap-2 bg-linear-to-br from-slate-100 via-slate-50 to-slate-100 text-slate-500">
+                          <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
+                            <ImageIcon size={18} />
+                          </span>
+                          <p className="text-sm font-medium">
+                            No feature image selected
+                          </p>
+                        </div>
+                      )}
 
-                <div className="absolute inset-x-3 bottom-3 rounded-lg border border-white/35 bg-white/88 p-2 backdrop-blur-sm">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <input
-                      ref={featureImageInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(event) => {
-                        void onUploadFeatureImage(event);
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="h-9"
-                      onClick={() => featureImageInputRef.current?.click()}
-                      disabled={isUploadingFeatureImage}
-                    >
-                      {isUploadingFeatureImage ? "Uploading..." : "Upload"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="h-9"
-                      onClick={() => setIsMediaPickerOpen(true)}
-                    >
-                      Media Center
-                    </Button>
-                    {form.feature_image_url ? (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="h-9 text-rose-600 hover:text-rose-700"
-                        onClick={() =>
-                          setForm((prev) => ({
-                            ...prev,
-                            feature_image_url: "",
-                            feature_image_id: "",
-                          }))
-                        }
-                      >
-                        Remove
-                      </Button>
+                      <div className="absolute inset-x-3 bottom-3 rounded-lg border border-white/35 bg-white/88 p-2 backdrop-blur-sm">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <input
+                            ref={featureImageInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              void onUploadFeatureImage(event);
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="h-9"
+                            onClick={() =>
+                              featureImageInputRef.current?.click()
+                            }
+                            disabled={isUploadingFeatureImage}
+                          >
+                            {isUploadingFeatureImage
+                              ? "Uploading..."
+                              : "Upload"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="h-9"
+                            onClick={() => setIsMediaPickerOpen(true)}
+                          >
+                            Media Center
+                          </Button>
+                          {form.feature_image_url ? (
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="h-9 text-rose-600 hover:text-rose-700"
+                              onClick={() =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  feature_image_url: "",
+                                  feature_image_id: "",
+                                }))
+                              }
+                            >
+                              Remove
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+
+                    {featureImageError ? (
+                      <p className="text-xs font-medium text-rose-600">
+                        {featureImageError}
+                      </p>
                     ) : null}
-                  </div>
-                </div>
-              </div>
-
-                  {featureImageError ? (
-                    <p className="text-xs font-medium text-rose-600">
-                      {featureImageError}
-                    </p>
-                  ) : null}
-                </>
+                  </>
                 )}
 
-                {form.type === "campus" && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="institution_type" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Institution Type
-                      </Label>
-                      <Select
-                        id="institution_type"
-                        value={form.institution_type}
-                        onChange={(event) =>
-                          setForm((prev) => ({ ...prev, institution_type: event.target.value }))
-                        }
-                      >
-                        <option value="">Select Type</option>
-                        <option value="university">University</option>
-                        <option value="college">College</option>
-                        <option value="school">School</option>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="institution_name" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Institution Name
-                      </Label>
-                      <Input
-                        id="institution_name"
-                        value={form.institution_name}
-                        placeholder="e.g. Dhaka University"
-                        onChange={(event) =>
-                          setForm((prev) => ({ ...prev, institution_name: event.target.value }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <Label htmlFor="location" className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Location
-                      </Label>
-                      <Select
-                        id="location"
-                        value={form.location}
-                        onChange={(event) =>
-                          setForm((prev) => ({ ...prev, location: event.target.value }))
-                        }
-                        disabled={isCityLoading}
-                      >
-                        <option value="">
-                          {isCityLoading ? "Loading cities..." : "Select City"}
-                        </option>
-                        {cityOptions.map((city) => (
-                          <option key={city.id} value={city.id}>
-                            {city.name}
-                          </option>
-                        ))}
-                      </Select>
-                    </div>
-                  </div>
-                )}
+              
 
                 {form.type === "video" && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-slate-800">
-                      YouTube Video URL
-                    </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-semibold text-slate-800">
+                        YouTube Video URL
+                      </h3>
+                    </div>
+                    <Input
+                      id="youtube_video_url"
+                      type="url"
+                      value={form.youtube_video_url}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          youtube_video_url: event.target.value,
+                        }))
+                      }
+                    />
+                    {fieldErrors.youtube_video_url ? (
+                      <p className="text-xs font-medium text-rose-600">
+                        {fieldErrors.youtube_video_url[0]}
+                      </p>
+                    ) : null}
                   </div>
-                  <Input
-                    id="youtube_video_url"
-                    type="url"
-                    value={form.youtube_video_url}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, youtube_video_url: event.target.value }))
-                    }
-                  />
-                  {fieldErrors.youtube_video_url ? (
-                    <p className="text-xs font-medium text-rose-600">
-                      {fieldErrors.youtube_video_url[0]}
-                    </p>
-                  ) : null}
-                </div>
-              )}
+                )}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
