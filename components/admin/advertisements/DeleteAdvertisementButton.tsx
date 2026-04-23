@@ -27,7 +27,7 @@ export function DeleteAdvertisementButton({ id }: { id: number | string }) {
   };
 
   return (
-    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={loading}>
+    <Button variant="danger" size="sm" onClick={handleDelete} disabled={loading}>
       <Trash2 size={14} />
       {loading ? "Deleting..." : "Delete"}
     </Button>
