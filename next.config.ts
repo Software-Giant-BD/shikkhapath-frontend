@@ -22,6 +22,10 @@ module.exports = {
         hostname: "api.shikkhapath.com",
       },
       {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "8000",

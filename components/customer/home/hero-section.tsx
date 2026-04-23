@@ -151,7 +151,7 @@ export function HeroSection({
             >
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
-                  src={story.image}
+                  src={story.image || "/placeholder-news.jpg"}
                   alt=""
                   width={240}
                   height={160}
@@ -183,7 +183,7 @@ export function HeroSection({
               >
                 <div className="relative overflow-hidden shrink-0">
                   <Image
-                    src={story.image}
+                    src={story.image || "/placeholder-news.jpg"}
                     alt={story.title}
                     width={500}
                     height={300}
@@ -257,7 +257,7 @@ export function HeroSection({
                     >
                       <Image
                         fill
-                        src={item.image}
+                        src={item.image || "/placeholder-news.jpg"}
                         alt=""
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -278,7 +278,7 @@ export function HeroSection({
                   <div className="relative aspect-16/10 overflow-hidden rounded-xl border border-slate-100">
                     <Image
                       fill
-                      src={topicData.main.image}
+                      src={topicData.main.image || "/placeholder-news.jpg"}
                       alt=""
                       className="object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     />
@@ -307,7 +307,7 @@ export function HeroSection({
                     >
                       <Image
                         fill
-                        src={item.image}
+                        src={item.image || "/placeholder-news.jpg"}
                         alt=""
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -335,7 +335,7 @@ export function HeroSection({
               >
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
-                    src={story.image}
+                    src={story.image || "/placeholder-news.jpg"}
                     alt=""
                     width={150}
                     height={100}
