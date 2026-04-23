@@ -1,3 +1,4 @@
+import { AdBanner } from "@/components/customer/home/ad-banner";
 import { PoliceServiceClient } from "@/components/customer/police-stations/police-client";
 import { Metadata } from "next";
 
@@ -7,5 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function PoliceServicePage() {
-  return <PoliceServiceClient />;
+  return (
+    <>
+      <div className="container mx-auto px-4 pt-8">
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="Police Ad" />
+      </div>
+      <PoliceServiceClient />
+    </>
+  );
 }

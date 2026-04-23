@@ -1,3 +1,4 @@
+import { AdBanner } from "@/components/customer/home/ad-banner";
 import { Metadata } from "next";
 import { AdmissionClient } from "@/components/customer/admission/admission-client";
 
@@ -7,5 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function AdmissionPage() {
-  return <AdmissionClient />;
+  return (
+    <>
+      <div className="container mx-auto px-4 pt-8">
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="Admission Ad" />
+      </div>
+      <AdmissionClient />
+    </>
+  );
 }

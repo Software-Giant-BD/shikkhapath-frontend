@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { AmbulancePageClient } from "@/components/customer/ambulance/ambulance-page-client";
+import { AdBanner } from "@/components/customer/home/ad-banner";
 
 export const metadata: Metadata = {
   title: "Ambulance Service | Shikkhapath",
@@ -8,5 +9,12 @@ export const metadata: Metadata = {
 };
 
 export default function AmbulancePage() {
-  return <AmbulancePageClient />;
+  return (
+    <>
+      <div className="container mx-auto px-4 pt-8">
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="Ambulance Ad" />
+      </div>
+      <AmbulancePageClient />
+    </>
+  );
 }
