@@ -3,14 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { fetchApi } from "./common";
 
-export async function createAdvertisementAction(payload: object) {
+export async function createAdvertisementAction(payload: object | FormData) {
   try {
+    const isFormData = payload instanceof FormData;
     const response = await fetchApi("/admin/advertisements", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      headers: isFormData ? {} : { "Content-Type": "application/json" },
+      body: isFormData ? payload : JSON.stringify(payload),
     });
 
     if (!response.ok) {
@@ -24,14 +23,17 @@ export async function createAdvertisementAction(payload: object) {
   }
 }
 
-export async function updateAdvertisementAction(id: string | number, payload: object) {
+export async function updateAdvertisementAction(id: string | number, payload: object | FormData) {
   try {
+    const isFormData = payload instanceof FormData;
+    if (isFormData) {
+      payload.append("_method", "PUT");
+    }
+    
     const response = await fetchApi(`/admin/advertisements/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      method: isFormData ? "POST" : "PUT",
+      headers: isFormData ? {} : { "Content-Type": "application/json" },
+      body: isFormData ? payload : JSON.stringify(payload),
     });
 
     if (!response.ok) {
