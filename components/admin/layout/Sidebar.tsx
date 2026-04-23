@@ -59,6 +59,14 @@ const menuConfig: MenuSection[] = [
           { title: "Add News", href: "/admin/news/add" },
         ],
       },
+      {
+        title: "Advertisements",
+        icon: Newspaper,
+        subItems: [
+          { title: "Advertisement List", href: "/admin/advertisements/list" },
+          { title: "Add Advertisement", href: "/admin/advertisements/add" },
+        ],
+      },
       { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
   },

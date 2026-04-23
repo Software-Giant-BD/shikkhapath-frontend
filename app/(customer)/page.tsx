@@ -83,6 +83,8 @@ export default async function Home() {
           label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
           className="my-4"
           heightClass="h-24 sm:h-28"
+          category="Home page"
+          placement="Top Banner Ad"
         />
 
         <HeroSection data={heroNews} popularNews={popularNews} latestNews={latestNews} />
@@ -100,7 +102,7 @@ export default async function Home() {
           </div>
         ) : null}
 
-        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" />
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" category="Home page" placement="In-Feed / Mid-Page Ad" />
 
         <TabSectionBlock data={tabNews} />
 

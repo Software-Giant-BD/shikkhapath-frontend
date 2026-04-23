@@ -1,3 +1,4 @@
+import { AdBanner } from "@/components/customer/home/ad-banner";
 import { Metadata } from "next";
 import { CgpaCalculatorClient } from "@/components/customer/tools/cgpa-calculator-client";
 
@@ -8,5 +9,12 @@ export const metadata: Metadata = {
 };
 
 export default function CgpaCalculatorPage() {
-  return <CgpaCalculatorClient />;
+  return (
+    <>
+      <div className="container mx-auto px-4 pt-8">
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="CGPA Calculator Ad" />
+      </div>
+      <CgpaCalculatorClient />
+    </>
+  );
 }
