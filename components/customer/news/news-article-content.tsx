@@ -76,17 +76,34 @@ export function NewsArticleContent({
         <SocialShare />
       </div>
 
-      {/* Featured Image */}
+      {/* Featured Image or Video */}
       <figure className="group flex flex-col gap-3">
-        <div className="overflow-hidden rounded-2xl border border-slate-100 shadow-lg">
-          <Image
-            src={news.feature_image_url || "/No_Image_Available.jpg"}
-            alt={news.title}
-            width={1200}
-            height={800}
-            className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
-          />
-        </div>
+        {news.type === "video" && news.youtube_video_url ? (
+          <div className="overflow-hidden rounded-2xl border border-slate-100 shadow-lg bg-black">
+             <iframe
+              className="aspect-video w-full"
+              src={`https://www.youtube.com/embed/${
+                news.youtube_video_url.match(
+                  /(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((?:\w|-){11})(?:[\?&].*)?$/
+                )?.[1]
+              }`}
+              title={news.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-2xl border border-slate-100 shadow-lg">
+            <Image
+              src={news.feature_image_url || "/No_Image_Available.jpg"}
+              alt={news.title}
+              width={1200}
+              height={800}
+              className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
+            />
+          </div>
+        )}
         <figcaption className="flex items-center gap-2 px-1 text-sm font-medium text-slate-500 leading-relaxed border-l-4 border-[#c79a1d] pl-4">
           <MessageCircle className="h-4 w-4 shrink-0" />
           {news.title}

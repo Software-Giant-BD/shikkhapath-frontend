@@ -15,7 +15,7 @@ export type NewsApiModel = {
   title: string;
   slug: string;
   url_slug: string;
-  type: "standard" | "video" | "campus";
+  type: "standard" | "video";
   youtube_video_url: string;
   institution_type: string;
   institution_name: string;
@@ -28,7 +28,7 @@ export type NewsApiModel = {
   source_name: string;
   source_url: string;
   feature_image_id: string;
-  feature_image_url: string;
+  feature_image_url: string | null;
   status: NewsStatus;
   publish_at: string;
   tags: string[];
@@ -63,8 +63,9 @@ export type HeroNewsItem = {
   url_slug: string;
   type?: "standard" | "video";
   youtube_video_url?: string;
+  youtube_thumbnail_url?: string;
   excerpt: string;
-  feature_image_url: string;
+  feature_image_url: string | null;
   publish_at: string;
   category?: {
     id: string;
@@ -143,7 +144,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     title: asString(item.title),
     slug: asString(item.slug),
     url_slug: asString(item.url_slug ?? null),
-    type: (asString(item.type, "standard") as "standard" | "video" | "campus"),
+    type: asString(item.type, "standard") as "standard" | "video",
     youtube_video_url: asString(item.youtube_video_url ?? null),
     institution_type: asString(item.institution_type ?? null),
     institution_name: asString(item.institution_name ?? null),
@@ -156,7 +157,8 @@ function normalizeNews(value: unknown): NewsApiModel {
     source_name: asString(item.source_name ?? null),
     source_url: asString(item.source_url ?? null),
     feature_image_id: asString(item.feature_image_id ?? null),
-    feature_image_url: asString(item.feature_image_url ?? null),
+    feature_image_url:
+      asString(item.feature_image_url ?? item.featureImageUrl) || null,
     status: normalizeStatus(item.status),
     publish_at: asString(item.publish_at ?? null),
     tags: Array.isArray(item.tags)
@@ -177,6 +179,25 @@ function normalizeNews(value: unknown): NewsApiModel {
     category: normalizeRelationCategory(item.category),
     sub_category: normalizeRelationCategory(item.sub_category ?? null),
     created_at: asString(item.created_at ?? null),
+  };
+}
+
+function normalizeHeroItem(item: any): HeroNewsItem {
+  return {
+    id: asString(item.id),
+    title: asString(item.title),
+    slug: asString(item.slug),
+    url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
+    type: asString(item.type, "standard") as "standard" | "video",
+    youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
+    youtube_thumbnail_url: asString(
+      item.youtube_thumbnail_url ?? item.youtubeThumbnailUrl,
+    ),
+    excerpt: asString(item.excerpt),
+    feature_image_url:
+      asString(item.feature_image_url ?? item.featureImageUrl) || null,
+    publish_at: asString(item.publish_at ?? item.publishAt),
+    category: normalizeRelationCategory(item.category),
   };
 }
 
@@ -333,23 +354,7 @@ export async function getHeroNews(): Promise<HeroNewsResponse> {
       return { feature_news: [], home_left: [] };
     }
 
-    console.log(payload);
     const data = payload?.resources || payload;
-
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
 
     return {
       feature_news: Array.isArray(data?.feature_news)
@@ -379,21 +384,6 @@ export async function getPopularNews(): Promise<PopularNewsResponse> {
     const resources = payload?.resources || payload;
     const items = Array.isArray(resources) ? resources : resources.data || [];
 
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
-
     return Array.isArray(items) ? items.map(normalizeHeroItem) : [];
   } catch (error) {
     console.error("Failed to fetch popular news:", error);
@@ -413,21 +403,6 @@ export async function getLatestNews(): Promise<LatestNewsResponse> {
     }
 
     const resources = payload?.resources || payload;
-
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
 
     return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
   } catch (error) {
@@ -449,21 +424,6 @@ export async function getTabNews(): Promise<TabNewsResponse> {
 
     const resources = payload?.resources || payload;
 
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
-
     return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
   } catch (error) {
     console.error("Failed to fetch tab news:", error);
@@ -471,9 +431,28 @@ export async function getTabNews(): Promise<TabNewsResponse> {
   }
 }
 
+export async function getVideoNews(): Promise<HeroNewsItem[]> {
+  try {
+    const response = await fetchApi("/video-news", undefined, {
+      includeAuth: false,
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const resources = payload?.resources || payload;
+
+    return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
+  } catch (error) {
+    console.error("Failed to fetch video news:", error);
+    return [];
+  }
+}
+
 export async function getNewsDetails(urlSlug: string) {
   try {
-    console.log(urlSlug);
     const response = await fetchApi(`/news/${urlSlug}`, undefined, {
       includeAuth: false,
     });
@@ -496,21 +475,6 @@ export async function getNewsDetails(urlSlug: string) {
     const category_news = resources?.category_news;
     const category_hierarchy = resources?.category_hierarchy;
     const popular_news = resources?.popular_news;
-
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
 
     return {
       main_news: normalizeNews(item),
@@ -569,21 +533,6 @@ export async function getCategoryPageData(
 
     const resources = payload?.resources || payload;
 
-    const normalizeHeroItem = (item: any): HeroNewsItem => ({
-      id: asString(item.id),
-      title: asString(item.title),
-      slug: asString(item.slug),
-      url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
-      type: (asString(item.type, "standard") as "standard" | "video"),
-      youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
-      excerpt: asString(item.excerpt),
-      feature_image_url: asString(
-        item.feature_image_url ?? item.featureImageUrl,
-      ),
-      publish_at: asString(item.publish_at ?? item.publishAt),
-      category: normalizeRelationCategory(item.category),
-    });
-
     return {
       category: {
         id: asString(resources.category?.id),
@@ -606,7 +555,6 @@ export async function getCategoryPageData(
       selective_news: Array.isArray(resources.selective_news)
         ? resources.selective_news.map(normalizeHeroItem)
         : [],
-
       paginated_news: Array.isArray(resources.paginated_news)
         ? resources.paginated_news.map(normalizeHeroItem)
         : [],

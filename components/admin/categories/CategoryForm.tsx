@@ -24,7 +24,6 @@ export type CategoryFormValues = {
   meta_title: string;
   meta_description: string;
   meta_keywords: string;
-  show_in_menu: boolean;
   featured: boolean;
 };
 
@@ -61,7 +60,6 @@ const defaultValues: CategoryFormValues = {
   meta_title: "",
   meta_description: "",
   meta_keywords: "",
-  show_in_menu: true,
   featured: false,
 };
 
@@ -135,7 +133,6 @@ export function CategoryForm({
         payload.append("meta_title", form.meta_title);
         payload.append("meta_description", form.meta_description);
         payload.append("meta_keywords", form.meta_keywords);
-        payload.append("show_in_menu", form.show_in_menu ? "1" : "0");
         payload.append("featured", form.featured ? "1" : "0");
 
         if (ogImageFile) {
@@ -342,20 +339,6 @@ export function CategoryForm({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Display Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <Checkbox
-                checked={form.show_in_menu}
-                onCheckedChange={(value) => setForm((prev) => ({ ...prev, show_in_menu: Boolean(value) }))}
-            />
-            Show this category in website menu
-          </label>
-        </CardContent>
-      </Card>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         {submitError ? <p className="w-full text-sm text-red-600 sm:order-first">{submitError}</p> : null}

@@ -11,7 +11,7 @@ import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
 } from "@/lib/api/home-page-category-news"
-import { getHeroNews, getPopularNews, getLatestNews, getTabNews } from "@/lib/api/news"
+import { getHeroNews, getPopularNews, getLatestNews, getTabNews, getVideoNews } from "@/lib/api/news"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
@@ -31,13 +31,14 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [categories, categoryNewsSections, heroNews, popularNews, latestNews, tabNews] = await Promise.all([
+  const [categories, categoryNewsSections, heroNews, popularNews, latestNews, tabNews, videoNews] = await Promise.all([
     getCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
     getPopularNews(),
     getLatestNews(),
     getTabNews(),
+    getVideoNews(),
   ])
 
   const categoryNewsBySlug = new Map(
@@ -90,7 +91,7 @@ export default async function Home() {
           <NewsSectionBlock key={section.category.id} sectionData={section} />
         ))}
 
-        <VideoSectionBlock />
+        <VideoSectionBlock data={videoNews} />
         {topCompactSections.length > 0 ? (
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             {topCompactSections.map((section) => (
