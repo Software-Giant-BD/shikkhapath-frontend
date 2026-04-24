@@ -84,6 +84,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
             className="w-[300px] mx-auto"
             heightClass="h-[250px]"
+            fit="contain"
             category="category page"
             placement="Right Sidebar Ad"
           />

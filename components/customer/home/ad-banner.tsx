@@ -6,11 +6,19 @@ interface Props {
   label: string
   className?: string
   heightClass?: string
+  fit?: "cover" | "contain"
   category?: string
   placement?: string
 }
 
-export async function AdBanner({ label, className = "my-4", heightClass = "h-16", category, placement }: Props) {
+export async function AdBanner({
+  label,
+  className = "my-4",
+  heightClass = "h-16",
+  fit = "cover",
+  category,
+  placement,
+}: Props) {
   let ad = null;
   
   if (category && placement) {
@@ -24,12 +32,16 @@ export async function AdBanner({ label, className = "my-4", heightClass = "h-16"
 
   if (ad && ad.image) {
     const content = (
-      <div className={`relative w-full ${heightClass} overflow-hidden rounded-xl bg-white`}>
+      <div
+        className={`relative w-full ${heightClass} overflow-hidden rounded-xl ${
+          fit === "contain" ? "bg-slate-50" : "bg-white"
+        }`}
+      >
         <Image
           src={ad.image}
           alt={ad.name}
           fill
-          className="object-contain"
+          className={fit === "contain" ? "object-contain" : "object-cover"}
           sizes="(min-width: 1024px) 300px, 100vw"
         />
         <div className="absolute right-2 top-2 rounded bg-black/50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-white backdrop-blur-sm">
