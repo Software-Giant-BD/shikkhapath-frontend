@@ -24,7 +24,6 @@ export const metadata: Metadata = {
 import { SiteHeader } from "@/components/customer/common/site-header";
 import { SiteFooter } from "@/components/customer/common/footer-sections";
 import { getMenuCategories } from "@/lib/api/categories";
-import { AdBanner } from "@/components/customer/home/ad-banner";
 
 export default async function RootLayout({
   children,
@@ -46,14 +45,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${sora.variable} ${sourceSerif.variable} antialiased`}>
-        <div className="min-h-screen bg-[#f5f5f5] text-slate-900 pb-16">
+        <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
           <SiteHeader navLinks={navLinks} />
           {children}
           <SiteFooter />
-          
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] backdrop-blur flex justify-center items-center">
-            <AdBanner category="category page" placement="Anchor / Sticky Footer Ad" className="w-full max-w-screen-2xl h-[60px]" label="" heightClass="h-[60px]" />
-          </div>
         </div>
       </body>
     </html>
