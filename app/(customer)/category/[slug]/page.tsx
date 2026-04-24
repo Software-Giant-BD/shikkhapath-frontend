@@ -29,7 +29,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   return (
     <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5 py-4">
       {/* Top Banner Ad Site-wide already in layout? No, local to page usually */}
-      <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="mb-6 h-[90px]" category="category page" placement="Header Ad" />
+      <AdBanner
+        label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+        className="mb-6"
+        heightClass="h-24 sm:h-28"
+        category="category page"
+        placement="Header Ad"
+      />
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px] w-full max-w-full overflow-hidden">
         {/* Main Content Area */}
@@ -44,7 +50,13 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <SelectedNewsSlider title="নির্বাচিত" news={data.selective_news} />
 
           <div className="my-8">
-            <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" category="category page" placement="In-Feed Ad" />
+            <AdBanner
+              label="[ বিজ্ঞাপন — ৯৭০×৬০ ]"
+              className="my-0"
+              heightClass="h-[60px]"
+              category="category page"
+              placement="In-Feed Ad"
+            />
           </div>
 
           <CategoryListGrid
@@ -56,13 +68,25 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
           {/* Bottom Ad in main area */}
           <div className="my-8">
-            <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" className="h-[60px]" category="category page" placement="In-Feed second Ad" />
+            <AdBanner
+              label="[ বিজ্ঞাপন — ৯৭০×৬০ ]"
+              className="my-0"
+              heightClass="h-[60px]"
+              category="category page"
+              placement="In-Feed second Ad"
+            />
           </div>
         </div>
 
         {/* Sidebar Area */}
         <div className="flex flex-col pt-24 gap-6">
-          <AdBanner label="[ বিজ্ঞাপন — ৩০০×২৫০ ]" className="h-[250px] w-[300px] mx-auto" category="category page" placement="Right Sidebar Ad" />
+          <AdBanner
+            label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
+            className="w-[300px] mx-auto"
+            heightClass="h-[250px]"
+            category="category page"
+            placement="Right Sidebar Ad"
+          />
           <NewsSidebar title="সর্বশেষ" news={data.latest_news} />
         </div>
       </div>

@@ -11,21 +11,6 @@ interface Props {
 export function NewsSidebar({ title = "আরও পড়ুন", news = [] }: Props) {
   return (
     <aside className="flex flex-col gap-6">
-      {/* Sidebar Ad 1 */}
-      <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-sm transition-all hover:shadow-md">
-        <div className="relative h-60 w-full overflow-hidden">
-          <Image
-            src="https://picsum.photos/seed/ad1/400/600"
-            alt="Advertisement"
-            fill
-            className="object-cover transition-transform duration-700 hover:scale-110"
-          />
-          <div className="absolute top-0 right-0 p-1.5 bg-black/40 text-[9px] uppercase tracking-widest text-white backdrop-blur-sm">
-            Ad
-          </div>
-        </div>
-      </div>
-
       {/* Standard Sidebar List */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1.5 pt-1">

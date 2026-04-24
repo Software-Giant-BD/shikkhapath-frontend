@@ -33,7 +33,7 @@ const AD_DIMENSIONS: Record<string, string> = {
   "Header Ad": "728 x 90",
   "In-Feed Ad": "728 x 90",
   "In-Feed second Ad": "728 x 90",
-  "Right Sidebar Ad": "300 x 600",
+  "Right Sidebar Ad": "300 x 250",
   "Anchor / Sticky Footer Ad": "728 x 90",
   "Ambulance Ad": "300 x 250",
   "Police Ad": "300 x 250",
