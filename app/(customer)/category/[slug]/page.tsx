@@ -53,7 +53,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <AdBanner
               label="[ বিজ্ঞাপন — ৯৭০×৬০ ]"
               className="my-0"
-              heightClass="h-[60px]"
+              heightClass="h-20 sm:h-24"
               category="category page"
               placement="In-Feed Ad"
             />
@@ -71,7 +71,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <AdBanner
               label="[ বিজ্ঞাপন — ৯৭০×৬০ ]"
               className="my-0"
-              heightClass="h-[60px]"
+              heightClass="h-20 sm:h-24"
               category="category page"
               placement="In-Feed second Ad"
             />
