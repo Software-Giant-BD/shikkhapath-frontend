@@ -18,7 +18,7 @@ export async function getAdvertisements(params?: { page?: number; per_page?: num
   if (params?.placement) searchParams.set("placement", params.placement);
   if (params?.status !== undefined) searchParams.set("status", params.status ? '1' : '0');
 
-  const response = await fetchApi(`/admin/advertisements?${searchParams.toString()}`);
+  const response = await fetchApi(`/admin/advertisements?${searchParams.toString()}`, { cache: "no-store" });
   if (!response.ok) {
     return { items: [], pagination: extractPagination({}, 1, 10) };
   }
@@ -37,7 +37,13 @@ export async function getCustomerAdvertisements(params?: { category?: string; pl
   if (params?.category) searchParams.set("category", params.category);
   if (params?.placement) searchParams.set("placement", params.placement);
 
-  const response = await fetchApi(`/advertisements?${searchParams.toString()}`, undefined, { includeAuth: false });
+  const response = await fetchApi(`/advertisements?${searchParams.toString()}`, {
+    next: {
+      revalidate: 300, // 5 minutes
+      tags: ["advertisements"],
+    },
+  }, { includeAuth: false });
+
   if (!response.ok) {
     return { items: [] };
   }
@@ -51,7 +57,7 @@ export async function getCustomerAdvertisements(params?: { category?: string; pl
 }
 
 export async function getAdvertisement(id: number | string) {
-  const response = await fetchApi(`/admin/advertisements/${id}`);
+  const response = await fetchApi(`/admin/advertisements/${id}`, { cache: "no-store" });
   if (!response.ok) return null;
   const data = await response.json();
   return (data.resources ?? data.data ?? data) as Advertisement;

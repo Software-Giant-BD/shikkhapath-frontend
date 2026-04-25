@@ -25,8 +25,10 @@ export async function AdBanner({
   
   if (category && placement) {
     try {
-      const { items } = await getCustomerAdvertisements({ category, placement });
-      ad = items[0];
+      // Fetch all ads for this category. 
+      // Next.js will deduplicate this call if multiple AdBanners use the same category.
+      const { items } = await getCustomerAdvertisements({ category });
+      ad = items.find((item: any) => item.placement === placement) || null;
     } catch (e) {
       // ignore
     }

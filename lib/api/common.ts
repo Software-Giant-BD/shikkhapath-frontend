@@ -31,7 +31,6 @@ export async function fetchApi(
   const token = includeAuth ? await getAdminToken() : undefined;
 
   return fetch(`${API_BASE_URL}${path}`, {
-    cache: "no-store",
     ...init,
     headers: {
       Accept: "application/json",
