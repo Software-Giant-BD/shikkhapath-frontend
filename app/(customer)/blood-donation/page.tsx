@@ -11,7 +11,13 @@ export default function BloodDonationPage() {
   return (
     <>
       <div className="container mx-auto px-4 pt-8">
-        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="Blood Ad" />
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+          heightClass="h-[90px]"
+          variant="leaderboard"
+          category="services pages"
+          placement="Blood Ad"
+        />
       </div>
       <BloodDonationClient />
     </>

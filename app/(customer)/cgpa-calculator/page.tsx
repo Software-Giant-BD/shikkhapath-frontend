@@ -12,7 +12,13 @@ export default function CgpaCalculatorPage() {
   return (
     <>
       <div className="container mx-auto px-4 pt-8">
-        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" className="h-[90px]" category="services pages" placement="CGPA Calculator Ad" />
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+          heightClass="h-[90px]"
+          variant="leaderboard"
+          category="services pages"
+          placement="CGPA Calculator Ad"
+        />
       </div>
       <CgpaCalculatorClient />
     </>
