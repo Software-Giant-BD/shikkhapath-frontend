@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { NewsArticleContent } from "@/components/customer/news/news-article-content";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
 import { getNewsDetails } from "@/lib/api/news";
+import { AdBanner } from "@/components/customer/home/ad-banner";
 
 interface Props {
   params: {
@@ -38,16 +39,14 @@ export default async function NewsDetailsPage({ params }: Props) {
         />
       </div>
 
-      {/* Bottom Full-Width Ad or Section */}
-      <div className="mt-12 py-8 border-t border-slate-100">
-        <div className="h-28 w-full rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-4">
-          <div className="text-center">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
-              Horizontal Footer Ad
-            </span>
-            <div className="mt-2 h-10 w-64 bg-slate-200 rounded animate-pulse mx-auto"></div>
-          </div>
-        </div>
+      {/* Bottom Full-Width Ad */}
+      <div className="mt-12">
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+          heightClass="h-28"
+          category="news details page"
+          placement="Footer Ad"
+        />
       </div>
     </main>
   );

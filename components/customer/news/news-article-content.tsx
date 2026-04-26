@@ -5,6 +5,7 @@ import { SocialShare } from "./social-share";
 
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 import type { NewsApiModel } from "@/lib/api/news";
+import { AdBanner } from "@/components/customer/home/ad-banner";
 
 interface NewsArticleContentProps {
   news: NewsApiModel;
@@ -20,19 +21,12 @@ export function NewsArticleContent({
   return (
     <div className="flex flex-col gap-6">
       {/* Top Banner Ad */}
-      <div className="w-full overflow-hidden rounded-xl border border-slate-100 shadow-sm">
-        <div className="relative h-24 w-full bg-slate-50 flex items-center justify-center p-2">
-          <Image
-            src="https://picsum.photos/seed/topad/1200/200"
-            alt="Top Ad"
-            fill
-            className="object-cover opacity-80"
-          />
-          <span className="absolute top-2 right-3 text-[9px] font-black uppercase tracking-widest text-slate-400">
-            Sponsored Banner
-          </span>
-        </div>
-      </div>
+      <AdBanner
+        label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
+        heightClass="h-24 sm:h-28"
+        category="news details page"
+        placement="Header Ad"
+      />
 
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-[13px] font-bold text-slate-400">
@@ -110,11 +104,41 @@ export function NewsArticleContent({
         </figcaption>
       </figure>
 
-      {/* Article Content */}
-      <div
-        className="prose prose-slate max-w-none prose-p:text-[17px] prose-p:leading-relaxed prose-p:text-slate-700 prose-strong:text-slate-900"
-        dangerouslySetInnerHTML={{ __html: news.content }}
+      {/* Content Top Ad */}
+      <AdBanner
+        label="[ বিজ্ঞাপন — ৯৭০×৬০ ]"
+        heightClass="h-20 sm:h-24"
+        category="news details page"
+        placement="Content Top Ad"
       />
+
+      {/* Article Content */}
+      <div className="prose prose-slate max-w-none prose-p:text-[17px] prose-p:leading-relaxed prose-p:text-slate-700 prose-strong:text-slate-900">
+        {/* We can split the content to inject an ad in the middle if it's long enough */}
+        {(() => {
+          const content = news.content || "";
+          const paragraphs = content.split("</p>");
+          if (paragraphs.length > 4) {
+            const firstHalf = paragraphs.slice(0, 3).join("</p>") + "</p>";
+            const secondHalf = paragraphs.slice(3).join("</p>");
+            return (
+              <>
+                <div dangerouslySetInnerHTML={{ __html: firstHalf }} />
+                <div className="my-8">
+                  <AdBanner
+                    label="[ বিজ্ঞাপন — ৭২৮×৯০ ]"
+                    heightClass="h-20 sm:h-24"
+                    category="news details page"
+                    placement="In-Content Ad"
+                  />
+                </div>
+                <div dangerouslySetInnerHTML={{ __html: secondHalf }} />
+              </>
+            );
+          }
+          return <div dangerouslySetInnerHTML={{ __html: content }} />;
+        })()}
+      </div>
 
       {/* Related Section */}
       <div className="mt-8 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-100">
