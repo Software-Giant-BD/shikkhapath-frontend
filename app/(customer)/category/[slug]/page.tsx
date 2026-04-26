@@ -88,7 +88,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             category="category page"
             placement="Right Sidebar Ad"
           />
-          <NewsSidebar title="সর্বশেষ" news={data.latest_news} />
+          <NewsSidebar 
+            title="সর্বশেষ" 
+            news={data.latest_news} 
+            adCategory="category page" 
+            adPlacement="Sidebar Bottom Ad" 
+          />
         </div>
       </div>
     </main>

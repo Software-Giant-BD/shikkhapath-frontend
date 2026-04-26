@@ -11,8 +11,8 @@ import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
 
 const CATEGORIES = {
-  "Home Page": ["Top Banner Ad", "Sidebar Ad", "In-Feed / Mid-Page Ad"],
-  "Category Page": ["Header Ad", "In-Feed Ad", "In-Feed second Ad", "Right Sidebar Ad", "Anchor / Sticky Footer Ad"],
+  "Home Page": ["Top Banner Ad", "Sidebar Ad", "In-Feed / Mid-Page Ad", "Sidebar Bottom Ad"],
+  "Category Page": ["Header Ad", "In-Feed Ad", "In-Feed second Ad", "Right Sidebar Ad", "Sidebar Bottom Ad", "Anchor / Sticky Footer Ad"],
   "Services Pages": [
     "Ambulance Ad",
     "Police Ad",
@@ -35,6 +35,7 @@ const AD_DIMENSIONS: Record<string, string> = {
   "In-Feed second Ad": "728 x 90",
   "Right Sidebar Ad": "300 x 250",
   "Anchor / Sticky Footer Ad": "728 x 90",
+  "Sidebar Bottom Ad": "300 x 250",
   "Ambulance Ad": "300 x 250",
   "Police Ad": "300 x 250",
   "Fire Ad": "300 x 250",

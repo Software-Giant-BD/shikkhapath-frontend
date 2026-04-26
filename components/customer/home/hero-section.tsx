@@ -6,6 +6,7 @@ import type {
   PopularNewsResponse,
   LatestNewsResponse,
 } from "@/lib/api/news";
+import { AdBanner } from "@/components/customer/home/ad-banner";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
 const HOME_LAYOUT_CONFIG = {
@@ -410,14 +411,14 @@ export function HeroSection({
         </div>
 
         {/* Small Ad Slot at the bottom of Hub */}
-        <div className="relative overflow-hidden rounded-2xl bg-slate-50 border border-slate-100 p-4 shadow-inner flex flex-col items-center justify-center min-h-[100px] group transition-all hover:bg-white hover:shadow-md">
-          <span className="absolute top-2 right-3 text-[8px] font-black uppercase tracking-widest text-slate-300">
-            Space available
-          </span>
-          <p className="text-[10px] font-bold text-slate-400">
-            বিজ্ঞাপন দিতে যোগাযোগ করুন
-          </p>
-        </div>
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
+          category="Home page"
+          placement="Sidebar Bottom Ad"
+          heightClass="h-[150px]"
+          fit="contain"
+          className="my-0"
+        />
       </aside>
     </section>
   );

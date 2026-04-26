@@ -30,7 +30,12 @@ export default async function NewsDetailsPage({ params }: Props) {
         </div>
 
         {/* Sidebar Area */}
-        <NewsSidebar title="জনপ্রিয় খবর" news={news_details.popular_news} />
+        <NewsSidebar 
+          title="জনপ্রিয় খবর" 
+          news={news_details.popular_news} 
+          adCategory="news details page" 
+          adPlacement="Sidebar Bottom Ad" 
+        />
       </div>
 
       {/* Bottom Full-Width Ad or Section */}

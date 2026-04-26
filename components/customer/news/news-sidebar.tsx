@@ -3,12 +3,16 @@ import Link from "next/link";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 import { type HeroNewsItem } from "@/lib/api/news";
 
+import { AdBanner } from "@/components/customer/home/ad-banner";
+
 interface Props {
   title?: string;
   news?: HeroNewsItem[];
+  adCategory?: string;
+  adPlacement?: string;
 }
 
-export function NewsSidebar({ title = "আরও পড়ুন", news = [] }: Props) {
+export function NewsSidebar({ title = "আরও পড়ুন", news = [], adCategory, adPlacement }: Props) {
   return (
     <aside className="flex flex-col gap-6">
       {/* Standard Sidebar List */}
@@ -51,17 +55,28 @@ export function NewsSidebar({ title = "আরও পড়ুন", news = [] }: Pro
       </div>
 
       {/* Sidebar Ad 2 */}
-      <div className="overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 shadow-sm transition-all hover:bg-slate-100/50">
-        <div className="flex flex-col items-center justify-center gap-3 text-center">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Sponsored Content
-          </span>
-          <div className="h-40 w-full bg-slate-200 rounded-xl animate-pulse" />
-          <p className="text-xs font-bold text-slate-500">
-            বিজ্ঞাপনের জন্য যোগাযোগ করুন
-          </p>
+      {adCategory && adPlacement ? (
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
+          category={adCategory}
+          placement={adPlacement}
+          heightClass="h-[250px]"
+          fit="contain"
+          className="my-0"
+        />
+      ) : (
+        <div className="overflow-hidden rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 shadow-sm transition-all hover:bg-slate-100/50">
+          <div className="flex flex-col items-center justify-center gap-3 text-center">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              Sponsored Content
+            </span>
+            <div className="h-40 w-full bg-slate-200 rounded-xl animate-pulse" />
+            <p className="text-xs font-bold text-slate-500">
+              বিজ্ঞাপনের জন্য যোগাযোগ করুন
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </aside>
   );
 }
