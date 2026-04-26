@@ -17,7 +17,7 @@ export async function createAdvertisementAction(payload: object | FormData) {
     }
 
     revalidatePath("/admin/advertisements");
-    revalidateTag("advertisements", "max");
+    revalidateTag("advertisements");
     return { ok: true, message: "Advertisement created successfully." };
   } catch (error) {
     return { ok: false, message: "API is unavailable." };
@@ -43,7 +43,7 @@ export async function updateAdvertisementAction(id: string | number, payload: ob
 
     revalidatePath("/admin/advertisements");
     revalidatePath(`/admin/advertisements/${id}`);
-    revalidateTag("advertisements", "max");
+    revalidateTag("advertisements");
     return { ok: true, message: "Advertisement updated successfully." };
   } catch (error) {
     return { ok: false, message: "API is unavailable." };
@@ -61,7 +61,7 @@ export async function deleteAdvertisementAction(id: string | number) {
     }
 
     revalidatePath("/admin/advertisements");
-    revalidateTag("advertisements", "max");
+    revalidateTag("advertisements");
     return { ok: true, message: "Advertisement deleted successfully." };
   } catch (error) {
     return { ok: false, message: "API is unavailable." };
@@ -83,7 +83,7 @@ export async function updateAdvertisementStatusAction(id: string | number, statu
     }
 
     revalidatePath("/admin/advertisements");
-    revalidateTag("advertisements", "max");
+    revalidateTag("advertisements");
     return { ok: true, message: "Status updated successfully." };
   } catch (error) {
     return { ok: false, message: "API is unavailable." };

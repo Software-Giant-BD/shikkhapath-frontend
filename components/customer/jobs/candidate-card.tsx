@@ -8,9 +8,10 @@ export interface Candidate {
   name: string;
   profession: string;
   experience: string;
-  education: string;
-  location: string;
+  education?: string;
+  location?: string;
   skills: string[];
+  cv_path: string;
 }
 
 interface CandidateCardProps {
@@ -19,8 +20,11 @@ interface CandidateCardProps {
 
 export function CandidateCard({ candidate }: CandidateCardProps) {
   const handleDownloadCV = () => {
-    // Mock download action
-    alert(`Downloading CV for ${candidate.name}...`);
+    if (!candidate.cv_path) {
+      alert("CV not available for this candidate.");
+      return;
+    }
+    window.open(candidate.cv_path, "_blank");
   };
 
   return (

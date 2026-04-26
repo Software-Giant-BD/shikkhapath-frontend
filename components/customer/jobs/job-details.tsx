@@ -57,10 +57,9 @@ export function JobDetails({ job }: JobDetailsProps) {
 
             <hr className="my-8 border-slate-100" />
 
-            <div className="prose prose-slate max-w-none">
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Job Description</h3>
+            <div className="prose prose-slate max-w-none prose-h3:text-xl prose-h3:font-bold prose-h3:text-slate-900 prose-h3:mb-4 prose-p:text-slate-600 prose-p:leading-relaxed">
+              <h3 className="not-prose text-xl font-bold text-slate-900 mb-4">Job Description</h3>
               <div
-                className="whitespace-pre-wrap text-slate-600 leading-relaxed"
                 dangerouslySetInnerHTML={{ __html: job.description }}
               />
             </div>

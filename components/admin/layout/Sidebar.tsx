@@ -13,6 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  Briefcase,
 } from "lucide-react";
 
 type MenuItem = {
@@ -67,6 +68,15 @@ const menuConfig: MenuSection[] = [
           { title: "Add Advertisement", href: "/admin/advertisements/add" },
         ],
       },
+      {
+        title: "Jobs",
+        icon: Briefcase,
+        subItems: [
+          { title: "Job List", href: "/admin/jobs/list" },
+          { title: "Candidate List", href: "/admin/candidates/list" },
+        ],
+      },
+      { title: "Ambulances", icon: Newspaper, href: "/admin/ambulances" },
       { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
   },

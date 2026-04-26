@@ -2,56 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { Search, Loader2, UploadCloud, Users, Briefcase, FileText, FileUp, X, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { JobApiModel, GetJobsParams } from "@/lib/api/jobs";
-import { fetchJobsAction } from "@/lib/api/jobs-actions";
+import { fetchJobsAction, submitCandidateCVAction, fetchCandidatesAction } from "@/lib/api/jobs-actions";
 import { JobCard } from "./job-card";
 import { CandidateCard, type Candidate } from "./candidate-card";
 import { ServiceAdBanner } from "../common/service-ad-banner";
 
-const MOCK_CANDIDATES: Candidate[] = [
-  {
-    id: "1",
-    name: "Rahim Uddin",
-    profession: "Senior Software Engineer",
-    experience: "5+ Years",
-    education: "BSc in Computer Science, BUET",
-    location: "Dhaka, Bangladesh",
-    skills: ["React", "Node.js", "TypeScript", "AWS"],
-  },
-  {
-    id: "2",
-    name: "Sadia Rahman",
-    profession: "UX/UI Designer",
-    experience: "3 Years",
-    education: "BFA, Dhaka University",
-    location: "Chattogram, Bangladesh",
-    skills: ["Figma", "Illustrator", "Prototyping", "User Research"],
-  },
-  {
-    id: "3",
-    name: "Kamrul Hasan",
-    profession: "Digital Marketing Analyst",
-    experience: "4 Years",
-    education: "BBA in Marketing, NSU",
-    location: "Remote",
-    skills: ["SEO", "Google Ads", "Facebook Ads", "Analytics"],
-  },
-  {
-    id: "4",
-    name: "Nusrat Jahan",
-    profession: "Frontend Developer",
-    experience: "2 Years",
-    education: "BSc in CSE, BRAC University",
-    location: "Sylhet, Bangladesh",
-    skills: ["Vue.js", "TailwindCSS", "JavaScript", "HTML/CSS"],
-  }
-];
 
 export function JobsPageClient() {
-  const [activeTab, setActiveTab] = useState<"jobs" | "candidates">("jobs");
+  const pathname = usePathname();
+  const activeTab = pathname === "/jobs/hire-talent" ? "candidates" : "jobs";
   
   const [jobs, setJobs] = useState<JobApiModel[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [filters, setFilters] = useState({
     category: "",
     job_type: "",
@@ -60,6 +27,11 @@ export function JobsPageClient() {
 
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isUploadSuccess, setIsUploadSuccess] = useState(false);
+  const [skills, setSkills] = useState<string[]>([]);
+  const [skillInput, setSkillInput] = useState("");
+  const [isSubmittingCV, setIsSubmittingCV] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const loadJobs = async () => {
     setLoading(true);
@@ -78,19 +50,78 @@ export function JobsPageClient() {
     }
   };
 
+  const loadCandidates = async () => {
+    setLoadingCandidates(true);
+    try {
+      const res = await fetchCandidatesAction();
+      setCandidates(res.items);
+    } catch (error) {
+      console.error("Failed to load candidates", error);
+    } finally {
+      setLoadingCandidates(false);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "jobs") {
       loadJobs();
+    } else if (activeTab === "candidates") {
+      loadCandidates();
     }
   }, [filters, activeTab]);
 
-  const handleUploadCV = (e: React.FormEvent) => {
+  const handleUploadCV = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsUploadSuccess(true);
-    setTimeout(() => {
-      setIsUploadSuccess(false);
-      setIsUploadModalOpen(false);
-    }, 2500);
+    setIsSubmittingCV(true);
+    setSubmitError("");
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      formData.append("skills", JSON.stringify(skills));
+      
+      const result = await submitCandidateCVAction(formData);
+      
+      if (result.ok) {
+        setIsUploadSuccess(true);
+        setTimeout(() => {
+          setIsUploadSuccess(false);
+          setIsUploadModalOpen(false);
+          setSkills([]);
+          setSkillInput("");
+          setSelectedFile(null);
+        }, 2500);
+      } else {
+        setSubmitError(result.message);
+      }
+    } catch (err) {
+      setSubmitError("An error occurred. Please try again.");
+    } finally {
+      setIsSubmittingCV(false);
+    }
+  };
+
+  const addSkill = (skill: string) => {
+    const trimmed = skill.trim().replace(/,/g, "");
+    if (!trimmed) return;
+    if (skills.includes(trimmed)) {
+      setSkillInput("");
+      return;
+    }
+    setSkills([...skills, trimmed]);
+    setSkillInput("");
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    setSkills(skills.filter((s) => s !== skillToRemove));
+  };
+
+  const onSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addSkill(skillInput);
+    } else if (e.key === "Backspace" && !skillInput && skills.length > 0) {
+      removeSkill(skills[skills.length - 1]);
+    }
   };
 
   return (
@@ -111,8 +142,8 @@ export function JobsPageClient() {
       {/* Tabs */}
       <div className="flex flex-col items-center mb-10">
         <div className="inline-flex items-center rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
-          <button
-            onClick={() => setActiveTab("jobs")}
+          <Link
+            href="/jobs"
             className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
               activeTab === "jobs"
                 ? "bg-slate-900 text-white shadow-md"
@@ -121,9 +152,9 @@ export function JobsPageClient() {
           >
             <Briefcase className="h-4 w-4" />
             Browse Jobs
-          </button>
-          <button
-            onClick={() => setActiveTab("candidates")}
+          </Link>
+          <Link
+            href="/jobs/hire-talent"
             className={`flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold transition-all ${
               activeTab === "candidates"
                 ? "bg-[#b38716] text-white shadow-md shadow-[#b38716]/20"
@@ -132,7 +163,7 @@ export function JobsPageClient() {
           >
             <Users className="h-4 w-4" />
             Hire Talent
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -236,18 +267,31 @@ export function JobsPageClient() {
             </button>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {MOCK_CANDIDATES.map(candidate => (
-              <CandidateCard key={candidate.id} candidate={candidate} />
-            ))}
-          </div>
+          {loadingCandidates ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3 w-full">
+              <Loader2 className="h-10 w-10 animate-spin text-[#b38716]" />
+              <p className="font-bold uppercase tracking-widest text-xs">Finding talent...</p>
+            </div>
+          ) : candidates.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {candidates.map((candidate) => (
+                <CandidateCard key={candidate.id} candidate={candidate} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 bg-slate-50 rounded-3xl border border-dashed border-slate-200 w-full">
+              <Users className="h-12 w-12 text-slate-300 mb-4" />
+              <p className="text-slate-500 font-bold">No candidates found yet.</p>
+              <p className="text-slate-400 text-sm">Be the first to submit your profile!</p>
+            </div>
+          )}
         </div>
       )}
 
       {/* Upload CV Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 my-auto">
+          <div className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-in zoom-in-95 duration-200 my-auto">
             <button 
               type="button"
               onClick={() => setIsUploadModalOpen(false)}
@@ -279,16 +323,16 @@ export function JobsPageClient() {
                   <div className="space-y-4">
                     <div>
                       <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Full Name</label>
-                      <input required type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. John Doe" />
+                      <input required name="name" type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. John Doe" />
                     </div>
                     <div>
                       <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Profession / Expected Role</label>
-                      <input required type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. Software Engineer" />
+                      <input required name="profession" type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. Software Engineer" />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Experience</label>
-                        <select required className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all text-slate-700">
+                        <select required name="experience" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all text-slate-700">
                           <option value="">Select...</option>
                           <option value="fresher">Fresher</option>
                           <option value="1-3">1-3 Years</option>
@@ -297,32 +341,103 @@ export function JobsPageClient() {
                         </select>
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Location</label>
-                        <input required type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="City/Area" />
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Education</label>
+                        <input required name="education" type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. BSc in CSE" />
                       </div>
                     </div>
                     <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Current Location</label>
+                      <input required name="location" type="text" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-[#b38716] focus:bg-white focus:ring-1 focus:ring-[#b38716] outline-none transition-all placeholder:text-slate-400" placeholder="e.g. Dhaka, Bangladesh" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Skills</label>
+                      <div className="flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 focus-within:border-[#b38716] focus-within:bg-white focus-within:ring-1 focus-within:ring-[#b38716] transition-all min-h-[50px]">
+                        {skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-bold text-white shadow-sm"
+                          >
+                            {skill}
+                            <button
+                              type="button"
+                              onClick={() => removeSkill(skill)}
+                              className="hover:text-red-400 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </span>
+                        ))}
+                        <input
+                          className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-slate-400 min-w-[120px]"
+                          placeholder={skills.length === 0 ? "e.g. React, Node.js..." : "Add more..."}
+                          value={skillInput}
+                          onChange={(e) => setSkillInput(e.target.value)}
+                          onKeyDown={onSkillKeyDown}
+                        />
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-tight">
+                        Press Enter or comma to add skills
+                      </p>
+                    </div>
+                    <div>
                       <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">Upload CV (PDF)</label>
-                      <div className="mt-1 flex justify-center rounded-xl border border-dashed border-slate-300 px-6 py-6 bg-slate-50 hover:bg-slate-100/50 transition-colors cursor-pointer group">
+                      <div className={`mt-1 flex justify-center rounded-xl border border-dashed px-6 py-6 transition-colors cursor-pointer group ${selectedFile ? 'border-emerald-300 bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100/50'}`}>
                         <div className="text-center">
-                          <UploadCloud className="mx-auto h-8 w-8 text-slate-400 group-hover:text-[#b38716] transition-colors" aria-hidden="true" />
+                          {selectedFile ? (
+                            <FileText className="mx-auto h-8 w-8 text-emerald-500 animate-bounce" aria-hidden="true" />
+                          ) : (
+                            <UploadCloud className="mx-auto h-8 w-8 text-slate-400 group-hover:text-[#b38716] transition-colors" aria-hidden="true" />
+                          )}
                           <div className="mt-2 text-sm text-slate-600 font-medium">
                             <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-transparent font-bold text-[#b38716] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#b38716] focus-within:ring-offset-2 hover:text-[#9a7310]">
-                              <span>Click to upload</span>
-                              <input id="file-upload" name="file-upload" type="file" required accept=".pdf" className="sr-only" />
+                              <span>{selectedFile ? 'Change file' : 'Click to upload'}</span>
+                              <input 
+                                id="file-upload" 
+                                name="cv" 
+                                type="file" 
+                                required 
+                                accept=".pdf" 
+                                className="sr-only" 
+                                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                              />
                             </label>
-                            <p className="pl-1">or drag and drop</p>
+                            {!selectedFile && <p className="pl-1 inline">or drag and drop</p>}
                           </div>
-                          <p className="text-xs leading-5 text-slate-500 mt-1">PDF up to 5MB</p>
+                          {selectedFile ? (
+                            <p className="text-xs font-black text-emerald-600 mt-1 uppercase tracking-tight truncate max-w-[200px]">
+                              {selectedFile.name}
+                            </p>
+                          ) : (
+                            <p className="text-xs leading-5 text-slate-500 mt-1">PDF up to 5MB</p>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-4">
-                    <button type="submit" className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#b38716] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#b38716]/20 transition-all hover:bg-[#9a7310] hover:scale-[1.02] active:scale-98">
-                      <FileUp className="h-4 w-4" />
-                      Submit Profile
+                  {submitError && (
+                    <div className="px-6 pb-2">
+                      <p className="text-xs font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">{submitError}</p>
+                    </div>
+                  )}
+
+                  <div className="pt-4 px-6 pb-6">
+                    <button 
+                      type="submit" 
+                      disabled={isSubmittingCV}
+                      className="w-full flex justify-center items-center gap-2 rounded-xl bg-[#b38716] py-3.5 text-sm font-bold text-white shadow-lg shadow-[#b38716]/20 transition-all hover:bg-[#9a7310] hover:scale-[1.02] active:scale-98 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {isSubmittingCV ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <FileUp className="h-4 w-4" />
+                          Submit Profile
+                        </>
+                      )}
                     </button>
                   </div>
                 </form>

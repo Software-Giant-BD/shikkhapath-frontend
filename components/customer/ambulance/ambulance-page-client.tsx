@@ -38,8 +38,8 @@ export function AmbulancePageClient() {
       </section>
 
       {/* Action Bar */}
-      <div className="container mx-auto -mt-10 px-4">
-        <div className="ase-panel p-6 shadow-2xl">
+      <div className="container relative z-50 mx-auto -mt-10 px-4">
+        <div className="ase-panel relative z-50 p-6 shadow-2xl">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex-grow">
               <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-400">
@@ -62,7 +62,7 @@ export function AmbulancePageClient() {
       </div>
 
       {/* Ad Section */}
-      <div className="container mx-auto mt-8 px-4">
+      <div className="container relative z-10 mx-auto mt-8 px-4">
         <ServiceAdBanner label="[ Ambulance Service Sponsor ]" />
       </div>
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Search, MapPin, Navigation } from "lucide-react";
-import { BANGLADESH_DISTRICTS } from "@/lib/constants/districts";
+import { useEffect, useState, useRef } from "react";
+import { MapPin, Navigation, Search, ChevronDown } from "lucide-react";
+import { getDistrictsAction, type LocationOption } from "@/lib/api/location-actions";
 import { Button } from "@/components/ui/button";
 
 interface LocationFilterProps {
@@ -10,12 +10,48 @@ interface LocationFilterProps {
 }
 
 export function LocationFilter({ onLocationChange }: LocationFilterProps) {
-  const [selectedLocation, setSelectedLocation] = useState("All");
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<LocationOption | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [districts, setDistricts] = useState<LocationOption[]>([]);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const handleLocationSelect = (loc: string) => {
+  useEffect(() => {
+    getDistrictsAction().then(res => {
+        if (res.ok) {
+            setDistricts(res.items);
+        }
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLocationSelect = (loc: LocationOption | null) => {
     setSelectedLocation(loc);
-    onLocationChange(loc);
+    onLocationChange(loc ? loc.id : "All");
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  const filteredDistricts = districts.filter(d => 
+    d.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (d.bn_name && d.bn_name.includes(searchTerm))
+  );
+
+  const getDisplayName = (d: LocationOption) => {
+    if (d.bn_name && d.name) {
+      return `${d.name} - ${d.bn_name}`;
+    }
+    return d.bn_name || d.name;
   };
 
   const handleCurrentLocation = () => {
@@ -27,15 +63,13 @@ export function LocationFilter({ onLocationChange }: LocationFilterProps) {
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        // In a real app, you would reverse geocode these coordinates
-        // For now, we'll just simulate finding "Dhaka" or similar
         console.log("Coords:", position.coords.latitude, position.coords.longitude);
-        
-        // Simulating a delay for reverse geocoding
         await new Promise(r => setTimeout(r, 1000));
         
-        const detected = "Dhaka"; // Simulated result
-        handleLocationSelect(detected);
+        if (districts.length > 0) {
+            const detected = districts[0]; // Simulation
+            handleLocationSelect(detected);
+        }
         setIsLocating(false);
       },
       (error) => {
@@ -48,25 +82,64 @@ export function LocationFilter({ onLocationChange }: LocationFilterProps) {
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div className="relative flex-grow">
-        <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <select
-          value={selectedLocation}
-          onChange={(e) => handleLocationSelect(e.target.value)}
-          className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm font-medium text-slate-700 outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5"
+      <div className="relative flex-grow" ref={dropdownRef}>
+        {/* Trigger */}
+        <div 
+          onClick={() => setIsOpen(!isOpen)}
+          className="relative flex w-full cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-medium text-slate-700 transition-all hover:border-primary focus:ring-4 focus:ring-primary/5"
         >
-          <option value="All">All Locations</option>
-          {BANGLADESH_DISTRICTS.map((district) => (
-            <option key={district} value={district}>
-              {district}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <span className={selectedLocation ? "text-slate-900" : "text-slate-500"}>
+            {selectedLocation ? getDisplayName(selectedLocation) : "সব এলাকা (All Locations)"}
+          </span>
+          <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
         </div>
+
+        {/* Dropdown Panel - Higher z-index to stay above ads */}
+        {isOpen && (
+          <div className="absolute left-0 top-full z-[100] mt-2 w-full min-w-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in fade-in slide-in-from-top-2">
+            <div className="p-3 border-b border-slate-100">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <input
+                  autoFocus
+                  type="text"
+                  placeholder="শহর খুঁজুন... (Search City)"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 py-2 pl-10 pr-4 text-sm outline-none focus:border-primary focus:ring-4 focus:ring-primary/5"
+                />
+              </div>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto p-1">
+              <div
+                onClick={() => handleLocationSelect(null)}
+                className="flex cursor-pointer items-center px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-primary rounded-lg transition-colors"
+              >
+                সব এলাকা (All Locations)
+              </div>
+              {filteredDistricts.length > 0 ? (
+                filteredDistricts.map((district) => (
+                  <div
+                    key={district.id}
+                    onClick={() => handleLocationSelect(district)}
+                    className={`flex cursor-pointer items-center px-4 py-2 text-sm rounded-lg transition-colors ${
+                      selectedLocation?.id === district.id 
+                        ? "bg-primary/5 text-primary font-bold" 
+                        : "text-slate-700 hover:bg-slate-50 hover:text-primary"
+                    }`}
+                  >
+                    {getDisplayName(district)}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-xs text-slate-400">
+                  কোনো এলাকা পাওয়া যায়নি (No matching location)
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <Button

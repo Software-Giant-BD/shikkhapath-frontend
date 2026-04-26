@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AmbulanceService, getAmbulanceServices } from "@/lib/api/ambulance";
+import { type AmbulanceService } from "@/lib/api/ambulance";
+import { getAmbulanceServicesAction } from "@/lib/api/ambulance-actions";
 import { AmbulanceServiceCard } from "./ambulance-service-card";
 import { Loader2, SearchX } from "lucide-react";
 
@@ -17,8 +18,9 @@ export function AmbulanceList({ location }: AmbulanceListProps) {
     const fetchServices = async () => {
       setIsLoading(true);
       try {
-        const data = await getAmbulanceServices(location === "All" ? undefined : location);
-        setServices(data.filter(s => s.status === "approved"));
+        const districtId = location === "All" ? undefined : location;
+        const { items } = await getAmbulanceServicesAction({ district_id: districtId });
+        setServices(items);
       } catch (error) {
         console.error("Failed to load services:", error);
       } finally {
@@ -47,7 +49,7 @@ export function AmbulanceList({ location }: AmbulanceListProps) {
         <div>
           <h3 className="text-lg font-bold text-slate-800">No Services Found</h3>
           <p className="max-w-xs text-sm text-slate-500">
-            We couldn't find any approved ambulance services in {location === "All" ? "your area" : location} right now.
+            We couldn't find any approved ambulance services in this area right now.
           </p>
         </div>
       </div>

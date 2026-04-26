@@ -2,9 +2,10 @@
 
 import { useState, useRef } from "react";
 import { X, Upload, Camera, CheckCircle2, Loader2, FileText, User } from "lucide-react";
-import { BANGLADESH_DISTRICTS } from "@/lib/constants/districts";
-import { registerAmbulanceService } from "@/lib/api/ambulance";
+import { registerAmbulanceAction } from "@/lib/api/ambulance-actions";
+import { getDistrictsAction, type LocationOption } from "@/lib/api/location-actions";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
 interface AmbulanceRegistrationFormProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ interface AmbulanceRegistrationFormProps {
 
 export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegistrationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [districts, setDistricts] = useState<LocationOption[]>([]);
   
   // Preview states
   const [previews, setPreviews] = useState({
@@ -29,10 +31,18 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
   const [formData, setFormData] = useState({
     full_name: "",
     phone_number: "",
-    location: "",
+    district_id: "",
     nid_number: "",
     description: "",
   });
+
+  useEffect(() => {
+    getDistrictsAction().then(res => {
+      if (res.ok) {
+        setDistricts(res.items);
+      }
+    });
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -42,11 +52,15 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof typeof previews) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviews(prev => ({ ...prev, [type]: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
+      if (file.type === "application/pdf") {
+        setPreviews(prev => ({ ...prev, [type]: "pdf" }));
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setPreviews(prev => ({ ...prev, [type]: reader.result as string }));
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -54,20 +68,54 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
     e.preventDefault();
     setIsSubmitting(true);
 
-    const result = await registerAmbulanceService({
-      ...formData,
-      image: ambulanceRef.current?.files?.[0],
-      nid_image: nidRef.current?.files?.[0],
-      provider_image: providerRef.current?.files?.[0],
-    });
+    const data = new FormData();
+    data.append("full_name", formData.full_name);
+    data.append("phone_number", formData.phone_number);
+    data.append("district_id", formData.district_id);
+    data.append("nid_number", formData.nid_number);
+    data.append("ambulance_details", formData.description);
+
+    if (ambulanceRef.current?.files?.[0]) {
+      data.append("ambulance_photo", ambulanceRef.current.files[0]);
+    }
+    if (nidRef.current?.files?.[0]) {
+      data.append("nid_copy", nidRef.current.files[0]);
+    }
+    if (providerRef.current?.files?.[0]) {
+      data.append("manager_photo", providerRef.current.files[0]);
+    }
+
+    const result = await registerAmbulanceAction(data);
 
     setIsSubmitting(false);
 
-    if (result.ok) {
+    if (result.success) {
       onSuccess();
     } else {
       alert(result.message);
     }
+  };
+
+  const renderPreview = (preview: string | null, label: string, icon: React.ReactNode) => {
+    if (preview === "pdf") {
+      return (
+        <div className="flex flex-col items-center gap-1 text-primary">
+          <FileText className="h-8 w-8" />
+          <span className="text-[10px] font-bold">PDF Selected</span>
+        </div>
+      );
+    }
+    
+    if (preview) {
+      return <img src={preview} alt={label} className="h-full w-full object-cover" />;
+    }
+
+    return (
+      <div className="flex flex-col items-center gap-1 text-slate-400">
+        {icon}
+        <span className="text-[10px] font-bold">{label}</span>
+      </div>
+    );
   };
 
   return (
@@ -96,15 +144,8 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
                 onClick={() => ambulanceRef.current?.click()}
                 className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-primary/50 hover:bg-primary/5 overflow-hidden"
               >
-                {previews.ambulance ? (
-                  <img src={previews.ambulance} alt="Ambulance" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-slate-400">
-                    <Camera className="h-6 w-6" />
-                    <span className="text-[10px] font-bold">Upload Photo</span>
-                  </div>
-                )}
-                <input type="file" ref={ambulanceRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, "ambulance")} />
+                {renderPreview(previews.ambulance, "Upload Photo", <Camera className="h-6 w-6" />)}
+                <input type="file" ref={ambulanceRef} className="hidden" accept=".webp,.png,.jpg,.jpeg,.pdf" onChange={(e) => handleFileChange(e, "ambulance")} />
               </div>
             </div>
 
@@ -115,15 +156,8 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
                 onClick={() => nidRef.current?.click()}
                 className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-primary/50 hover:bg-primary/5 overflow-hidden"
               >
-                {previews.nid ? (
-                  <img src={previews.nid} alt="NID" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-slate-400">
-                    <FileText className="h-6 w-6" />
-                    <span className="text-[10px] font-bold">Upload NID</span>
-                  </div>
-                )}
-                <input type="file" ref={nidRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, "nid")} />
+                {renderPreview(previews.nid, "Upload NID", <FileText className="h-6 w-6" />)}
+                <input type="file" ref={nidRef} className="hidden" accept=".webp,.png,.jpg,.jpeg,.pdf" onChange={(e) => handleFileChange(e, "nid")} />
               </div>
             </div>
 
@@ -134,15 +168,8 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
                 onClick={() => providerRef.current?.click()}
                 className="relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 transition-all hover:border-primary/50 hover:bg-primary/5 overflow-hidden"
               >
-                {previews.provider ? (
-                  <img src={previews.provider} alt="Provider" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center gap-1 text-slate-400">
-                    <User className="h-6 w-6" />
-                    <span className="text-[10px] font-bold">Upload Photo</span>
-                  </div>
-                )}
-                <input type="file" ref={providerRef} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, "provider")} />
+                {renderPreview(previews.provider, "Upload Photo", <User className="h-6 w-6" />)}
+                <input type="file" ref={providerRef} className="hidden" accept=".webp,.png,.jpg,.jpeg,.pdf" onChange={(e) => handleFileChange(e, "provider")} />
               </div>
             </div>
           </div>
@@ -179,18 +206,18 @@ export function AmbulanceRegistrationForm({ onClose, onSuccess }: AmbulanceRegis
 
             {/* Location Selector */}
             <div className="space-y-2">
-              <label htmlFor="location" className="text-sm font-semibold text-slate-700">Service Location</label>
+              <label htmlFor="district_id" className="text-sm font-semibold text-slate-700">Service Location</label>
               <select
-                id="location"
-                name="location"
+                id="district_id"
+                name="district_id"
                 required
-                value={formData.location}
+                value={formData.district_id}
                 onChange={handleInputChange}
                 className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/5 appearance-none"
               >
                 <option value="">Select District</option>
-                {BANGLADESH_DISTRICTS.map(d => (
-                  <option key={d} value={d}>{d}</option>
+                {districts.map(d => (
+                  <option key={d.id} value={d.id}>{d.bn_name || d.name}</option>
                 ))}
               </select>
             </div>

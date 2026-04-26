@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 
 import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { getCategoriesByParentAction } from "@/lib/api/category-actions";
-import { getCitiesAction } from "@/lib/api/location-actions";
+import { getDistrictsAction, getDivisionsAction, getUpazilasAction } from "@/lib/api/location-actions";
 import { createNewsAction, updateNewsAction } from "@/lib/api/news-actions";
 import { Button } from "@/components/admin/ui/button";
 import {
@@ -41,6 +41,9 @@ type NewsFormValues = {
   institution_type: string;
   institution_name: string;
   location: string;
+  division_id: string;
+  district_id: string;
+  upazila_id: string;
   feature_image_id: string;
   feature_image_url: string;
   status: "draft" | "published" | "scheduled";
@@ -83,6 +86,9 @@ const defaultValues: NewsFormValues = {
   institution_type: "",
   institution_name: "",
   location: "",
+  division_id: "",
+  district_id: "",
+  upazila_id: "",
   feature_image_id: "",
   feature_image_url: "",
   status: "draft",
@@ -156,10 +162,18 @@ export function NewsForm({
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
-  const [cityOptions, setCityOptions] = useState<
+  const [divisionOptions, setDivisionOptions] = useState<
     Array<{ id: string; name: string }>
   >([]);
-  const [isCityLoading, setIsCityLoading] = useState(false);
+  const [districtOptions, setDistrictOptions] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [upazilaOptions, setUpazilaOptions] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
+  const [isDivisionLoading, setIsDivisionLoading] = useState(false);
+  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
+  const [isUpazilaLoading, setIsUpazilaLoading] = useState(false);
   const featureImageInputRef = useRef<HTMLInputElement | null>(null);
 
   const router = useRouter();
@@ -211,16 +225,48 @@ export function NewsForm({
   }, [form.category_id]);
 
   useEffect(() => {
-    async function loadCities() {
-      setIsCityLoading(true);
-      const result = await getCitiesAction();
+    async function loadDivisions() {
+      setIsDivisionLoading(true);
+      const result = await getDivisionsAction();
       if (result.ok) {
-        setCityOptions(result.items);
+        setDivisionOptions(result.items);
       }
-      setIsCityLoading(false);
+      setIsDivisionLoading(false);
     }
-    void loadCities();
+    void loadDivisions();
   }, []);
+
+  useEffect(() => {
+    async function loadDistricts() {
+      if (!form.division_id) {
+        setDistrictOptions([]);
+        return;
+      }
+      setIsDistrictLoading(true);
+      const result = await getDistrictsAction(form.division_id);
+      if (result.ok) {
+        setDistrictOptions(result.items);
+      }
+      setIsDistrictLoading(false);
+    }
+    void loadDistricts();
+  }, [form.division_id]);
+
+  useEffect(() => {
+    async function loadUpazilas() {
+      if (!form.district_id) {
+        setUpazilaOptions([]);
+        return;
+      }
+      setIsUpazilaLoading(true);
+      const result = await getUpazilasAction(form.district_id);
+      if (result.ok) {
+        setUpazilaOptions(result.items);
+      }
+      setIsUpazilaLoading(false);
+    }
+    void loadUpazilas();
+  }, [form.district_id]);
 
   const addTag = (tag: string) => {
     const trimmed = tag.trim().replace(/,/g, "");
@@ -324,6 +370,9 @@ export function NewsForm({
           type: form.type,
           youtube_video_url:
             form.type === "video" ? form.youtube_video_url : undefined,
+          division_id: form.division_id || undefined,
+          district_id: form.district_id || undefined,
+          upazila_id: form.upazila_id || undefined,
          
           feature_image_id:
             (form.type === "standard" ) &&
@@ -761,6 +810,98 @@ export function NewsForm({
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Location (Optional)</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid gap-5 md:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="division_id">Division</Label>
+              <Select
+                id="division_id"
+                value={form.division_id}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    division_id: event.target.value,
+                    district_id: "",
+                    upazila_id: "",
+                  }))
+                }
+                disabled={isDivisionLoading}
+              >
+                <option value="">
+                  {isDivisionLoading ? "Loading..." : "Select Division"}
+                </option>
+                {divisionOptions.map((division) => (
+                  <option key={division.id} value={division.id}>
+                    {division.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="district_id">District</Label>
+              <Select
+                id="district_id"
+                value={form.district_id}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    district_id: event.target.value,
+                    upazila_id: "",
+                  }))
+                }
+                disabled={!form.division_id || isDistrictLoading}
+              >
+                <option value="">
+                  {isDistrictLoading
+                    ? "Loading..."
+                    : form.division_id
+                      ? "Select District"
+                      : "Select Division first"}
+                </option>
+                {districtOptions.map((district) => (
+                  <option key={district.id} value={district.id}>
+                    {district.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="upazila_id">Upazila / Area</Label>
+              <Select
+                id="upazila_id"
+                value={form.upazila_id}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    upazila_id: event.target.value,
+                  }))
+                }
+                disabled={!form.district_id || isUpazilaLoading}
+              >
+                <option value="">
+                  {isUpazilaLoading
+                    ? "Loading..."
+                    : form.district_id
+                      ? "Select Upazila"
+                      : "Select District first"}
+                </option>
+                {upazilaOptions.map((upazila) => (
+                  <option key={upazila.id} value={upazila.id}>
+                    {upazila.name}
+                  </option>
+                ))}
+              </Select>
             </div>
           </div>
         </CardContent>

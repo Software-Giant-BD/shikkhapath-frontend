@@ -22,11 +22,13 @@ export function AmbulanceServiceCard({ service }: AmbulanceServiceCardProps) {
     window.location.href = `tel:${service.phone_number}`;
   };
 
+  const displayLocation = service.district?.bn_name || service.district?.name || "Unknown Location";
+
   return (
     <Card className="ase-fade-up group flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10">
       <div className="relative aspect-video w-full overflow-hidden">
         <Image
-          src={service.image_url}
+          src={service.ambulance_photo || "/placeholder-ambulance.jpg"}
           alt={service.provider_name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -42,13 +44,13 @@ export function AmbulanceServiceCard({ service }: AmbulanceServiceCardProps) {
         </div>
         <CardDescription className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
           <MapPin className="h-3.5 w-3.5 text-primary" />
-          {service.location}
+          {displayLocation}
         </CardDescription>
       </CardHeader>
 
       <CardContent className="flex-grow">
         <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
-          {service.description}
+          {service.ambulance_details}
         </p>
       </CardContent>
 

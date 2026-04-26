@@ -9,6 +9,7 @@ import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { Textarea } from "@/components/admin/ui/textarea";
 import { Select } from "@/components/admin/ui/select";
+import { RichTextEditor } from "../news/RichTextEditor";
 import type { JobApiModel } from "@/lib/api/jobs";
 import { createJobAction, updateJobAction } from "@/lib/api/jobs-actions";
 
@@ -38,6 +39,10 @@ export function JobForm({ initialData, headerTitle, headerAction }: JobFormProps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setFormData({ ...formData, description: value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,13 +208,9 @@ export function JobForm({ initialData, headerTitle, headerAction }: JobFormProps
 
         <div className="space-y-2">
           <Label htmlFor="description">Job Description</Label>
-          <Textarea
-            id="description"
-            name="description"
-            required
-            rows={8}
+          <RichTextEditor
             value={formData.description}
-            onChange={handleChange}
+            onChange={handleDescriptionChange}
             placeholder="Detailed job description, requirements, etc."
           />
         </div>

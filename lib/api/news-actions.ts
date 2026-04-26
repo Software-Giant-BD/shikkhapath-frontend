@@ -45,6 +45,9 @@ export type CreateNewsPayload = {
   meta_title?: string;
   meta_description?: string;
   meta_keywords?: string;
+  division_id?: string;
+  district_id?: string;
+  upazila_id?: string;
 };
 
 export async function createNewsAction(
