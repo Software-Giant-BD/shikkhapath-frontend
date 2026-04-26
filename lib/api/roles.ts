@@ -21,7 +21,9 @@ export type RolesListResult = {
 };
 
 function asObject(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -70,7 +72,14 @@ function extractList(payload: unknown): unknown[] {
   if (Array.isArray(root.resources)) return root.resources;
 
   const resources = asObject(root.resources);
-  const candidates = [root.data, root.roles, resources.roles, resources.data, resources.items, resources];
+  const candidates = [
+    root.data,
+    root.roles,
+    resources.roles,
+    resources.data,
+    resources.items,
+    resources,
+  ];
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
@@ -89,10 +98,21 @@ function extractOne(payload: unknown): unknown | null {
 
   const root = asObject(payload);
   const resources = asObject(root.resources);
-  const candidates = [root.role, root.data, resources.role, resources.data, resources.item, resources];
+  const candidates = [
+    root.role,
+    root.data,
+    resources.role,
+    resources.data,
+    resources.item,
+    resources,
+  ];
 
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      !Array.isArray(candidate)
+    ) {
       return candidate;
     }
   }
@@ -100,9 +120,11 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getRolesList(params?: GetRolesParams): Promise<RolesListResult> {
+export async function getRolesList(
+  params?: GetRolesParams,
+): Promise<RolesListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 20;
+  const fallbackper_page = params?.per_page ?? 20;
 
   try {
     const query = new URLSearchParams();
@@ -115,7 +137,9 @@ export async function getRolesList(params?: GetRolesParams): Promise<RolesListRe
       query.set("per_page", String(params.per_page));
     }
 
-    const path = query.toString() ? `/admin/roles?${query.toString()}` : "/admin/roles";
+    const path = query.toString()
+      ? `/admin/roles?${query.toString()}`
+      : "/admin/roles";
 
     const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
@@ -126,28 +150,32 @@ export async function getRolesList(params?: GetRolesParams): Promise<RolesListRe
 
     return {
       items: extractList(payload).map(normalizeRole),
-      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+      pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch roles:", error);
     return {
       items: [],
       pagination: {
-        currentPage: fallbackPage,
-        lastPage: fallbackPage,
-        perPage: fallbackPerPage,
+        current_page: fallbackPage,
+        last_page: fallbackPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };
   }
 }
 
-export async function getRoles(params?: GetRolesParams): Promise<RoleApiModel[]> {
+export async function getRoles(
+  params?: GetRolesParams,
+): Promise<RoleApiModel[]> {
   const { items } = await getRolesList(params);
   return items;
 }
 
-export async function getRoleById(roleId: string): Promise<RoleApiModel | null> {
+export async function getRoleById(
+  roleId: string,
+): Promise<RoleApiModel | null> {
   try {
     const response = await fetchApi(`/admin/roles/${roleId}`);
     const payload = await response.json().catch(() => null);
@@ -157,7 +185,9 @@ export async function getRoleById(roleId: string): Promise<RoleApiModel | null> 
     }
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load role details.");
+      throw new Error(
+        (payload as any)?.message || "Failed to load role details.",
+      );
     }
 
     const item = extractOne(payload);

@@ -60,27 +60,32 @@ export function extractFieldErrors(data: any): FieldErrors | null {
 export function extractPagination(
   payload: any,
   fallbackPage: number,
-  fallbackPerPage: number,
+  fallbackper_page: number,
 ): BasePagination {
   const pagination =
     payload?.pagination ?? payload?.meta?.pagination ?? payload?.meta;
+  const current_page = Math.max(
+    1,
+    Number(
+      pagination?.current_page ?? pagination?.current_page ?? fallbackPage,
+    ) || fallbackPage,
+  );
+  const last_page = Math.max(
+    1,
+    Number(pagination?.last_page ?? pagination?.last_page ?? fallbackPage) ||
+      fallbackPage,
+  );
+  const per_page = Math.max(
+    1,
+    Number(pagination?.per_page ?? pagination?.per_page ?? fallbackper_page) ||
+      fallbackper_page,
+  );
+  const total = Math.max(0, Number(pagination?.total ?? 0) || 0);
+
   return {
-    current_page: Math.max(
-      1,
-      Number(
-        pagination?.current_page ?? pagination?.currentPage ?? fallbackPage,
-      ) || fallbackPage,
-    ),
-    last_page: Math.max(
-      1,
-      Number(pagination?.last_page ?? pagination?.lastPage ?? fallbackPage) ||
-        fallbackPage,
-    ),
-    per_page: Math.max(
-      1,
-      Number(pagination?.per_page ?? pagination?.perPage ?? fallbackPerPage) ||
-        fallbackPerPage,
-    ),
-    total: Math.max(0, Number(pagination?.total ?? 0) || 0),
+    current_page: current_page,
+    last_page: last_page,
+    per_page: per_page,
+    total: total,
   };
 }

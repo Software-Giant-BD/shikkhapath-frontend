@@ -19,20 +19,29 @@ export default async function UsersListPage({
   searchParams: SearchParams;
 }) {
   const { page, search } = await searchParams;
-  const currentPage = Math.max(1, Number(page) || 1);
+  const current_page = Math.max(1, Number(page) || 1);
   const searchValue = search?.trim() || "";
 
   const usersResult = await getUsersList({
-    page: currentPage,
+    page: current_page,
     per_page: 20,
     search: searchValue || undefined,
   });
 
   const { items: users, pagination } = usersResult;
 
-  const startItem = pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.perPage + 1;
-  const endItem = Math.min(pagination.currentPage * pagination.perPage, pagination.total);
-  const pageLinks = Array.from({ length: pagination.lastPage }, (_, idx) => idx + 1);
+  const startItem =
+    pagination.total === 0
+      ? 0
+      : (pagination.current_page - 1) * pagination.per_page + 1;
+  const endItem = Math.min(
+    pagination.current_page * pagination.per_page,
+    pagination.total,
+  );
+  const pageLinks = Array.from(
+    { length: pagination.last_page },
+    (_, idx) => idx + 1,
+  );
   const getPageHref = (pageNumber: number) => {
     const query = new URLSearchParams();
     query.set("page", String(pageNumber));
@@ -56,14 +65,14 @@ export default async function UsersListPage({
           <UsersListFilters
             initialSearch={searchValue}
             title="Users"
-            action={(
+            action={
               <Link href="/admin/users/add">
                 <Button>
                   <Plus size={16} />
                   Add User
                 </Button>
               </Link>
-            )}
+            }
           />
 
           <div className="overflow-x-auto">
@@ -82,14 +91,27 @@ export default async function UsersListPage({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/70 transition-colors">
+                  <tr
+                    key={user.id}
+                    className="hover:bg-slate-50/70 transition-colors"
+                  >
                     <td className="px-6 py-4 text-slate-600">#{user.id}</td>
-                    <td className="px-6 py-4 font-medium text-slate-800">{user.name}</td>
+                    <td className="px-6 py-4 font-medium text-slate-800">
+                      {user.name}
+                    </td>
                     <td className="px-6 py-4 text-slate-600">{user.email}</td>
-                    <td className="px-6 py-4 text-slate-600">{user.phone || "-"}</td>
-                    <td className="px-6 py-4 text-slate-600">{user.role_name || user.role_id || "-"}</td>
-                    <td className="px-6 py-4 text-slate-600">{formatBoolean(user.is_active, "Active", "Inactive")}</td>
-                    <td className="px-6 py-4 text-slate-600">{formatBoolean(user.can_manage_news, "Yes", "No")}</td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {user.phone || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {user.role_name || user.role_id || "-"}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {formatBoolean(user.is_active, "Active", "Inactive")}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {formatBoolean(user.can_manage_news, "Yes", "No")}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <Link href={`/admin/users/${user.id}/edit`}>
                         <Button variant="secondary" size="sm">
@@ -102,7 +124,10 @@ export default async function UsersListPage({
                 ))}
                 {users.length === 0 ? (
                   <tr>
-                    <td className="px-6 py-8 text-center text-slate-500" colSpan={8}>
+                    <td
+                      className="px-6 py-8 text-center text-slate-500"
+                      colSpan={8}
+                    >
                       No users found.
                     </td>
                   </tr>
@@ -118,10 +143,10 @@ export default async function UsersListPage({
 
             <div className="flex items-center gap-2">
               <Link
-                href={getPageHref(Math.max(1, pagination.currentPage - 1))}
-                aria-disabled={pagination.currentPage <= 1}
+                href={getPageHref(Math.max(1, pagination.current_page - 1))}
+                aria-disabled={pagination.current_page <= 1}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.currentPage <= 1
+                  pagination.current_page <= 1
                     ? "pointer-events-none bg-slate-100 text-slate-400"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
@@ -134,7 +159,7 @@ export default async function UsersListPage({
                   key={pageNumber}
                   href={getPageHref(pageNumber)}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    pageNumber === pagination.currentPage
+                    pageNumber === pagination.current_page
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
@@ -144,10 +169,12 @@ export default async function UsersListPage({
               ))}
 
               <Link
-                href={getPageHref(Math.min(pagination.lastPage, pagination.currentPage + 1))}
-                aria-disabled={pagination.currentPage >= pagination.lastPage}
+                href={getPageHref(
+                  Math.min(pagination.last_page, pagination.current_page + 1),
+                )}
+                aria-disabled={pagination.current_page >= pagination.last_page}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.currentPage >= pagination.lastPage
+                  pagination.current_page >= pagination.last_page
                     ? "pointer-events-none bg-slate-100 text-slate-400"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}

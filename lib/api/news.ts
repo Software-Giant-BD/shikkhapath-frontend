@@ -274,7 +274,7 @@ export async function getNewsList(
   params?: GetNewsParams,
 ): Promise<NewsListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 20;
+  const fallbackper_page = params?.per_page ?? 20;
 
   try {
     const query = new URLSearchParams();
@@ -302,7 +302,7 @@ export async function getNewsList(
 
     return {
       items: extractList(payload).map(normalizeNews),
-      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+      pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch news list:", error);
@@ -310,9 +310,9 @@ export async function getNewsList(
     return {
       items: [],
       pagination: {
-        currentPage: fallbackPage,
-        lastPage: fallbackPage,
-        perPage: fallbackPerPage,
+        current_page: fallbackPage,
+        last_page: fallbackPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };

@@ -1,4 +1,4 @@
-import { type BasePagination } from "./api-utils";
+export { type BasePagination } from "./api-utils";
 
 export type AmbulanceStatus = "pending" | "approved" | "rejected";
 

@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CheckCircle, XCircle, Clock, Eye, Phone, FileText } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  Eye,
+  Phone,
+  FileText,
+} from "lucide-react";
 import {
   type AmbulanceService,
   type BasePagination,
@@ -201,7 +208,8 @@ export function AmbulanceTable({ items, pagination }: AmbulanceTableProps) {
                     <div className="flex justify-between border-b border-slate-200 pb-2">
                       <span className="text-slate-500">Location</span>
                       <span className="font-semibold text-slate-800">
-                        {selectedAmbulance.district?.bn_name || selectedAmbulance.district?.name}
+                        {selectedAmbulance.district?.bn_name ||
+                          selectedAmbulance.district?.name}
                       </span>
                     </div>
                     <div className="flex justify-between border-b border-slate-200 pb-2">
@@ -234,7 +242,7 @@ export function AmbulanceTable({ items, pagination }: AmbulanceTableProps) {
                       Approve Registration
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 h-12 rounded-xl font-bold"
                       onClick={() =>
                         handleStatusUpdate(selectedAmbulance.id, "rejected")

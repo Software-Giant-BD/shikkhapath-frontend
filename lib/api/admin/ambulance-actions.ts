@@ -22,7 +22,12 @@ function getMessage(payload: unknown, fallback: string): string {
   return fallback;
 }
 
-export async function getAdminAmbulanceList(params: { page?: number; per_page?: number; status?: string; search?: string }): Promise<{ items: AmbulanceService[]; pagination: BasePagination }> {
+export async function getAdminAmbulanceList(params: {
+  page?: number;
+  per_page?: number;
+  status?: string;
+  search?: string;
+}): Promise<{ items: AmbulanceService[]; pagination: BasePagination }> {
   const query = new URLSearchParams();
   if (params.page) query.append("page", params.page.toString());
   if (params.per_page) query.append("per_page", params.per_page.toString());
@@ -33,7 +38,10 @@ export async function getAdminAmbulanceList(params: { page?: number; per_page?: 
   const data = await response.json();
 
   if (!response.ok) {
-    return { items: [], pagination: { currentPage: 1, lastPage: 1, perPage: 20, total: 0 } };
+    return {
+      items: [],
+      pagination: { current_page: 1, last_page: 1, per_page: 20, total: 0 },
+    };
   }
 
   return {
@@ -45,7 +53,7 @@ export async function getAdminAmbulanceList(params: { page?: number; per_page?: 
 export async function updateAmbulanceStatusAction(
   ambulanceId: string,
   status: AmbulanceStatus,
-  rejectionReason?: string
+  rejectionReason?: string,
 ): Promise<AmbulanceActionResult> {
   try {
     const response = await fetchApi(`/admin/ambulances/${ambulanceId}/status`, {

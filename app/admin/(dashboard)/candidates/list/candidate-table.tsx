@@ -129,7 +129,7 @@ export function CandidateTable({ candidates: initialCandidates }: CandidateTable
                   {candidate.status === "rejected" ? (
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       className="h-8 border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                       onClick={() => handleStatusUpdate(candidate.id, "approved")}
                       disabled={loadingId === candidate.id}
@@ -140,7 +140,7 @@ export function CandidateTable({ candidates: initialCandidates }: CandidateTable
                   ) : (
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       className="h-8 border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700"
                       onClick={() => handleStatusUpdate(candidate.id, "rejected")}
                       disabled={loadingId === candidate.id}

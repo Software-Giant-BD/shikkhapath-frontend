@@ -10,28 +10,50 @@ import { DeleteAdvertisementButton } from "@/components/admin/advertisements/Del
 
 type SearchParams = Promise<{ page?: string }>;
 
-export default async function AdvertisementsListPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function AdvertisementsListPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   const { page } = await searchParams;
-  const currentPage = Math.max(1, Number(page) || 1);
+  const current_page = Math.max(1, Number(page) || 1);
 
-  const { items, pagination } = await getAdvertisements({ page: currentPage, per_page: 20 });
+  const { items, pagination } = await getAdvertisements({
+    page: current_page,
+    per_page: 20,
+  });
 
-  const startItem = pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.perPage + 1;
-  const endItem = Math.min(pagination.currentPage * pagination.perPage, pagination.total);
-  const pageLinks = Array.from({ length: pagination.lastPage }, (_, idx) => idx + 1);
-  const getPageHref = (pageNumber: number) => `/admin/advertisements/list?page=${pageNumber}`;
+  const startItem =
+    pagination.total === 0
+      ? 0
+      : (pagination.current_page - 1) * pagination.per_page + 1;
+  const endItem = Math.min(
+    pagination.current_page * pagination.per_page,
+    pagination.total,
+  );
+  const pageLinks = Array.from(
+    { length: pagination.last_page },
+    (_, idx) => idx + 1,
+  );
+  const getPageHref = (pageNumber: number) =>
+    `/admin/advertisements/list?page=${pageNumber}`;
 
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
       <PageHeader
         title=""
-        breadcrumbs={[{ label: "Home", href: "/admin" }, { label: "Advertisements" }]}
+        breadcrumbs={[
+          { label: "Home", href: "/admin" },
+          { label: "Advertisements" },
+        ]}
       />
 
       <Card>
         <CardContent className="p-0">
           <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">
-            <h1 className="text-2xl font-bold text-slate-800">Advertisement List</h1>
+            <h1 className="text-2xl font-bold text-slate-800">
+              Advertisement List
+            </h1>
 
             <Link href="/admin/advertisements/add">
               <Button>
@@ -55,21 +77,33 @@ export default async function AdvertisementsListPage({ searchParams }: { searchP
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {items.map((ad) => (
-                  <tr key={ad.id} className="transition-colors hover:bg-slate-50/70">
+                  <tr
+                    key={ad.id}
+                    className="transition-colors hover:bg-slate-50/70"
+                  >
                     <td className="px-6 py-4">
                       {ad.image ? (
                         <div className="relative h-12 w-20 overflow-hidden rounded-md border border-slate-200">
-                          <Image src={ad.image} alt={ad.name} fill className="object-cover" />
+                          <Image
+                            src={ad.image}
+                            alt={ad.name}
+                            fill
+                            className="object-cover"
+                          />
                         </div>
                       ) : (
                         <span className="text-slate-400">No image</span>
                       )}
                     </td>
-                    <td className="max-w-90 px-6 py-4 font-medium text-slate-800">{ad.name}</td>
+                    <td className="max-w-90 px-6 py-4 font-medium text-slate-800">
+                      {ad.name}
+                    </td>
                     <td className="px-6 py-4 text-slate-600">{ad.category}</td>
                     <td className="px-6 py-4 text-slate-600">{ad.placement}</td>
                     <td className="px-6 py-4">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${ad.status ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${ad.status ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}
+                      >
                         {ad.status ? "Active" : "Inactive"}
                       </span>
                     </td>
@@ -88,7 +122,10 @@ export default async function AdvertisementsListPage({ searchParams }: { searchP
                 ))}
                 {items.length === 0 ? (
                   <tr>
-                    <td className="px-6 py-8 text-center text-slate-500" colSpan={6}>
+                    <td
+                      className="px-6 py-8 text-center text-slate-500"
+                      colSpan={6}
+                    >
                       No advertisements found.
                     </td>
                   </tr>
@@ -105,10 +142,10 @@ export default async function AdvertisementsListPage({ searchParams }: { searchP
 
               <div className="flex items-center gap-2">
                 <Link
-                  href={getPageHref(Math.max(1, pagination.currentPage - 1))}
-                  aria-disabled={pagination.currentPage <= 1}
+                  href={getPageHref(Math.max(1, pagination.current_page - 1))}
+                  aria-disabled={pagination.current_page <= 1}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    pagination.currentPage <= 1
+                    pagination.current_page <= 1
                       ? "pointer-events-none bg-slate-100 text-slate-400"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
@@ -121,7 +158,7 @@ export default async function AdvertisementsListPage({ searchParams }: { searchP
                     key={pageNumber}
                     href={getPageHref(pageNumber)}
                     className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      pageNumber === pagination.currentPage
+                      pageNumber === pagination.current_page
                         ? "bg-indigo-600 text-white"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
@@ -131,10 +168,14 @@ export default async function AdvertisementsListPage({ searchParams }: { searchP
                 ))}
 
                 <Link
-                  href={getPageHref(Math.min(pagination.lastPage, pagination.currentPage + 1))}
-                  aria-disabled={pagination.currentPage >= pagination.lastPage}
+                  href={getPageHref(
+                    Math.min(pagination.last_page, pagination.current_page + 1),
+                  )}
+                  aria-disabled={
+                    pagination.current_page >= pagination.last_page
+                  }
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    pagination.currentPage >= pagination.lastPage
+                    pagination.current_page >= pagination.last_page
                       ? "pointer-events-none bg-slate-100 text-slate-400"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}

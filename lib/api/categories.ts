@@ -41,7 +41,9 @@ export type CategoriesListResult = {
 };
 
 function asObject(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -62,10 +64,14 @@ function asBoolean(value: unknown, fallback = false): boolean {
 }
 
 function normalizeStatus(value: unknown): CategoryStatus {
-  return asString(value, "draft").toLowerCase() === "published" ? "published" : "draft";
+  return asString(value, "draft").toLowerCase() === "published"
+    ? "published"
+    : "draft";
 }
 
-function normalizeParentCategory(value: unknown): CategoryParentApiModel | undefined {
+function normalizeParentCategory(
+  value: unknown,
+): CategoryParentApiModel | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
@@ -90,13 +96,22 @@ function normalizeCategory(value: unknown): CategoryApiModel {
     parent: normalizeParentCategory(item.parent),
     status: normalizeStatus(item.status),
     sort_order: asString(item.sort_order ?? item.sortOrder ?? "0"),
-    home_sort_order: asString(item.home_sort_order ?? item.homeSortOrder ?? item.sort_order ?? item.sortOrder ?? "0"),
+    home_sort_order: asString(
+      item.home_sort_order ??
+        item.homeSortOrder ??
+        item.sort_order ??
+        item.sortOrder ??
+        "0",
+    ),
     description: asString(item.description),
     meta_title: asString(item.meta_title ?? item.metaTitle),
     meta_description: asString(item.meta_description ?? item.metaDescription),
     meta_keywords: asString(item.meta_keywords ?? item.metaKeywords),
     show_in_menu: asBoolean(item.show_in_menu ?? item.showInMenu, true),
-    show_on_home: asBoolean(item.show_on_home ?? item.showOnHome ?? item.featured, false),
+    show_on_home: asBoolean(
+      item.show_on_home ?? item.showOnHome ?? item.featured,
+      false,
+    ),
     featured: asBoolean(item.featured, false),
     og_image_url: asString(item.og_image_url ?? item.ogImageUrl) || undefined,
     children_count: Number(item.children_count ?? 0),
@@ -152,10 +167,21 @@ function extractOne(payload: unknown): unknown | null {
 
   const resources = asObject(data.resources);
 
-  const candidates = [resources.category, resources.item, data.category, data.data, resources.data, resources];
+  const candidates = [
+    resources.category,
+    resources.item,
+    data.category,
+    data.data,
+    resources.data,
+    resources,
+  ];
 
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      !Array.isArray(candidate)
+    ) {
       return candidate;
     }
   }
@@ -163,9 +189,11 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getCategoriesList(params?: GetCategoriesParams): Promise<CategoriesListResult> {
+export async function getCategoriesList(
+  params?: GetCategoriesParams,
+): Promise<CategoriesListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 20;
+  const fallbackper_page = params?.per_page ?? 20;
 
   try {
     const query = new URLSearchParams();
@@ -178,39 +206,47 @@ export async function getCategoriesList(params?: GetCategoriesParams): Promise<C
       query.set("per_page", String(params.per_page));
     }
 
-    const path = query.toString() ? `/admin/categories?${query.toString()}` : "/admin/categories";
+    const path = query.toString()
+      ? `/admin/categories?${query.toString()}`
+      : "/admin/categories";
 
     const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load categories.");
+      throw new Error(
+        (payload as any)?.message || "Failed to load categories.",
+      );
     }
 
     return {
       items: extractList(payload).map(normalizeCategory),
-      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+      pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch categories:", error);
     return {
       items: [],
       pagination: {
-        currentPage: fallbackPage,
-        lastPage: fallbackPage,
-        perPage: fallbackPerPage,
+        current_page: fallbackPage,
+        last_page: fallbackPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };
   }
 }
 
-export async function getCategories(params?: GetCategoriesParams): Promise<CategoryApiModel[]> {
+export async function getCategories(
+  params?: GetCategoriesParams,
+): Promise<CategoryApiModel[]> {
   const { items } = await getCategoriesList(params);
   return items;
 }
 
-export async function getCategoryById(catId: string): Promise<CategoryApiModel | null> {
+export async function getCategoryById(
+  catId: string,
+): Promise<CategoryApiModel | null> {
   try {
     const response = await fetchApi(`/admin/categories/${catId}`);
     const payload = await response.json().catch(() => null);
@@ -237,11 +273,17 @@ export async function getCategoryById(catId: string): Promise<CategoryApiModel |
 
 export async function getMenuCategories(): Promise<CategoryApiModel[]> {
   try {
-    const response = await fetchApi("/menu-categories", { cache: "no-store" }, { includeAuth: false });
+    const response = await fetchApi(
+      "/menu-categories",
+      { cache: "no-store" },
+      { includeAuth: false },
+    );
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load menu categories.");
+      throw new Error(
+        (payload as any)?.message || "Failed to load menu categories.",
+      );
     }
 
     const items = extractList(payload);

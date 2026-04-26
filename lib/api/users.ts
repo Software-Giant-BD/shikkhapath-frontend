@@ -26,7 +26,9 @@ export type UsersListResult = {
 };
 
 function asObject(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -70,7 +72,14 @@ function extractList(payload: unknown): unknown[] {
   if (Array.isArray(root.resources)) return root.resources;
 
   const resources = asObject(root.resources);
-  const candidates = [root.data, root.users, resources.users, resources.data, resources.items, resources];
+  const candidates = [
+    root.data,
+    root.users,
+    resources.users,
+    resources.data,
+    resources.items,
+    resources,
+  ];
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
@@ -89,10 +98,21 @@ function extractOne(payload: unknown): unknown | null {
 
   const root = asObject(payload);
   const resources = asObject(root.resources);
-  const candidates = [root.user, root.data, resources.user, resources.data, resources.item, resources];
+  const candidates = [
+    root.user,
+    root.data,
+    resources.user,
+    resources.data,
+    resources.item,
+    resources,
+  ];
 
   for (const candidate of candidates) {
-    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+    if (
+      candidate &&
+      typeof candidate === "object" &&
+      !Array.isArray(candidate)
+    ) {
       return candidate;
     }
   }
@@ -100,9 +120,11 @@ function extractOne(payload: unknown): unknown | null {
   return null;
 }
 
-export async function getUsersList(params?: GetUsersParams): Promise<UsersListResult> {
+export async function getUsersList(
+  params?: GetUsersParams,
+): Promise<UsersListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 20;
+  const fallbackper_page = params?.per_page ?? 20;
 
   try {
     const query = new URLSearchParams();
@@ -123,7 +145,9 @@ export async function getUsersList(params?: GetUsersParams): Promise<UsersListRe
       query.set("role_id", params.role_id.trim());
     }
 
-    const path = query.toString() ? `/admin/users?${query.toString()}` : "/admin/users";
+    const path = query.toString()
+      ? `/admin/users?${query.toString()}`
+      : "/admin/users";
 
     const response = await fetchApi(path);
     const payload = await response.json().catch(() => null);
@@ -134,28 +158,32 @@ export async function getUsersList(params?: GetUsersParams): Promise<UsersListRe
 
     return {
       items: extractList(payload).map(normalizeUser),
-      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+      pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch users:", error);
     return {
       items: [],
       pagination: {
-        currentPage: fallbackPage,
-        lastPage: fallbackPage,
-        perPage: fallbackPerPage,
+        current_page: fallbackPage,
+        last_page: fallbackPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };
   }
 }
 
-export async function getUsers(params?: GetUsersParams): Promise<UserApiModel[]> {
+export async function getUsers(
+  params?: GetUsersParams,
+): Promise<UserApiModel[]> {
   const { items } = await getUsersList(params);
   return items;
 }
 
-export async function getUserById(userId: string): Promise<UserApiModel | null> {
+export async function getUserById(
+  userId: string,
+): Promise<UserApiModel | null> {
   try {
     const response = await fetchApi(`/admin/users/${userId}`);
     const payload = await response.json().catch(() => null);
@@ -165,7 +193,9 @@ export async function getUserById(userId: string): Promise<UserApiModel | null> 
     }
 
     if (!response.ok) {
-      throw new Error((payload as any)?.message || "Failed to load user details.");
+      throw new Error(
+        (payload as any)?.message || "Failed to load user details.",
+      );
     }
 
     const item = extractOne(payload);

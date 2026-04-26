@@ -45,9 +45,12 @@ export default async function NewsListPage({
   searchParams: SearchParams;
 }) {
   const { page } = await searchParams;
-  const currentPage = Math.max(1, Number(page) || 1);
+  const current_page = Math.max(1, Number(page) || 1);
 
-  const { items: newsItems, pagination } = await getNewsList({ page: currentPage, per_page: 20 });
+  const { items: newsItems, pagination } = await getNewsList({
+    page: current_page,
+    per_page: 20,
+  });
 
   const rows = newsItems.map((item) => ({
     id: item.id,
@@ -56,16 +59,28 @@ export default async function NewsListPage({
     category: item.category?.title || "-",
     subCategory: item.sub_category?.title || "-",
     author: item.author_name || "-",
-    status: (
-      item.status === "published" ? "Published" : item.status === "scheduled" ? "Scheduled" : "Draft"
-    ) as "Published" | "Scheduled" | "Draft",
+    status: (item.status === "published"
+      ? "Published"
+      : item.status === "scheduled"
+        ? "Scheduled"
+        : "Draft") as "Published" | "Scheduled" | "Draft",
     publishAt: formatDateTime(item.publish_at),
   }));
 
-  const startItem = pagination.total === 0 ? 0 : (pagination.currentPage - 1) * pagination.perPage + 1;
-  const endItem = Math.min(pagination.currentPage * pagination.perPage, pagination.total);
-  const pageLinks = Array.from({ length: pagination.lastPage }, (_, idx) => idx + 1);
-  const getPageHref = (pageNumber: number) => `/admin/news/list?page=${pageNumber}`;
+  const startItem =
+    pagination.total === 0
+      ? 0
+      : (pagination.current_page - 1) * pagination.per_page + 1;
+  const endItem = Math.min(
+    pagination.current_page * pagination.per_page,
+    pagination.total,
+  );
+  const pageLinks = Array.from(
+    { length: pagination.last_page },
+    (_, idx) => idx + 1,
+  );
+  const getPageHref = (pageNumber: number) =>
+    `/admin/news/list?page=${pageNumber}`;
 
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
@@ -103,18 +118,31 @@ export default async function NewsListPage({
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {rows.map((news) => (
-                  <tr key={news.id} className="transition-colors hover:bg-slate-50/70">
-                    <td className="max-w-90 px-6 py-4 font-medium text-slate-800">{news.title}</td>
+                  <tr
+                    key={news.id}
+                    className="transition-colors hover:bg-slate-50/70"
+                  >
+                    <td className="max-w-90 px-6 py-4 font-medium text-slate-800">
+                      {news.title}
+                    </td>
                     <td className="px-6 py-4 text-slate-600">/{news.slug}</td>
-                    <td className="px-6 py-4 text-slate-600">{news.category}</td>
-                    <td className="px-6 py-4 text-slate-600">{news.subCategory}</td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {news.category}
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {news.subCategory}
+                    </td>
                     <td className="px-6 py-4 text-slate-600">{news.author}</td>
                     <td className="px-6 py-4">
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(news.status)}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(news.status)}`}
+                      >
                         {news.status}
                       </span>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-slate-600">{news.publishAt}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-slate-600">
+                      {news.publishAt}
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <Link href={`/admin/news/${news.id}/edit`}>
                         <Button variant="secondary" size="sm">
@@ -127,7 +155,10 @@ export default async function NewsListPage({
                 ))}
                 {rows.length === 0 ? (
                   <tr>
-                    <td className="px-6 py-8 text-center text-slate-500" colSpan={8}>
+                    <td
+                      className="px-6 py-8 text-center text-slate-500"
+                      colSpan={8}
+                    >
                       No news found.
                     </td>
                   </tr>
@@ -143,10 +174,10 @@ export default async function NewsListPage({
 
             <div className="flex items-center gap-2">
               <Link
-                href={getPageHref(Math.max(1, pagination.currentPage - 1))}
-                aria-disabled={pagination.currentPage <= 1}
+                href={getPageHref(Math.max(1, pagination.current_page - 1))}
+                aria-disabled={pagination.current_page <= 1}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.currentPage <= 1
+                  pagination.current_page <= 1
                     ? "pointer-events-none bg-slate-100 text-slate-400"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
@@ -159,7 +190,7 @@ export default async function NewsListPage({
                   key={pageNumber}
                   href={getPageHref(pageNumber)}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    pageNumber === pagination.currentPage
+                    pageNumber === pagination.current_page
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
@@ -169,10 +200,12 @@ export default async function NewsListPage({
               ))}
 
               <Link
-                href={getPageHref(Math.min(pagination.lastPage, pagination.currentPage + 1))}
-                aria-disabled={pagination.currentPage >= pagination.lastPage}
+                href={getPageHref(
+                  Math.min(pagination.last_page, pagination.current_page + 1),
+                )}
+                aria-disabled={pagination.current_page >= pagination.last_page}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.currentPage >= pagination.lastPage
+                  pagination.current_page >= pagination.last_page
                     ? "pointer-events-none bg-slate-100 text-slate-400"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}

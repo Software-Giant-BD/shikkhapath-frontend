@@ -41,7 +41,7 @@ export async function getJobsList(
   isAdmin = false,
 ): Promise<JobListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 20;
+  const fallbackper_page = params?.per_page ?? 20;
 
   try {
     const query = new URLSearchParams();
@@ -70,7 +70,7 @@ export async function getJobsList(
 
     return {
       items: Array.isArray(items) ? items : [],
-      pagination: extractPagination(payload, fallbackPage, fallbackPerPage),
+      pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch jobs list:", error);
@@ -79,7 +79,7 @@ export async function getJobsList(
       pagination: {
         current_page: fallbackPage,
         last_page: fallbackPage,
-        per_page: fallbackPerPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };
@@ -256,7 +256,7 @@ export async function getCandidatesList(
   isAdmin = false,
 ): Promise<CandidateListResult> {
   const fallbackPage = params?.page ?? 1;
-  const fallbackPerPage = params?.per_page ?? 12;
+  const fallbackper_page = params?.per_page ?? 12;
 
   try {
     const query = new URLSearchParams();
@@ -266,7 +266,9 @@ export async function getCandidatesList(
     if (params?.profession) query.set("profession", params.profession);
 
     const basePath = isAdmin ? "/admin/candidates" : "/candidates";
-    const path = query.toString() ? `${basePath}?${query.toString()}` : basePath;
+    const path = query.toString()
+      ? `${basePath}?${query.toString()}`
+      : basePath;
     const response = await fetchApi(path, undefined, { includeAuth: isAdmin });
     const payload = await response.json().catch(() => null);
 
@@ -280,7 +282,7 @@ export async function getCandidatesList(
       items: Array.isArray(items) ? items : [],
       pagination:
         payload?.pagination ||
-        extractPagination(payload, fallbackPage, fallbackPerPage),
+        extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
     console.error("Failed to fetch candidates list:", error);
@@ -289,7 +291,7 @@ export async function getCandidatesList(
       pagination: {
         current_page: fallbackPage,
         last_page: fallbackPage,
-        per_page: fallbackPerPage,
+        per_page: fallbackper_page,
         total: 0,
       },
     };
