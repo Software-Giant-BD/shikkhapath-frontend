@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { type HeroNewsItem } from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
@@ -35,11 +36,18 @@ export function CategoryHero({ news }: Props) {
           <Link href={`/news/${main.url_slug}`} className="flex flex-col">
             <div className="relative aspect-[16/10] overflow-hidden">
               <Image
-                src={main.feature_image_url || "https://picsum.photos/seed/cat1/800/600"}
+                src={main.youtube_thumbnail_url || main.feature_image_url || "https://picsum.photos/seed/cat1/800/600"}
                 alt={main.title}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-105"
               />
+              {main.type === "video" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 shadow-2xl transition-transform group-hover:scale-110">
+                    <Play className="h-8 w-8 fill-red-600 text-red-600 ml-1.5" />
+                  </div>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
                 <h2 className="text-2xl font-black leading-tight text-white md:text-3xl lg:text-4xl group-hover:text-amber-400 transition-colors">
@@ -55,7 +63,14 @@ export function CategoryHero({ news }: Props) {
            {news.slice(3, 5).map((item) => (
              <article key={item.id} className="group flex flex-col gap-3">
                <Link href={`/news/${item.url_slug}`} className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
-                  <Image fill src={item.feature_image_url || "https://picsum.photos/seed/cs1/300/200"} alt={item.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <Image fill src={item.youtube_thumbnail_url || item.feature_image_url || "https://picsum.photos/seed/cs1/300/200"} alt={item.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  {item.type === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                        <Play className="h-4 w-4 fill-red-600 text-red-600 ml-0.5" />
+                      </div>
+                    </div>
+                  )}
                </Link>
                <div>
                   <h3 className="text-[15px] font-bold leading-snug line-clamp-2 group-hover:text-[#c00000] transition-colors">{item.title}</h3>
@@ -71,7 +86,14 @@ export function CategoryHero({ news }: Props) {
         {secondary && (
           <article className="group flex flex-col gap-4 border-b border-slate-100 pb-6">
             <Link href={`/news/${secondary.url_slug}`} className="relative aspect-video overflow-hidden rounded-xl">
-               <Image fill src={secondary.feature_image_url || "https://picsum.photos/seed/cat2/400/300"} alt={secondary.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+               <Image fill src={secondary.youtube_thumbnail_url || secondary.feature_image_url || "https://picsum.photos/seed/cat2/400/300"} alt={secondary.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
+               {secondary.type === "video" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                    <Play className="h-5 w-5 fill-red-600 text-red-600 ml-0.5" />
+                  </div>
+                </div>
+              )}
             </Link>
             <div className="space-y-2">
               <h3 className="text-lg font-bold leading-tight group-hover:text-[#c00000] transition-colors">{secondary.title}</h3>
@@ -85,7 +107,7 @@ export function CategoryHero({ news }: Props) {
            {news.slice(2, 3).map((item) => (
              <article key={item.id} className="group flex gap-3 items-center">
                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
-                  <Image fill src={item.feature_image_url || "https://picsum.photos/seed/cs3/300/200"} alt={item.title} className="object-cover" />
+                  <Image fill src={item.youtube_thumbnail_url || item.feature_image_url || "https://picsum.photos/seed/cs3/300/200"} alt={item.title} className="object-cover" />
                </div>
                <div>
                   <h4 className="text-[13px] font-bold leading-tight line-clamp-2 group-hover:text-[#c00000]">{item.title}</h4>

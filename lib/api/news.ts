@@ -539,7 +539,7 @@ export async function getCategoryPageData(
 
     const resources = payload?.resources || payload;
 
-    return {
+    const data: CategoryPageResponse = {
       category: {
         id: asString(resources.category?.id),
         title: asString(resources.category?.title),
@@ -571,6 +571,21 @@ export async function getCategoryPageData(
         total: asNumber(resources.meta?.total),
       },
     };
+
+    // Special fallback for video category if it's empty
+    if (slug === "video" && data.paginated_news.length === 0) {
+      const vNews = await getVideoNews();
+      if (vNews && vNews.length > 0) {
+        data.paginated_news = vNews;
+        if (data.latest_news.length === 0) data.latest_news = vNews;
+        if (data.popular_news.length === 0) data.popular_news = vNews.slice(0, 5);
+        data.meta.total = vNews.length;
+        data.meta.per_page = vNews.length;
+        data.meta.last_page = 1;
+      }
+    }
+
+    return data;
   } catch (error) {
     console.error(`Failed to fetch category data for ${slug}:`, error);
     return null;

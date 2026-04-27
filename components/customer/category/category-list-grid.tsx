@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Play } from "lucide-react";
 import { type HeroNewsItem } from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 
@@ -58,12 +58,20 @@ export function CategoryListGrid({
               <Image
                 fill
                 src={
+                  story.youtube_thumbnail_url ||
                   story.feature_image_url ||
                   "https://picsum.photos/seed/cs4/400/300"
                 }
                 alt={story.title}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
+              {story.type === "video" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                    <Play className="h-5 w-5 fill-red-600 text-red-600 ml-0.5" />
+                  </div>
+                </div>
+              )}
             </Link>
           </article>
         ))}
