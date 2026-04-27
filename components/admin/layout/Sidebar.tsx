@@ -15,6 +15,7 @@ import {
   X,
   Briefcase,
   Shield,
+  Flame,
 } from "lucide-react";
 
 type MenuItem = {
@@ -34,7 +35,6 @@ const menuConfig: MenuSection[] = [
     title: "Main",
     items: [
       { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-      { title: "Members", icon: UserCircle, href: "/admin/members/list" },
       {
         title: "Categories",
         icon: Tags,
@@ -78,7 +78,16 @@ const menuConfig: MenuSection[] = [
         ],
       },
       { title: "Ambulances", icon: Newspaper, href: "/admin/ambulances" },
-      { title: "Police Stations", icon: Shield, href: "/admin/police-stations" },
+      {
+        title: "Police Stations",
+        icon: Shield,
+        href: "/admin/police-stations",
+      },
+      {
+        title: "Fire Stations",
+        icon: Flame,
+        href: "/admin/fire-stations",
+      },
       { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
   },
@@ -180,7 +189,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     item.href === pathname ||
                     (hasSubItems &&
                       item.subItems?.some((sub) => sub.href === pathname));
-                  const isExpanded = expandedMenuTitle === item.title || isActive;
+                  const isExpanded =
+                    expandedMenuTitle === item.title || isActive;
                   const Icon = item.icon;
 
                   return (

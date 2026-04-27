@@ -107,7 +107,7 @@ export function PoliceStationTable({ items, pagination }: PoliceStationTableProp
                       </Button>
                     </Link>
                     <Button
-                      variant="destructive"
+                      variant="danger"
                       size="sm"
                       onClick={() => handleDelete(item.id)}
                       disabled={isDeleting === item.id}

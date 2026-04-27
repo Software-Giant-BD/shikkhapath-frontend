@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type FireStation, getFireStations } from "@/lib/api/fire-service";
+import { type FireStation } from "@/lib/api/fire-station-types";
+import { getFireStations } from "@/lib/api/fire-stations";
 import { FireStationCard } from "./fire-station-card";
-import { Loader2, SearchX, Map } from "lucide-react";
+import { Loader2, SearchX } from "lucide-react";
 
 interface FireStationListProps {
   filters: {
-    division: string;
-    city: string;
-    area: string;
+    division_id?: string;
+    district_id?: string;
+    upazila_id?: string;
+    search?: string;
     gps?: { lat: number; lng: number };
   };
 }
@@ -23,11 +25,12 @@ export function FireStationList({ filters }: FireStationListProps) {
       setIsLoading(true);
       try {
         const data = await getFireStations({
-          division: filters.division,
-          city: filters.city,
-          area: filters.area,
-          userLat: filters.gps?.lat,
-          userLng: filters.gps?.lng,
+          division_id: filters.division_id ? Number(filters.division_id) : undefined,
+          district_id: filters.district_id ? Number(filters.district_id) : undefined,
+          upazila_id: filters.upazila_id ? Number(filters.upazila_id) : undefined,
+          search: filters.search,
+          latitude: filters.gps?.lat,
+          longitude: filters.gps?.lng,
         });
         setStations(data);
       } catch (error) {
@@ -43,8 +46,8 @@ export function FireStationList({ filters }: FireStationListProps) {
   if (isLoading) {
     return (
       <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-        <Loader2 className="h-12 w-12 animate-spin text-red-600" />
-        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Loading Directory...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-orange-600" />
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 font-mono">Accessing Archives...</p>
       </div>
     );
   }
@@ -56,8 +59,8 @@ export function FireStationList({ filters }: FireStationListProps) {
           <SearchX className="h-12 w-12 text-slate-200" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-2xl font-black text-slate-800 tracking-tight">No Stations Found</h3>
-          <p className="max-w-xs text-sm font-bold text-slate-400 italic">
+          <h3 className="text-2xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Record Not Found</h3>
+          <p className="max-w-xs text-xs font-bold text-slate-400 italic">
             Try searching for a major division or city nearby.
           </p>
         </div>
