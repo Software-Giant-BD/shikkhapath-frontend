@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { type PoliceStation, getPoliceStations } from "@/lib/api/police-stations";
+import { type PoliceStation } from "@/lib/api/police-station-types";
+import { getPoliceStations } from "@/lib/api/police-stations";
 import { PoliceStationCard } from "./police-station-card";
 import { Loader2, SearchX } from "lucide-react";
 

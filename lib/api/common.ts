@@ -29,6 +29,7 @@ export async function fetchApi(
     ...init,
     headers: {
       Accept: "application/json",
+      ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },

@@ -14,6 +14,7 @@ import {
   ChevronRight,
   X,
   Briefcase,
+  Shield,
 } from "lucide-react";
 
 type MenuItem = {
@@ -77,6 +78,7 @@ const menuConfig: MenuSection[] = [
         ],
       },
       { title: "Ambulances", icon: Newspaper, href: "/admin/ambulances" },
+      { title: "Police Stations", icon: Shield, href: "/admin/police-stations" },
       { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
   },
