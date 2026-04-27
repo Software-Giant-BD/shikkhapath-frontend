@@ -18,11 +18,15 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+import { cn } from "@/lib/utils";
+
 interface PoliceStationCardProps {
   station: PoliceStation;
 }
 
 export function PoliceStationCard({ station }: PoliceStationCardProps) {
+  const isFarAway = (station.distance ?? 0) > 100;
+
   const handleCall = () => {
     window.location.href = `tel:${station.phone_number}`;
   };
@@ -35,7 +39,12 @@ export function PoliceStationCard({ station }: PoliceStationCardProps) {
   };
 
   return (
-    <Card className="ase-fade-up group relative overflow-hidden transition-all duration-300 hover:shadow-2xl border-slate-100 bg-white">
+    <Card
+      className={cn(
+        "ase-fade-up group relative overflow-hidden transition-all duration-300 hover:shadow-2xl border-slate-100",
+        isFarAway ? "bg-amber-50/40" : "bg-white"
+      )}
+    >
       <div className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full bg-slate-50 transition-transform duration-500 group-hover:scale-150" />
 
       <CardHeader className="flex-none pb-2 pt-8">
@@ -64,7 +73,7 @@ export function PoliceStationCard({ station }: PoliceStationCardProps) {
         {station.distance !== undefined && (
           <div className="inline-flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-blue-600">
             <Navigation className="h-3 w-3" />
-            {station.distance.toFixed(1)} km away
+            {station.distance?.toFixed(1)} km away
           </div>
         )}
       </CardContent>

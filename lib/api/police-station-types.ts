@@ -12,6 +12,7 @@ export type PoliceStation = {
   district?: { id: number; name: string; bn_name: string };
   upazila?: { id: number; name: string; bn_name: string };
   address?: string | null;
+  distance?: number | null;
   created_at: string;
   updated_at: string;
 };

@@ -43,7 +43,7 @@ export default async function RootLayout({
   const navLinks = menuCategoryLinks;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${sora.variable} ${sourceSerif.variable} antialiased`}>
         <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
           <SiteHeader navLinks={navLinks} />
