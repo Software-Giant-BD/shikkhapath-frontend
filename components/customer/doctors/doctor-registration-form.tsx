@@ -35,6 +35,7 @@ export function DoctorRegistrationForm({ onClose, onSuccess }: DoctorRegistratio
     available_days: [] as string[],
     available_time: "",
     nid_number: "",
+    bmdc_number: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -181,10 +182,14 @@ export function DoctorRegistrationForm({ onClose, onSuccess }: DoctorRegistratio
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-3">
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">Consultation Fee (Optional)</label>
               <input name="fee" type="number" value={formData.fee} onChange={handleInputChange} className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/30 px-5 py-4 text-sm font-bold text-slate-700 transition-all focus:border-blue-500 focus:bg-white" placeholder="In BDT (e.g. 1000)" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">BM&DC Registration No.</label>
+              <input name="bmdc_number" value={formData.bmdc_number} onChange={handleInputChange} className="w-full rounded-2xl border-2 border-slate-100 bg-slate-50/30 px-5 py-4 text-sm font-bold text-slate-700 transition-all focus:border-blue-500 focus:bg-white" placeholder="A-12345" />
             </div>
             <div className="space-y-2">
               <label className="text-xs font-black uppercase tracking-widest text-slate-400 px-1">NID for Verification</label>

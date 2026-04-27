@@ -17,6 +17,7 @@ export type DoctorProfile = {
   image_url?: string;
   clinic_image_url?: string;
   nid_number: string;
+  bmdc_number?: string;
   status: DoctorStatus;
   created_at: string;
 };
@@ -32,6 +33,7 @@ export type RegisterDoctorParams = {
   available_days: string[];
   available_time: string;
   nid_number: string;
+  bmdc_number?: string;
   profile_image?: File;
   clinic_image?: File;
 };
@@ -50,6 +52,7 @@ const MOCK_DOCTORS: DoctorProfile[] = [
     available_time: "5:00 PM - 8:00 PM",
     image_url: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400",
     nid_number: "1234567890",
+    bmdc_number: "A-12345",
     status: "approved",
     created_at: new Date().toISOString(),
   },
@@ -80,6 +83,7 @@ const MOCK_DOCTORS: DoctorProfile[] = [
     available_time: "6:00 PM - 9:00 PM",
     image_url: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=400",
     nid_number: "1122334455",
+    bmdc_number: "A-54321",
     status: "approved",
     created_at: new Date().toISOString(),
   },

@@ -65,10 +65,12 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
               <Hospital className="h-3.5 w-3.5 text-blue-500" />
               {doctor.hospital}
             </div>
-            <div className="mt-2 flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded shadow-sm border border-emerald-100">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              BM&DC Registered Verified
-            </div>
+            {doctor.bmdc_number && (
+              <div className="mt-2 flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-1 rounded shadow-sm border border-emerald-100">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                BM&DC Registered Verified
+              </div>
+            )}
           </div>
         </div>
       </CardHeader>
