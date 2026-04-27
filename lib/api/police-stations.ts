@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { fetchApi } from "./common";
 import {
   type PoliceStation,
@@ -41,6 +42,8 @@ export async function getPoliceStations(params?: {
     query.set("division", params.division);
   if (params?.city) query.set("city", params.city);
   if (params?.area) query.set("area", params.area);
+  if (params?.userLat) query.set("latitude", params.userLat.toString());
+  if (params?.userLng) query.set("longitude", params.userLng.toString());
 
   const endpoint = params?.isAdmin
     ? "/admin/police-stations"
@@ -63,7 +66,7 @@ export async function getPoliceStation(id: number): Promise<PoliceStation> {
   const response = await fetchApi(`/admin/police-stations/${id}`);
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Failed to fetch station");
-  return data.data;
+  return data.resources;
 }
 
 export async function createPoliceStation(data: any) {
@@ -74,7 +77,8 @@ export async function createPoliceStation(data: any) {
   const result = await response.json();
   if (!response.ok)
     throw new Error(result.message || "Failed to create station");
-  return result.data;
+  revalidatePath("/admin/police-stations");
+  return result.resources;
 }
 
 export async function updatePoliceStation(id: number, data: any) {
@@ -85,7 +89,8 @@ export async function updatePoliceStation(id: number, data: any) {
   const result = await response.json();
   if (!response.ok)
     throw new Error(result.message || "Failed to update station");
-  return result.data;
+  revalidatePath("/admin/police-stations");
+  return result.resources;
 }
 
 export async function deletePoliceStation(id: number) {
@@ -95,5 +100,6 @@ export async function deletePoliceStation(id: number) {
   const result = await response.json();
   if (!response.ok)
     throw new Error(result.message || "Failed to delete station");
-  return result.data;
+  revalidatePath("/admin/police-stations");
+  return result.resources;
 }

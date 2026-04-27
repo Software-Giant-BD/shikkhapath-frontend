@@ -5,10 +5,14 @@ import { PageHeader } from "@/components/admin/ui/page-header";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { Button } from "@/components/admin/ui/button";
 import { PoliceStationTable } from "./police-station-table";
+import { PoliceStationListFilters } from "./police-station-list-filters";
 
 type SearchParams = Promise<{
   page?: string;
   search?: string;
+  division_id?: string;
+  district_id?: string;
+  upazila_id?: string;
 }>;
 
 export default async function PoliceStationsPage({
@@ -16,12 +20,15 @@ export default async function PoliceStationsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { page, search } = await searchParams;
+  const { page, search, division_id, district_id, upazila_id } = await searchParams;
   const current_page = Math.max(1, Number(page) || 1);
 
   const { items, pagination } = await getPoliceStations({
     page: current_page,
     search: search,
+    division_id: division_id ? Number(division_id) : undefined,
+    district_id: district_id ? Number(district_id) : undefined,
+    upazila_id: upazila_id ? Number(upazila_id) : undefined,
     isAdmin: true,
   });
 
@@ -54,6 +61,7 @@ export default async function PoliceStationsPage({
             </Link>
           </div>
 
+          <PoliceStationListFilters />
           <PoliceStationTable items={items} pagination={pagination} />
         </CardContent>
       </Card>

@@ -5,7 +5,11 @@ import { notFound } from "next/navigation";
 
 type Params = Promise<{ id: string }>;
 
-export default async function EditPoliceStationPage({ params }: { params: Params }) {
+export default async function EditPoliceStationPage({
+  params,
+}: {
+  params: Params;
+}) {
   const { id } = await params;
   const stationId = parseInt(id);
 

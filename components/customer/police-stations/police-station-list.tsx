@@ -8,9 +8,10 @@ import { Loader2, SearchX } from "lucide-react";
 
 interface PoliceStationListProps {
   filters: {
-    division: string;
-    city: string;
-    area: string;
+    division_id?: string;
+    district_id?: string;
+    upazila_id?: string;
+    search?: string;
     gps?: { lat: number; lng: number };
   };
 }
@@ -24,9 +25,10 @@ export function PoliceStationList({ filters }: PoliceStationListProps) {
       setIsLoading(true);
       try {
         const data = await getPoliceStations({
-          division: filters.division,
-          city: filters.city,
-          area: filters.area,
+          division_id: filters.division_id ? Number(filters.division_id) : undefined,
+          district_id: filters.district_id ? Number(filters.district_id) : undefined,
+          upazila_id: filters.upazila_id ? Number(filters.upazila_id) : undefined,
+          search: filters.search,
           userLat: filters.gps?.lat,
           userLng: filters.gps?.lng,
         });
