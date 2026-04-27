@@ -52,6 +52,11 @@ export type NewsApiModel = {
 export type GetNewsParams = {
   page?: number;
   per_page?: number;
+  search?: string;
+  status?: NewsStatus;
+  type?: "standard" | "video";
+  category_id?: string | number;
+  language?: string;
 };
 
 export type NewsListResult = {
@@ -285,6 +290,26 @@ export async function getNewsList(
 
     if (params?.per_page !== undefined) {
       query.set("per_page", String(params.per_page));
+    }
+
+    if (params?.search) {
+      query.set("search", params.search);
+    }
+
+    if (params?.status) {
+      query.set("status", params.status);
+    }
+
+    if (params?.type) {
+      query.set("type", params.type);
+    }
+
+    if (params?.category_id !== undefined && String(params.category_id).trim()) {
+      query.set("category_id", String(params.category_id));
+    }
+
+    if (params?.language) {
+      query.set("language", params.language);
     }
 
     const path = query.toString()
