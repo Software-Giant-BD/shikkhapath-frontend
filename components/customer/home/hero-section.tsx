@@ -361,43 +361,6 @@ export function HeroSection({
           className="my-0"
         />
 
-        {/* Video News Sidebar Section */}
-        {videoNews && videoNews.length > 0 && (
-          <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
-            <div className="bg-slate-900 px-5 py-3 text-center">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">
-                Video News
-              </h4>
-            </div>
-            <div className="flex flex-col p-3 gap-4">
-              {videoNews.slice(0, 4).map((video, vIdx) => (
-                <Link
-                  key={vIdx}
-                  href={`/news/${video.url_slug}`}
-                  className="group flex flex-col gap-2"
-                >
-                  <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-100">
-                    <Image
-                      src={video.youtube_thumbnail_url || video.feature_image_url || "/placeholder-news.jpg"}
-                      alt={video.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
-                        <Play className="h-3 w-3 fill-red-600 text-red-600 ml-0.5" />
-                      </div>
-                    </div>
-                  </div>
-                  <h5 className="line-clamp-2 text-[13px] font-bold leading-snug text-slate-900 group-hover:text-red-600 transition-colors">
-                    {video.title}
-                  </h5>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
           {/* Hub Header */}
           <div className="bg-slate-900 px-5 py-4 text-center">
@@ -453,6 +416,43 @@ export function HeroSection({
             </p>
           </div>
         </div>
+
+        {/* Video News Sidebar Section */}
+        {videoNews && videoNews.length > 0 && (
+          <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
+            <div className="bg-slate-900 px-5 py-3 text-center">
+              <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">
+                Video News
+              </h4>
+            </div>
+            <div className="flex flex-col p-3 gap-4">
+              {videoNews.slice(0, 2).map((video, vIdx) => (
+                <Link
+                  key={vIdx}
+                  href={`/news/${video.url_slug}`}
+                  className="group flex flex-col gap-2"
+                >
+                  <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-100">
+                    <Image
+                      src={video.youtube_thumbnail_url || video.feature_image_url || "/placeholder-news.jpg"}
+                      alt={video.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                        <Play className="h-3 w-3 fill-red-600 text-red-600 ml-0.5" />
+                      </div>
+                    </div>
+                  </div>
+                  <h5 className="line-clamp-2 text-[13px] font-bold leading-snug text-slate-900 group-hover:text-red-600 transition-colors">
+                    {video.title}
+                  </h5>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Small Ad Slot at the bottom of Hub */}
         <AdBanner
