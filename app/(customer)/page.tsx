@@ -87,7 +87,7 @@ export default async function Home() {
           placement="Top Banner Ad"
         />
 
-        <HeroSection data={heroNews} popularNews={popularNews} latestNews={latestNews} />
+        <HeroSection data={heroNews} popularNews={popularNews} latestNews={latestNews} videoNews={videoNews} />
 
         {primarySections.map((section) => (
           <NewsSectionBlock key={section.category.id} sectionData={section} />
