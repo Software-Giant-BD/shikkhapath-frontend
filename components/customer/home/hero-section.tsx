@@ -353,8 +353,7 @@ export function HeroSection({
       <aside className="flex flex-col gap-4">
         <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
           {/* Hub Header */}
-          <div className="bg-slate-900 px-5 py-5 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-red-500/10 animate-pulse"></div>
+          <div className="bg-[#036735] px-5 py-5 text-center relative overflow-hidden">
             <h4 className="relative text-[18px] font-black uppercase tracking-[0.1em] text-amber-400 drop-shadow-md flex items-center justify-center gap-2">
               Emergency Contact
             </h4>
