@@ -1,4 +1,4 @@
-  import "server-only";
+import "server-only";
 import { fetchApi, extractPagination, type BasePagination } from "./common";
 
 export interface AdmissionUniversityModel {
@@ -28,7 +28,7 @@ export interface AdmissionListResult {
 
 export interface GetFilters {
   page?: number;
-  limit?: number;
+  per_page?: number;
 }
 
 export async function getAdmissions(
@@ -36,26 +36,25 @@ export async function getAdmissions(
 ): Promise<AdmissionListResult> {
   const searchParams = new URLSearchParams();
   if (params?.page) searchParams.set("page", params.page.toString());
-  if (params?.limit) searchParams.set("limit", params.limit.toString());
+  if (params?.per_page)
+    searchParams.set("per_page", params.per_page.toString());
 
   const query = searchParams.toString();
-  const url = query ? `/api/admissions?${query}` : `/api/admissions`;
+  const url = query ? `/admin/admissions?${query}` : `/admin/admissions`;
 
   try {
     const res = await fetchApi(url, {
       next: { revalidate: 60, tags: ["admissions"] },
     });
     if (!res.ok) throw new Error("Failed to fetch admissions");
-    const json = await res.json();
+    const data = await res.json();
+    const items = Array.isArray(data.resources) ? data.resources : [];
     return {
-      items: (json.data || []).map((item: any) => ({
-        ...item,
-        id: item.id?.toString() || Math.random().toString(),
-      })),
+      items: items,
       pagination: extractPagination(
-        json,
+        data,
         params?.page || 1,
-        params?.limit || 15,
+        params?.per_page || 15,
       ),
     };
   } catch (err) {
@@ -65,7 +64,7 @@ export async function getAdmissions(
       pagination: {
         current_page: 1,
         last_page: 1,
-        per_page: params?.limit || 15,
+        per_page: params?.per_page || 15,
         total: 0,
       },
     };
@@ -118,7 +117,9 @@ export async function deleteAdmission(id: string): Promise<void> {
   }
 }
 
-export async function getAdmission(id: string): Promise<AdmissionUniversityModel | null> {
+export async function getAdmission(
+  id: string,
+): Promise<AdmissionUniversityModel | null> {
   try {
     const res = await fetchApi(`/admin/admissions/${id}`);
     if (!res.ok) return null;
