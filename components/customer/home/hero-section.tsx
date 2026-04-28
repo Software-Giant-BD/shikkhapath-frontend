@@ -351,16 +351,6 @@ export function HeroSection({
 
       {/* Right Column: Sidebar */}
       <aside className="flex flex-col gap-4">
-        {/* Sidebar Top Ad */}
-        <AdBanner
-          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
-          category="Home page"
-          placement="Sidebar Ad"
-          heightClass="h-[250px]"
-          fit="contain"
-          className="my-0"
-        />
-
         <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
           {/* Hub Header */}
           <div className="bg-slate-900 px-5 py-4 text-center">
@@ -416,6 +406,16 @@ export function HeroSection({
             </p>
           </div>
         </div>
+
+        {/* Sidebar Ad Moved Below Hub */}
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
+          category="Home page"
+          placement="Sidebar Ad"
+          heightClass="h-[250px]"
+          fit="contain"
+          className="my-0"
+        />
 
         {/* Video News Sidebar Section */}
         {videoNews && videoNews.length > 0 && (
