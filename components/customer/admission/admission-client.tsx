@@ -28,14 +28,34 @@ export function AdmissionClient() {
   useEffect(() => {
     const loadUniversities = async () => {
       setLoading(true);
-      try {
-        const res = await fetchAdmissionsAction();
-        setUniversities(res.items);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      
+      const customData: AdmissionUniversityModel[] = [
+        { id: "med", name: "Medical Colleges", unit: "MBBS (Central)", exam_date: "2026-02-09T00:00:00Z", app_start_date: "2026-01-11T00:00:00Z", app_deadline: "2026-01-23T00:00:00Z", exam_type: "MCQ", seats: 5380, tags: ["MEDICAL"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "du", name: "University of Dhaka", unit: "All Units", exam_date: "2026-03-01T00:00:00Z", app_start_date: "2026-01-15T00:00:00Z", app_deadline: "2026-02-15T00:00:00Z", exam_type: "Written & MCQ", seats: 5965, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "cu", name: "University of Chittagong", unit: "All Units", exam_date: "2026-03-22T00:00:00Z", app_start_date: "2026-01-10T00:00:00Z", app_deadline: "2026-02-12T00:00:00Z", exam_type: "MCQ", seats: 4926, tags: ["PUBLIC"], req_ssc: 3.5, req_hsc: 3.5, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "ru", name: "University of Rajshahi", unit: "All Units", exam_date: "2026-03-20T00:00:00Z", app_start_date: "2026-02-05T00:00:00Z", app_deadline: "2026-03-01T00:00:00Z", exam_type: "MCQ", seats: 4000, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 7.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "cou", name: "Comilla University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1040, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "sust", name: "Shahjalal University of Sci & Tech (SUST)", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1700, tags: ["SCIENCE & TECH"], req_ssc: 3.5, req_hsc: 3.5, req_total: 8.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "bup", name: "Bangladesh Univ. of Professionals (BUP)", unit: "All Units", exam_date: "2026-03-10T00:00:00Z", app_start_date: "2026-01-20T00:00:00Z", app_deadline: "2026-02-20T00:00:00Z", exam_type: "MCQ", seats: 1250, tags: ["PUBLIC"], req_ssc: 4.0, req_hsc: 4.0, req_total: 8.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "buet", name: "BUET", unit: "Engineering", exam_date: "2026-04-10T00:00:00Z", app_start_date: "2026-01-20T00:00:00Z", app_deadline: "2026-02-25T00:00:00Z", exam_type: "Written", seats: 1305, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 5.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "cuet", name: "CUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 960, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "kuet", name: "KUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 1065, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "ruet", name: "RUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 1235, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "duet", name: "DUET", unit: "Engineering", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written", seats: 880, tags: ["ENGINEERING"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.0, allowed_groups: ["Science"], apply_url: "#" }, // DUET is for diploma
+        { id: "butex", name: "BUTEX", unit: "Engineering", exam_date: "2026-04-20T00:00:00Z", app_start_date: "2026-02-15T00:00:00Z", app_deadline: "2026-03-15T00:00:00Z", exam_type: "Written", seats: 600, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 8.5, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "gst", name: "GST Cluster", unit: "24 Universities", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 21000, tags: ["CLUSTER"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "iut", name: "IUT", unit: "Engineering", exam_date: "2026-04-05T00:00:00Z", app_start_date: "2026-01-10T00:00:00Z", app_deadline: "2026-02-10T00:00:00Z", exam_type: "MCQ", seats: 750, tags: ["INT. UNIVERSITY"], req_ssc: 4.5, req_hsc: 4.5, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "jnu", name: "Jagannath University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 2765, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "ju", name: "Jahangirnagar University", unit: "All Units", exam_date: "2026-03-25T00:00:00Z", app_start_date: "2026-02-10T00:00:00Z", app_deadline: "2026-03-10T00:00:00Z", exam_type: "MCQ", seats: 1889, tags: ["PUBLIC"], req_ssc: 3.5, req_hsc: 3.5, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "ku", name: "Khulna University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1200, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "agri", name: "Agriculture Cluster", unit: "9 Universities", exam_date: "2026-05-25T00:00:00Z", app_start_date: "2026-04-10T00:00:00Z", app_deadline: "2026-05-10T00:00:00Z", exam_type: "MCQ", seats: 3539, tags: ["AGRICULTURE"], req_ssc: 3.5, req_hsc: 3.5, req_total: 8.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "mist", name: "MIST", unit: "Engineering", exam_date: "2026-03-15T00:00:00Z", app_start_date: "2026-01-15T00:00:00Z", app_deadline: "2026-02-15T00:00:00Z", exam_type: "Written", seats: 570, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
+        { id: "nu", name: "National University", unit: "Honours", exam_date: "2026-05-10T00:00:00Z", app_start_date: "2026-04-01T00:00:00Z", app_deadline: "2026-04-30T00:00:00Z", exam_type: "GPA Based", seats: "400,000+", tags: ["NATIONAL"], req_ssc: 2.5, req_hsc: 2.5, req_total: 6.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
+        { id: "nursing", name: "Nursing Admissions", unit: "B.Sc & Diploma", exam_date: "2026-05-05T00:00:00Z", app_start_date: "2026-03-01T00:00:00Z", app_deadline: "2026-04-05T00:00:00Z", exam_type: "MCQ", seats: "3,000+", tags: ["NURSING"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" }
+      ];
+
+      setUniversities(customData);
+      setLoading(false);
     };
     loadUniversities();
   }, []);
