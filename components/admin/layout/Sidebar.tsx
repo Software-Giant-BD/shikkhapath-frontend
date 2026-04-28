@@ -16,6 +16,7 @@ import {
   Briefcase,
   Shield,
   Flame,
+  University,
 } from "lucide-react";
 
 type MenuItem = {
@@ -87,6 +88,14 @@ const menuConfig: MenuSection[] = [
         title: "Fire Stations",
         icon: Flame,
         href: "/admin/fire-stations",
+      },
+      {
+        title: "Admissions",
+        icon: University,
+        subItems: [
+          { title: "Admission List", href: "/admin/admissions" },
+          { title: "Add Admission", href: "/admin/admissions/add" },
+        ],
       },
       { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
     ],
