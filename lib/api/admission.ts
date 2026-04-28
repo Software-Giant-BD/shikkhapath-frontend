@@ -1,4 +1,4 @@
-import "server-only";
+  import "server-only";
 import { fetchApi, extractPagination, type BasePagination } from "./common";
 
 export interface AdmissionUniversityModel {
@@ -9,7 +9,7 @@ export interface AdmissionUniversityModel {
   exam_date: string;
   app_start_date: string;
   app_deadline: string;
-  exam_type: "Written" | "MCQ" | "Online" | "Written & MCQ";
+  exam_type: "Written" | "MCQ" | "Online" | "Written & MCQ" | "GPA Based";
   seats: number | string;
   tags: string[];
 

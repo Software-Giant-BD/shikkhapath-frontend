@@ -23,6 +23,7 @@ const EXAM_TYPES: AdmissionUniversityModel["exam_type"][] = [
   "MCQ",
   "Online",
   "Written & MCQ",
+  "GPA Based",
 ];
 
 export function AdmissionForm({ initialData }: AdmissionFormProps) {
