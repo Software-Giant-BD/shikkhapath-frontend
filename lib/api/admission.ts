@@ -29,6 +29,7 @@ export interface AdmissionListResult {
 export interface GetFilters {
   page?: number;
   per_page?: number;
+  isAdmin?: boolean;
 }
 
 export async function getAdmissions(
@@ -40,7 +41,9 @@ export async function getAdmissions(
     searchParams.set("per_page", params.per_page.toString());
 
   const query = searchParams.toString();
-  const url = query ? `/admin/admissions?${query}` : `/admin/admissions`;
+  const isAdmin = params?.isAdmin !== false;
+  const basePath = isAdmin ? "/admin/admissions" : "/admissions";
+  const url = query ? `${basePath}?${query}` : basePath;
 
   try {
     const res = await fetchApi(url, {

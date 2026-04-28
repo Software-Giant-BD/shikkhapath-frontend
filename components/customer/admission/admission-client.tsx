@@ -14,7 +14,7 @@ interface FilterState {
   group: string;
 }
 
-export function AdmissionClient() {
+export function AdmissionClient({ isAdmin = true }: { isAdmin?: boolean }) {
   const [universities, setUniversities] = useState<AdmissionUniversityModel[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +29,7 @@ export function AdmissionClient() {
     const loadUniversities = async () => {
       setLoading(true);
       try {
-        const response = await fetchAdmissionsAction();
+        const response = await fetchAdmissionsAction({ isAdmin });
         setUniversities(response.items);
       } catch (error) {
         console.error("Failed to load admissions", error);
@@ -39,7 +39,7 @@ export function AdmissionClient() {
       }
     };
     loadUniversities();
-  }, []);
+  }, [isAdmin]);
 
   const handleEligibilityCheck = (e: React.FormEvent) => {
     e.preventDefault();
