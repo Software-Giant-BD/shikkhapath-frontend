@@ -102,7 +102,7 @@ export default async function Home() {
           </div>
         ) : null}
 
-        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৬০ ]" category="Home page" placement="In-Feed / Mid-Page Ad" />
+        <AdBanner label="[ বিজ্ঞাপন — ৯৭০×৯০ ]" category="Home page" placement="In-Feed / Mid-Page Ad" heightClass="h-24 sm:h-32" />
 
         <TabSectionBlock data={tabNews} />
 
