@@ -6,17 +6,17 @@ export function FinalCtaSection() {
 
 export function SiteFooter() {
   const footerCategories = [
-    { label: "শিক্ষাঙ্গন", href: "/news?category=education" },
-    { label: "উচ্চশিক্ষা", href: "/news?category=higher-education" },
-    { label: "ভর্তি পরীক্ষা", href: "/news?category=admission" },
-    { label: "কর্মজীবন", href: "/news?category=career" },
-    { label: "জাতীয়", href: "/news?category=national" },
-    { label: "আন্তর্জাতিক", href: "/news?category=international" },
-    { label: "বিজ্ঞান ও প্রযুক্তি", href: "/news?category=science" },
-    { label: "খেলাধুলা", href: "/news?category=sports" },
-    { label: "অর্থনীতি", href: "/news?category=economy" },
-    { label: "মুক্তমত", href: "/news?category=opinion" },
-    { label: "ভিডিও", href: "/news?category=video" },
+    { label: "শিক্ষাঙ্গন", href: "/category/education" },
+    { label: "উচ্চশিক্ষা", href: "/category/higher-education" },
+    { label: "ভর্তি পরীক্ষা", href: "/category/admission" },
+    { label: "কর্মজীবন", href: "/category/career" },
+    { label: "জাতীয়", href: "/category/national" },
+    { label: "আন্তর্জাতিক", href: "/category/international" },
+    { label: "বিজ্ঞান ও প্রযুক্তি", href: "/category/science" },
+    { label: "খেলাধুলা", href: "/category/sports" },
+    { label: "অর্থনীতি", href: "/category/economy" },
+    { label: "মুক্তমত", href: "/category/opinion" },
+    { label: "ভিডিও", href: "/category/video" },
     { label: "যোগাযোগ", href: "/contact-us" },
   ]
 
@@ -99,9 +99,18 @@ export function SiteFooter() {
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-between gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
-          <p>© ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।</p>
-          <p>সম্পাদক ও প্রকাশক: মো. নাফিস | নিউজরুম: newsroom@shikkhapath.news</p>
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-center gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
+          <p>
+            © ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত। Developed by{" "}
+            <a
+              href="https://gpit.com.bd/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold transition-colors hover:text-[#c79a1d]"
+            >
+              GPIT
+            </a>
+          </p>
         </div>
       </div>
     </footer>
