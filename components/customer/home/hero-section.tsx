@@ -228,7 +228,7 @@ export function HeroSection({
         {topicData && (
           <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
             {/* Block Header */}
-            <div className="flex h-11 items-center justify-between bg-slate-950 px-4 text-white">
+            <div className="flex h-11 items-center justify-between bg-[#036735] px-4 text-white">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-600 animate-pulse" />
                 <span className="text-[14px] font-black tracking-tight line-clamp-1">
@@ -351,25 +351,12 @@ export function HeroSection({
 
       {/* Right Column: Sidebar */}
       <aside className="flex flex-col gap-4">
-        {/* Sidebar Top Ad */}
-        <AdBanner
-          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
-          category="Home page"
-          placement="Sidebar Ad"
-          heightClass="h-[250px]"
-          fit="contain"
-          className="my-0"
-        />
-
         <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
           {/* Hub Header */}
-          <div className="bg-slate-900 px-5 py-4 text-center">
-            <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">
-              Hub & Services
+          <div className="bg-[#036735] px-5 py-5 text-center relative overflow-hidden">
+            <h4 className="relative text-[18px] font-black uppercase tracking-[0.1em] text-amber-400 drop-shadow-md flex items-center justify-center gap-2">
+              Emergency Contact
             </h4>
-            <p className="text-[13px] font-bold text-white mt-0.5">
-              প্রয়োজনীয় লিংক ও সেবা
-            </p>
           </div>
 
           <div className="flex flex-col p-2 gap-2">
@@ -417,10 +404,20 @@ export function HeroSection({
           </div>
         </div>
 
+        {/* Sidebar Ad Moved Below Hub */}
+        <AdBanner
+          label="[ বিজ্ঞাপন — ৩০০×২৫০ ]"
+          category="Home page"
+          placement="Sidebar Ad"
+          heightClass="h-[250px]"
+          fit="contain"
+          className="my-0"
+        />
+
         {/* Video News Sidebar Section */}
         {videoNews && videoNews.length > 0 && (
           <div className="flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm ring-1 ring-slate-50">
-            <div className="bg-slate-900 px-5 py-3 text-center">
+            <div className="bg-[#036735] px-5 py-3 text-center">
               <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">
                 Video News
               </h4>
