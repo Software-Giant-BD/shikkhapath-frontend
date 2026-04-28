@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Sora, Source_Serif_4 } from "next/font/google";
+import { Noto_Sans_Bengali, Noto_Serif_Bengali } from "next/font/google";
 import "@/app/globals.css";
 
-const sora = Sora({
-  variable: "--font-manrope",
-  subsets: ["latin"],
+const notoSansBengali = Noto_Sans_Bengali({
+  variable: "--font-noto-sans-bengali",
+  subsets: ["bengali"],
 });
 
-const sourceSerif = Source_Serif_4({
-  variable: "--font-source-serif",
-  subsets: ["latin"],
+const notoSerifBengali = Noto_Serif_Bengali({
+  variable: "--font-noto-serif-bengali",
+  subsets: ["bengali"],
 });
 
 export const metadata: Metadata = {
@@ -28,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${sora.variable} ${sourceSerif.variable} antialiased`}>
+    <html lang="bn" className={`${notoSansBengali.variable} ${notoSerifBengali.variable}`}>
+      <body className={`font-sans antialiased`}>
         {children}
       </body>
     </html>
