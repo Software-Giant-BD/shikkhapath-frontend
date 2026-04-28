@@ -29,8 +29,11 @@ export function SiteFooter() {
           <div>
             <p className="text-lg font-bold text-white">শিক্ষাপথ</p>
             <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              শিক্ষাপথ বাংলাদেশের একটি বিশ্বস্ত শিক্ষা সংবাদ পোর্টাল। শিক্ষাঙ্গন, ভর্তি, কর্মজীবন ও জাতীয়
-              সংবাদের নির্ভরযোগ্য উৎস।
+              Shikkhapath <br />
+              Empire Talukder Dream <br />
+              22–23 Station Road, <br />
+              Tejgaon, Dhaka–1212 <br />
+              01704-052374
             </p>
             <div className="mt-4 flex gap-3">
               {["f", "▶", "𝕏", "in"].map((icon) => (
