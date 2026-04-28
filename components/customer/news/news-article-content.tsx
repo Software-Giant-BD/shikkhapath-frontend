@@ -124,13 +124,16 @@ export function NewsArticleContent({
             return (
               <>
                 <div dangerouslySetInnerHTML={{ __html: firstHalf }} />
-                <div className="my-8">
-                  <AdBanner
-                    label="[ বিজ্ঞাপন — ৭২৮×৯০ ]"
-                    heightClass="h-20 sm:h-24"
-                    category="news details page"
-                    placement="In-Content Ad"
-                  />
+                <div className="my-8 flex justify-center">
+                  <div className="w-full max-w-[500px]">
+                    <AdBanner
+                      label="[ বিজ্ঞাপন — ৫০০×৪০০ ]"
+                      heightClass="h-[400px]"
+                      fit="contain"
+                      category="news details page"
+                      placement="In-Content Square Ad"
+                    />
+                  </div>
                 </div>
                 <div dangerouslySetInnerHTML={{ __html: secondHalf }} />
               </>
