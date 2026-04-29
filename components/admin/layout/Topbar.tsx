@@ -201,19 +201,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               </div>
 
               <Link
-                href="/profile"
+                href="/admin/profile"
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
               >
                 <User size={16} />
                 Profile
-              </Link>
-
-              <Link
-                href="/settings"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
-              >
-                <Settings size={16} />
-                Settings
               </Link>
 
               <div className="border-t border-slate-100 mt-1 pt-1">

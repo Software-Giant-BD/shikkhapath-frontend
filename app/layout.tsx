@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${sora.variable} ${sourceSerif.variable} antialiased`}>
         {children}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );
