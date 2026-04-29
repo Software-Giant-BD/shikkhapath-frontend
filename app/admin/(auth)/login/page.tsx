@@ -1,5 +1,4 @@
 import { KeyRound } from "lucide-react";
-import Link from "next/link";
 import { LoginForm } from "@/components/admin/auth/LoginForm";
 
 export default function LoginPage() {
@@ -27,18 +26,6 @@ export default function LoginPage() {
 
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
           <LoginForm />
-
-          <div className="mt-8 pt-6 border-t border-white/5 text-center">
-            <p className="text-sm text-slate-500">
-              Don't have an account?{" "}
-              <Link
-                href="#"
-                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
-              >
-                Request access
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

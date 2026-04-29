@@ -14,7 +14,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 
 type KpiCard = {
@@ -40,7 +45,6 @@ type ActivityItem = {
 };
 
 const mockKpis: KpiCard[] = [
- 
   {
     label: "Total Services",
     value: 18,
@@ -48,7 +52,7 @@ const mockKpis: KpiCard[] = [
     delta: 6,
     icon: Wrench,
   },
- 
+
   {
     label: "Team Members",
     value: 11,
@@ -79,17 +83,65 @@ const mockCareerStatus: StatusSummary[] = [
 ];
 
 const mockRecentMessages: ActivityItem[] = [
-  { id: 28, name: "Rahim Ahmed", meta: "Bridge renovation inquiry", status: "new", createdAt: "2026-03-30T10:22:00Z" },
-  { id: 27, name: "Nusrat Jahan", meta: "Consultation request", status: "processing", createdAt: "2026-03-30T08:14:00Z" },
-  { id: 26, name: "Abrar Hasan", meta: "Project quote", status: "resolved", createdAt: "2026-03-29T17:32:00Z" },
-  { id: 25, name: "Maliha Noor", meta: "Permit support", status: "new", createdAt: "2026-03-29T14:05:00Z" },
+  {
+    id: 28,
+    name: "Rahim Ahmed",
+    meta: "Bridge renovation inquiry",
+    status: "new",
+    createdAt: "2026-03-30T10:22:00Z",
+  },
+  {
+    id: 27,
+    name: "Nusrat Jahan",
+    meta: "Consultation request",
+    status: "processing",
+    createdAt: "2026-03-30T08:14:00Z",
+  },
+  {
+    id: 26,
+    name: "Abrar Hasan",
+    meta: "Project quote",
+    status: "resolved",
+    createdAt: "2026-03-29T17:32:00Z",
+  },
+  {
+    id: 25,
+    name: "Maliha Noor",
+    meta: "Permit support",
+    status: "new",
+    createdAt: "2026-03-29T14:05:00Z",
+  },
 ];
 
 const mockRecentApplications: ActivityItem[] = [
-  { id: 19, name: "Siam Chowdhury", meta: "Assistant Team Leader", status: "reviewing", createdAt: "2026-03-30T09:03:00Z" },
-  { id: 18, name: "Tahsin Kabir", meta: "Team Leader", status: "new", createdAt: "2026-03-30T07:40:00Z" },
-  { id: 17, name: "Farzana Islam", meta: "Project Engineer", status: "shortlisted", createdAt: "2026-03-29T13:18:00Z" },
-  { id: 16, name: "Rifat Karim", meta: "Intern", status: "rejected", createdAt: "2026-03-28T11:29:00Z" },
+  {
+    id: 19,
+    name: "Siam Chowdhury",
+    meta: "Assistant Team Leader",
+    status: "reviewing",
+    createdAt: "2026-03-30T09:03:00Z",
+  },
+  {
+    id: 18,
+    name: "Tahsin Kabir",
+    meta: "Team Leader",
+    status: "new",
+    createdAt: "2026-03-30T07:40:00Z",
+  },
+  {
+    id: 17,
+    name: "Farzana Islam",
+    meta: "Project Engineer",
+    status: "shortlisted",
+    createdAt: "2026-03-29T13:18:00Z",
+  },
+  {
+    id: 16,
+    name: "Rifat Karim",
+    meta: "Intern",
+    status: "rejected",
+    createdAt: "2026-03-28T11:29:00Z",
+  },
 ];
 
 function formatNumber(value: number) {
@@ -136,9 +188,17 @@ function Trend({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex items-center gap-1 text-xs">
       <span
-        className={positive ? "flex items-center text-emerald-600" : "flex items-center text-rose-600"}
+        className={
+          positive
+            ? "flex items-center text-emerald-600"
+            : "flex items-center text-rose-600"
+        }
       >
-        {positive ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
+        {positive ? (
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        ) : (
+          <ArrowDownRight className="h-3.5 w-3.5" />
+        )}
         {Math.abs(value)}%
       </span>
       <span className="text-slate-500">{label}</span>
@@ -152,7 +212,8 @@ function StatusBars({ items }: { items: StatusSummary[] }) {
   return (
     <div className="space-y-3">
       {items.map((item) => {
-        const percentage = total === 0 ? 0 : Math.round((item.count / total) * 100);
+        const percentage =
+          total === 0 ? 0 : Math.round((item.count / total) * 100);
 
         return (
           <div key={item.label} className="space-y-1.5">
@@ -173,47 +234,6 @@ function StatusBars({ items }: { items: StatusSummary[] }) {
   );
 }
 
-function ActivityList({
-  title,
-  viewHref,
-  items,
-}: {
-  title: string;
-  viewHref: string;
-  items: ActivityItem[];
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>{title}</CardTitle>
-        <Link href={viewHref} className="text-xs font-semibold text-indigo-600 hover:text-indigo-500">
-          View all
-        </Link>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {!items.length && <p className="text-sm text-slate-500">No data available.</p>}
-        {items.map((item) => (
-          <div key={item.id} className="rounded-xl border border-slate-100 p-4">
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-800">{item.name}</p>
-                <p className="text-xs text-slate-500">{item.meta}</p>
-              </div>
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold capitalize ${getStatusClasses(item.status)}`}>
-                {item.status}
-              </span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-slate-500">
-              <Clock3 className="h-3.5 w-3.5" />
-              {formatDate(item.createdAt)}
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
 export default async function Home() {
   // Replace mock constants with API data when endpoints are ready.
   const kpis = mockKpis;
@@ -227,16 +247,18 @@ export default async function Home() {
       <PageHeader
         title="Dashboard Overview"
         breadcrumbs={[{ label: "Home", href: "/" }, { label: "Dashboard" }]}
-        action={(
+        action={
           <div className="flex items-center gap-2">
-            <Link href="/admin/projects/add">
-              <Button size="sm">Add Project</Button>
+            <Link href="/admin/news/add">
+              <Button size="sm">Add News</Button>
             </Link>
-            <Link href="/admin/services/add">
-              <Button size="sm" variant="secondary">Add Service</Button>
+            <Link href="/admin/advertisements/add">
+              <Button size="sm" variant="secondary">
+                Add Ads
+              </Button>
             </Link>
           </div>
-        )}
+        }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -246,12 +268,16 @@ export default async function Home() {
             <Card key={item.label}>
               <CardContent className="p-5">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-medium text-slate-500">{item.label}</p>
+                  <p className="text-sm font-medium text-slate-500">
+                    {item.label}
+                  </p>
                   <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
-                <p className="text-2xl font-bold text-slate-800">{formatNumber(item.value)}</p>
+                <p className="text-2xl font-bold text-slate-800">
+                  {formatNumber(item.value)}
+                </p>
                 <div className="mt-2">
                   <Trend value={item.delta} label={item.deltaLabel} />
                 </div>
