@@ -105,7 +105,6 @@ export async function SiteFooter() {
                 { label: "বিজ্ঞাপন দিন", href: "/advertise" },
                 { label: "লেখক হোন", href: "/careers" },
                 { label: "গোপনীয়তা নীতি", href: "/privacy" },
-                { label: "যোগাযোগ", href: "/contact-us" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-sm text-slate-400 hover:text-[#c79a1d]">
@@ -122,15 +121,7 @@ export async function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-center gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
           <p>
-            © ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত। Developed by{" "}
-            <a
-              href="https://gpit.com.bd/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold transition-colors hover:text-[#c79a1d]"
-            >
-              GPIT
-            </a>
+            © ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।
           </p>
         </div>
       </div>
