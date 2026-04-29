@@ -83,9 +83,9 @@ export default async function UsersListPage({
                   <th className="px-6 py-4 font-semibold">Name</th>
                   <th className="px-6 py-4 font-semibold">Email</th>
                   <th className="px-6 py-4 font-semibold">Phone</th>
-                  <th className="px-6 py-4 font-semibold">Role</th>
+                  {/* <th className="px-6 py-4 font-semibold">Role</th> */}
                   <th className="px-6 py-4 font-semibold">Status</th>
-                  <th className="px-6 py-4 font-semibold">Manage News</th>
+                  {/* <th className="px-6 py-4 font-semibold">Manage News</th> */}
                   <th className="px-6 py-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
@@ -103,15 +103,15 @@ export default async function UsersListPage({
                     <td className="px-6 py-4 text-slate-600">
                       {user.phone || "-"}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    {/* <td className="px-6 py-4 text-slate-600">
                       {user.role_name || user.role_id || "-"}
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 text-slate-600">
                       {formatBoolean(user.is_active, "Active", "Inactive")}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">
+                    {/* <td className="px-6 py-4 text-slate-600">
                       {formatBoolean(user.can_manage_news, "Yes", "No")}
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 text-right">
                       <Link href={`/admin/users/${user.id}/edit`}>
                         <Button variant="secondary" size="sm">
