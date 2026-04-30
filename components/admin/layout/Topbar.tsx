@@ -184,7 +184,7 @@ export function Topbar({ onMenuClick, profile }: TopbarProps) {
             </div>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-100 transition-all shrink-0">
               <img
-                src="https://i.pravatar.cc/150?img=11"
+                src="/images/user.png"
                 alt="User avatar"
                 className="w-full h-full object-cover"
               />

@@ -60,6 +60,7 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "News List", href: "/admin/news/list" },
           { title: "Add News", href: "/admin/news/add" },
+           { title: "Media Center", href: "/admin/media-center" },
         ],
       },
       {
@@ -102,7 +103,7 @@ const menuConfig: MenuSection[] = [
           { title: "Add Admission", href: "/admin/admissions/add" },
         ],
       },
-      { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
+     
     ],
   },
 ];
