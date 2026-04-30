@@ -24,6 +24,7 @@ import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { RichTextEditor } from "@/components/admin/news/RichTextEditor";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
@@ -478,24 +479,22 @@ export function NewsForm({
 
             <div className="space-y-2">
               <Label htmlFor="category_id">Category</Label>
-              <Select
-                id="category_id"
+              <SearchableSelect
+                options={[
+                  { id: "", name: "Select Category" },
+                  ...parentCategories.map((c) => ({ id: c.id, name: c.title })),
+                ]}
                 value={form.category_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    category_id: event.target.value,
+                    category_id: val,
                     sub_category_id: "",
                   }))
                 }
-              >
-                <option value="">Select Category</option>
-                {parentCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.title}
-                  </option>
-                ))}
-              </Select>
+                placeholder="Select Category"
+                searchPlaceholder="Search categories..."
+              />
               {fieldErrors.category_id ? (
                 <p className="text-xs font-medium text-rose-600">
                   {fieldErrors.category_id[0]}
@@ -506,30 +505,26 @@ export function NewsForm({
 
           <div className="space-y-2">
             <Label htmlFor="sub_category_id">Sub-category</Label>
-            <Select
-              id="sub_category_id"
+            <SearchableSelect
+              options={[
+                {
+                  id: "",
+                  name: isSubCategoryLoading
+                    ? "Loading..."
+                    : form.category_id
+                      ? "Select Sub-category"
+                      : "Select Category first",
+                },
+                ...subCategoryOptions.map((sc) => ({ id: sc.id, name: sc.title })),
+              ]}
               value={form.sub_category_id}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sub_category_id: event.target.value,
-                }))
+              onChange={(val) =>
+                setForm((prev) => ({ ...prev, sub_category_id: val }))
               }
+              placeholder={isSubCategoryLoading ? "Loading..." : "Select Sub-category"}
+              searchPlaceholder="Search sub-categories..."
               disabled={!form.category_id || isSubCategoryLoading}
-            >
-              <option value="">
-                {isSubCategoryLoading
-                  ? "Loading sub-categories..."
-                  : form.category_id
-                    ? "Select Sub-category"
-                    : "Select Category first"}
-              </option>
-              {subCategoryOptions.map((sc) => (
-                <option key={sc.id} value={sc.id}>
-                  {sc.title}
-                </option>
-              ))}
-            </Select>
+            />
             {fieldErrors.sub_category_id ? (
               <p className="text-xs font-medium text-rose-600">
                 {fieldErrors.sub_category_id[0]}
@@ -823,85 +818,76 @@ export function NewsForm({
           <div className="grid gap-5 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="division_id">Division</Label>
-              <Select
-                id="division_id"
+              <SearchableSelect
+                options={[
+                  { id: "", name: isDivisionLoading ? "Loading..." : "Select Division" },
+                  ...divisionOptions,
+                ]}
                 value={form.division_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    division_id: event.target.value,
+                    division_id: val,
                     district_id: "",
                     upazila_id: "",
                   }))
                 }
+                placeholder={isDivisionLoading ? "Loading..." : "Select Division"}
+                searchPlaceholder="Search division..."
                 disabled={isDivisionLoading}
-              >
-                <option value="">
-                  {isDivisionLoading ? "Loading..." : "Select Division"}
-                </option>
-                {divisionOptions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="district_id">District</Label>
-              <Select
-                id="district_id"
+              <SearchableSelect
+                options={[
+                  {
+                    id: "",
+                    name: isDistrictLoading
+                      ? "Loading..."
+                      : form.division_id
+                        ? "Select District"
+                        : "Select Division first",
+                  },
+                  ...districtOptions,
+                ]}
                 value={form.district_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    district_id: event.target.value,
+                    district_id: val,
                     upazila_id: "",
                   }))
                 }
+                placeholder={isDistrictLoading ? "Loading..." : "Select District"}
+                searchPlaceholder="Search district..."
                 disabled={!form.division_id || isDistrictLoading}
-              >
-                <option value="">
-                  {isDistrictLoading
-                    ? "Loading..."
-                    : form.division_id
-                      ? "Select District"
-                      : "Select Division first"}
-                </option>
-                {districtOptions.map((district) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="upazila_id">Upazila / Area</Label>
-              <Select
-                id="upazila_id"
+              <SearchableSelect
+                options={[
+                  {
+                    id: "",
+                    name: isUpazilaLoading
+                      ? "Loading..."
+                      : form.district_id
+                        ? "Select Upazila"
+                        : "Select District first",
+                  },
+                  ...upazilaOptions,
+                ]}
                 value={form.upazila_id}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    upazila_id: event.target.value,
-                  }))
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, upazila_id: val }))
                 }
+                placeholder={isUpazilaLoading ? "Loading..." : "Select Upazila"}
+                searchPlaceholder="Search upazila..."
                 disabled={!form.district_id || isUpazilaLoading}
-              >
-                <option value="">
-                  {isUpazilaLoading
-                    ? "Loading..."
-                    : form.district_id
-                      ? "Select Upazila"
-                      : "Select District first"}
-                </option>
-                {upazilaOptions.map((upazila) => (
-                  <option key={upazila.id} value={upazila.id}>
-                    {upazila.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
           </div>
         </CardContent>
