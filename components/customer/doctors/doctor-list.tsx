@@ -20,8 +20,8 @@ export function DoctorList({ filters }: DoctorListProps) {
     const fetchDoctors = async () => {
       setIsLoading(true);
       try {
-        const data = await getDoctors(filters.specialty, filters.location);
-        setDoctors(data);
+        const response = await getDoctors(filters.specialty, filters.location);
+        setDoctors(response.data);
       } catch (error) {
         console.error("Failed to fetch doctors:", error);
       } finally {
