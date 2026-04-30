@@ -17,6 +17,7 @@ import {
   Shield,
   Flame,
   University,
+  Stethoscope,
 } from "lucide-react";
 
 type MenuItem = {
@@ -44,6 +45,13 @@ const menuConfig: MenuSection[] = [
           { title: "Add Category", href: "/admin/categories/add" },
           { title: "Home Page Categories", href: "/admin/categories/homepage" },
           { title: "Website Menu Categories", href: "/admin/categories/menu" },
+        ],
+      },
+      {
+        title: "Doctors Manage",
+        icon: Stethoscope,
+        subItems: [
+          { title: "Doctors List", href: "/admin/doctors/list" },
         ],
       },
       {
