@@ -78,7 +78,7 @@ export default async function DoctorsListPage(props: {
         title="Doctors Management"
         breadcrumbs={[
           { label: "Home", href: "/admin" },
-          { label: "Doctors", href: "/admin/doctors/list" },
+          { label: "Doctors", href: "/admin/doctors" },
           { label: "List" },
         ]}
       />
@@ -209,7 +209,7 @@ export default async function DoctorsListPage(props: {
               <div className="flex gap-2">
                 {meta.current_page > 1 && (
                   <Link
-                    href={`/admin/doctors/list?page=${meta.current_page - 1}${search ? `&search=${search}` : ""}`}
+                    href={`/admin/doctors?page=${meta.current_page - 1}${search ? `&search=${search}` : ""}`}
                   >
                     <Button variant="secondary" size="sm">
                       Previous
@@ -218,7 +218,7 @@ export default async function DoctorsListPage(props: {
                 )}
                 {meta.current_page < meta.last_page && (
                   <Link
-                    href={`/admin/doctors/list?page=${meta.current_page + 1}${search ? `&search=${search}` : ""}`}
+                    href={`/admin/doctors?page=${meta.current_page + 1}${search ? `&search=${search}` : ""}`}
                   >
                     <Button variant="secondary" size="sm">
                       Next

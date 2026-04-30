@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 export function DoctorFilters({
   specialties,
@@ -17,7 +18,7 @@ export function DoctorFilters({
   const searchParams = useSearchParams();
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
-  
+
   const status = searchParams.get("status") || "";
   const specialty = searchParams.get("specialty") || "";
   const district_id = searchParams.get("district_id") || "";
@@ -44,7 +45,7 @@ export function DoctorFilters({
       params.delete("page");
       router.push(`${pathname}?${params.toString()}`);
     },
-    [searchParams, pathname, router]
+    [searchParams, pathname, router],
   );
 
   return (
@@ -71,31 +72,29 @@ export function DoctorFilters({
         <option value="rejected">Rejected</option>
       </select>
 
-      <select
+      <SearchableSelect
+        options={[
+          { id: "", name: "All Specialties" },
+          ...specialties.map((spec) => ({ id: spec, name: spec })),
+        ]}
         value={specialty}
-        onChange={(e) => updateFilters({ specialty: e.target.value })}
-        className="w-full sm:w-auto rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[180px] truncate"
-      >
-        <option value="">All Specialties</option>
-        {specialties.map((spec) => (
-          <option key={spec} value={spec}>
-            {spec}
-          </option>
-        ))}
-      </select>
+        onChange={(val) => updateFilters({ specialty: val })}
+        placeholder="All Specialties"
+        searchPlaceholder="Search specialty..."
+        className="w-full sm:w-[220px]"
+      />
 
-      <select
+      <SearchableSelect
+        options={[
+          { id: "", name: "All Districts" },
+          ...districts,
+        ]}
         value={district_id}
-        onChange={(e) => updateFilters({ district_id: e.target.value })}
-        className="w-full sm:w-auto rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[150px] truncate"
-      >
-        <option value="">All Districts</option>
-        {districts.map((dist) => (
-          <option key={dist.id} value={dist.id}>
-            {dist.name}
-          </option>
-        ))}
-      </select>
+        onChange={(val) => updateFilters({ district_id: val })}
+        placeholder="All Districts"
+        searchPlaceholder="Search district..."
+        className="w-full sm:w-[200px]"
+      />
 
       {(search || status || district_id || specialty) && (
         <Button

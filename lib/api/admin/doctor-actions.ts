@@ -6,7 +6,9 @@ import { fetchApi } from "../common";
 export type Doctor = {
   id: number;
   profile_image: string | null;
+  profile_image_url: string | null;
   clinic_image: string | null;
+  clinic_image_url: string | null;
   full_name: string;
   specialty: string;
   phone_number: string;
@@ -37,7 +39,7 @@ export async function getDoctors(
   search = "",
   status = "",
   districtId = "",
-  specialty = ""
+  specialty = "",
 ): Promise<{ data: Doctor[]; meta: any } | null> {
   try {
     const params = new URLSearchParams({
@@ -78,7 +80,7 @@ export async function getDoctor(id: string): Promise<Doctor | null> {
     }
 
     const data = await response.json();
-    return data.data || data; // Assuming data is wrapped in data or directly returned
+    return data.resources || null;
   } catch (error) {
     console.error(`Failed to fetch doctor ${id}:`, error);
     return null;
