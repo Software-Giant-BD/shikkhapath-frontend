@@ -78,16 +78,21 @@ const menuConfig: MenuSection[] = [
           { title: "Candidate List", href: "/admin/candidates/list" },
         ],
       },
-      { title: "Ambulances", icon: Newspaper, href: "/admin/ambulances" },
       {
-        title: "Police Stations",
-        icon: Shield,
-        href: "/admin/police-stations",
+        title: "Health",
+        icon: Briefcase,
+        subItems: [
+          { title: "Ambulances", href: "/admin/ambulances" },
+          { title: "Doctors", href: "/admin/doctors" },
+        ],
       },
       {
-        title: "Fire Stations",
-        icon: Flame,
-        href: "/admin/fire-stations",
+        title: "Emergency",
+        icon: Shield,
+        subItems: [
+          { title: "Police Stations", href: "/admin/police-stations" },
+          { title: "Fire Stations", href: "/admin/fire-stations" },
+        ],
       },
       {
         title: "Admissions",

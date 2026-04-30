@@ -27,7 +27,7 @@ export async function getAdminAmbulanceList(params: {
   per_page?: number;
   status?: string;
   search?: string;
-}): Promise<{ items: AmbulanceService[]; pagination: BasePagination }> {
+}): Promise<{ items: AmbulanceService[]; pagination: BasePagination; error?: string }> {
   const query = new URLSearchParams();
   if (params.page) query.append("page", params.page.toString());
   if (params.per_page) query.append("per_page", params.per_page.toString());

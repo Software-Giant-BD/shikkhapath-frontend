@@ -25,13 +25,19 @@ export async function fetchApi(
   const includeAuth = options?.includeAuth ?? true;
   const token = includeAuth ? await getAdminToken() : undefined;
 
-  return fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
+  try {
+    return await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        Accept: "application/json",
+        ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+  } catch (error) {
+    console.error(`[fetchApi] Failed to fetch from ${path}:`, error);
+    // Throw a generic error that will be caught by error.tsx boundaries
+    throw new Error("Server is not responding. Please try again later.");
+  }
 }
