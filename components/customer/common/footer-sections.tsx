@@ -1,24 +1,45 @@
 import Link from "next/link"
+import { getMenuCategories } from "@/lib/api/categories"
 
 export function FinalCtaSection() {
   return null
 }
 
-export function SiteFooter() {
-  const footerCategories = [
-    { label: "শিক্ষাঙ্গন", href: "/category/education" },
-    { label: "উচ্চশিক্ষা", href: "/category/higher-education" },
-    { label: "ভর্তি পরীক্ষা", href: "/category/admission" },
-    { label: "কর্মজীবন", href: "/category/career" },
-    { label: "জাতীয়", href: "/category/national" },
-    { label: "আন্তর্জাতিক", href: "/category/international" },
-    { label: "বিজ্ঞান ও প্রযুক্তি", href: "/category/science" },
-    { label: "খেলাধুলা", href: "/category/sports" },
-    { label: "অর্থনীতি", href: "/category/economy" },
-    { label: "মুক্তমত", href: "/category/opinion" },
-    { label: "ভিডিও", href: "/category/video" },
-    { label: "যোগাযোগ", href: "/contact-us" },
-  ]
+export async function SiteFooter() {
+  const categories = await getMenuCategories();
+  
+  // Create dynamic category links from the API
+  const dynamicCategories = categories
+    .sort((a, b) => Number(a.sort_order || "0") - Number(b.sort_order || "0"))
+    .map((category) => ({
+      label: category.title,
+      href: `/category/${category.slug}`,
+    }));
+
+  // Fallback to static if API returns empty, otherwise use dynamic
+  const baseCategories = dynamicCategories.length > 0 
+    ? dynamicCategories 
+    : [
+        { label: "শিক্ষাঙ্গন", href: "/category/education" },
+        { label: "উচ্চশিক্ষা", href: "/category/higher-education" },
+        { label: "ভর্তি পরীক্ষা", href: "/category/admission" },
+        { label: "কর্মজীবন", href: "/category/career" },
+        { label: "জাতীয়", href: "/category/national" },
+        { label: "আন্তর্জাতিক", href: "/category/international" },
+        { label: "বিজ্ঞান ও প্রযুক্তি", href: "/category/science" },
+        { label: "খেলাধুলা", href: "/category/sports" },
+        { label: "অর্থনীতি", href: "/category/economy" },
+        { label: "মুক্তমত", href: "/category/opinion" },
+        { label: "ভিডিও", href: "/category/video" },
+      ];
+
+  // Divide into two columns
+  const midPoint = Math.ceil(baseCategories.length / 2);
+  const leftCategories = baseCategories.slice(0, midPoint);
+  const rightCategories = baseCategories.slice(midPoint);
+
+  // Add Contact link to the right column
+  rightCategories.push({ label: "যোগাযোগ", href: "/contact-us" });
 
   return (
     <footer className="bg-[#1a1a1a] text-slate-300">
@@ -51,7 +72,7 @@ export function SiteFooter() {
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-wider text-white">বিভাগসমূহ</p>
             <ul className="space-y-1.5">
-              {footerCategories.slice(0, 6).map((cat) => (
+              {leftCategories.map((cat) => (
                 <li key={cat.href}>
                   <Link href={cat.href} className="text-sm text-slate-400 hover:text-[#c79a1d]">
                     › {cat.label}
@@ -64,7 +85,7 @@ export function SiteFooter() {
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-wider text-white">আরও</p>
             <ul className="space-y-1.5">
-              {footerCategories.slice(6).map((cat) => (
+              {rightCategories.map((cat) => (
                 <li key={cat.href}>
                   <Link href={cat.href} className="text-sm text-slate-400 hover:text-[#c79a1d]">
                     › {cat.label}
@@ -84,7 +105,6 @@ export function SiteFooter() {
                 { label: "বিজ্ঞাপন দিন", href: "/advertise" },
                 { label: "লেখক হোন", href: "/careers" },
                 { label: "গোপনীয়তা নীতি", href: "/privacy" },
-                { label: "যোগাযোগ", href: "/contact-us" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link href={link.href} className="text-sm text-slate-400 hover:text-[#c79a1d]">
@@ -101,15 +121,7 @@ export function SiteFooter() {
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-center gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
           <p>
-            © ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত। Developed by{" "}
-            <a
-              href="https://gpit.com.bd/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold transition-colors hover:text-[#c79a1d]"
-            >
-              GPIT
-            </a>
+            © ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।
           </p>
         </div>
       </div>

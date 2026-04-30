@@ -52,17 +52,6 @@ export async function AdBanner({
           className={fit === "contain" ? "object-contain" : "object-cover"}
           sizes="(min-width: 1024px) 300px, 100vw"
         />
-        <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/25 to-transparent" />
-        <div
-          className={[
-            "absolute left-3 top-3 inline-flex items-center gap-2",
-            "rounded-full bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-700",
-            "backdrop-blur-sm ring-1 ring-black/5",
-          ].join(" ")}
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          Sponsored
-        </div>
       </div>
     );
 

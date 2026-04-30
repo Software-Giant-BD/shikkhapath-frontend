@@ -113,7 +113,7 @@ export function NewsArticleContent({
       />
 
       {/* Article Content */}
-      <div className="prose prose-slate max-w-none prose-p:text-[17px] prose-p:leading-relaxed prose-p:text-slate-700 prose-strong:text-slate-900">
+      <div className="prose prose-slate max-w-none font-sans text-[18px] md:text-[19px] leading-[1.9] text-[#222222] prose-p:mb-6 prose-p:text-[18px] md:prose-p:text-[19px] prose-p:leading-[1.9] prose-p:text-[#222222] prose-strong:text-black whitespace-pre-wrap space-y-6">
         {/* We can split the content to inject an ad in the middle if it's long enough */}
         {(() => {
           const content = news.content || "";
