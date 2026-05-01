@@ -19,6 +19,7 @@ interface SearchableSelectProps {
   emptyMessage?: string;
   disabled?: boolean;
   className?: string;
+  triggerClassName?: string;
 }
 
 export function SearchableSelect({
@@ -30,6 +31,7 @@ export function SearchableSelect({
   emptyMessage = "No results found.",
   disabled = false,
   className,
+  triggerClassName,
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,9 +66,10 @@ export function SearchableSelect({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/20",
-          disabled ? "cursor-not-allowed opacity-50 bg-slate-50" : "cursor-pointer hover:border-indigo-500",
-          isOpen && "border-indigo-500 ring-2 ring-indigo-500/20"
+          "flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold transition-all focus:outline-none focus:ring-4 focus:ring-red-500/5",
+          disabled ? "cursor-not-allowed opacity-50 bg-slate-50" : "cursor-pointer hover:border-red-500",
+          isOpen && "border-red-500 ring-4 ring-red-500/5",
+          triggerClassName
         )}
       >
         <span className={cn("truncate", !selectedOption && "text-slate-400")}>
@@ -81,8 +84,8 @@ export function SearchableSelect({
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-[100] mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl animate-in fade-in zoom-in-95 duration-100">
-          <div className="border-b border-slate-100 p-2">
+        <div className="absolute left-0 top-full z-[100] mt-2 w-full overflow-hidden rounded-[24px] border border-slate-100 bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+          <div className="border-b border-slate-100 p-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
@@ -91,11 +94,11 @@ export function SearchableSelect({
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-md border border-slate-100 bg-slate-50 py-1.5 pl-9 pr-4 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
+                className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2 pl-9 pr-4 text-sm font-medium outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5"
               />
             </div>
           </div>
-          <div className="max-h-[250px] overflow-y-auto p-1">
+          <div className="max-h-[250px] overflow-y-auto p-2">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((opt) => (
                 <div
@@ -106,10 +109,10 @@ export function SearchableSelect({
                     setSearchTerm("");
                   }}
                   className={cn(
-                    "flex cursor-pointer items-center justify-between px-3 py-2 text-sm rounded-md transition-colors",
+                    "flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm rounded-xl transition-colors mb-1 last:mb-0",
                     value.toString() === opt.id.toString()
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-slate-700 hover:bg-slate-50 hover:text-indigo-600"
+                      ? "bg-red-50 text-red-600 font-bold"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-red-500"
                   )}
                 >
                   <span className="truncate">{getDisplayName(opt)}</span>
@@ -119,7 +122,7 @@ export function SearchableSelect({
                 </div>
               ))
             ) : (
-              <div className="px-3 py-6 text-center text-xs text-slate-400">
+              <div className="px-3 py-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
                 {emptyMessage}
               </div>
             )}

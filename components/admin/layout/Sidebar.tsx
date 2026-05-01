@@ -88,6 +88,7 @@ const menuConfig: MenuSection[] = [
           { title: "Ambulances", href: "/admin/ambulances" },
           { title: "Doctors", href: "/admin/doctors" },
           { title: "Appointments", href: "/admin/doctor-appointments" },
+          { title: "Blood Donors", href: "/admin/blood-donors" },
         ],
       },
       {

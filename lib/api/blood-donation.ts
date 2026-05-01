@@ -1,3 +1,5 @@
+"use server";
+
 import { fetchApi } from "./common";
 import { type BloodGroup } from "@/lib/constants/blood-groups";
 
@@ -5,22 +7,23 @@ export type DonorStatus = "pending" | "approved" | "rejected";
 
 export type BloodDonor = {
   id: string;
-  name: string;
+  full_name: string;
   phone_number: string;
-  location: string;
+  district: string;
+  district_id: number;
   blood_group: BloodGroup;
   last_donation_date?: string;
   is_available: boolean;
   status: DonorStatus;
   nid_number: string;
-  profile_image_url?: string;
+  image_url?: string;
   created_at: string;
 };
 
 export type RegisterDonorParams = {
-  name: string;
+  full_name: string;
   phone_number: string;
-  location: string;
+  district_id: number | string;
   blood_group: BloodGroup;
   nid_number: string;
   last_donation_date?: string;
@@ -28,72 +31,80 @@ export type RegisterDonorParams = {
   image?: File;
 };
 
-// Mock data for initial development
-const MOCK_DONORS: BloodDonor[] = [
-  {
-    id: "1",
-    name: "Arifur Rahman",
-    phone_number: "01711223344",
-    location: "Dhaka",
-    blood_group: "O+",
-    last_donation_date: "2024-02-15",
-    is_available: true,
-    status: "approved",
-    nid_number: "1234567890",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "Sumaiya Akter",
-    phone_number: "01811556677",
-    location: "Chittagong",
-    blood_group: "A+",
-    last_donation_date: "2024-01-10",
-    is_available: true,
-    status: "approved",
-    nid_number: "0987654321",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "Tanvir Hasan",
-    phone_number: "01911998877",
-    location: "Dhaka",
-    blood_group: "B+",
-    last_donation_date: "2023-12-05",
-    is_available: false,
-    status: "approved",
-    nid_number: "1122334455",
-    created_at: new Date().toISOString(),
-  },
-];
+export async function getDonors(
+  bloodGroup?: string,
+  districtId?: string | number,
+): Promise<BloodDonor[]> {
+  try {
+    const query = new URLSearchParams();
+    if (bloodGroup && bloodGroup !== "All")
+      query.set("blood_group", bloodGroup);
+    if (districtId && districtId !== "All")
+      query.set("district_id", districtId.toString());
 
-export async function getDonors(bloodGroup?: string, location?: string): Promise<BloodDonor[]> {
-  await new Promise((resolve) => setTimeout(resolve, 600)); // Simulation
+    const response = await fetchApi(
+      `/blood-donors?${query.toString()}`,
+      {
+        cache: "no-store",
+      },
+      { includeAuth: false },
+    );
 
-  let filtered = MOCK_DONORS.filter(d => d.status === "approved");
+    const data = await response.json().catch(() => null);
 
-  if (bloodGroup && bloodGroup !== "All") {
-    filtered = filtered.filter(d => d.blood_group === bloodGroup);
+    if (!response.ok || !data) {
+      return [];
+    }
+
+    return Array.isArray(data.resources) ? data.resources : [];
+  } catch (error) {
+    console.error("Fetch donors error:", error);
+    return [];
   }
-
-  if (location && location !== "All") {
-    filtered = filtered.filter(d => d.location.toLowerCase().includes(location.toLowerCase()));
-  }
-
-  return filtered;
 }
 
-export async function registerDonor(data: RegisterDonorParams): Promise<{ ok: boolean; message: string }> {
+export async function registerDonor(
+  data: RegisterDonorParams,
+): Promise<{ ok: boolean; message: string }> {
   try {
-    // In a real app, send to backend
-    console.log("Registering donor:", data);
-    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulation
+    const formData = new FormData();
+    formData.append("full_name", data.full_name);
+    formData.append("phone_number", data.phone_number);
+    formData.append("district_id", data.district_id.toString());
+    formData.append("blood_group", data.blood_group);
+    formData.append("nid_number", data.nid_number);
+    if (data.last_donation_date)
+      formData.append("last_donation_date", data.last_donation_date);
+    formData.append("is_available", String(data.is_available));
 
-    return {
-      ok: true,
-      message: "Registration successful! You will be visible to seekers once admin approves your verification.",
-    };
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+
+    const response = await fetchApi(
+      "/blood-donors",
+      {
+        method: "POST",
+        body: formData,
+      },
+      { includeAuth: false },
+    );
+
+    const result = await response.json().catch(() => null);
+
+    if (response.ok) {
+      return {
+        ok: true,
+        message:
+          result?.message ||
+          "Registration successful! You will be visible once approved.",
+      };
+    } else {
+      return {
+        ok: false,
+        message: result?.message || "An error occurred during registration.",
+      };
+    }
   } catch (error) {
     console.error("Donor registration error:", error);
     return {
