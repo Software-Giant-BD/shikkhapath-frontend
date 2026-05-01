@@ -53,7 +53,7 @@ export async function SiteFooter() {
               Shikkhapath <br />
               Empire Talukder Dream <br />
               22–23 Station Road, <br />
-              Tejgaon, Dhaka–1212 <br />
+              Tejgaon, Dhaka–1215 <br />
               01704-052374
             </p>
             <div className="mt-4 flex gap-3">
