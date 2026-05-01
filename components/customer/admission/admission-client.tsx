@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   XCircle,
   ChevronRight,
+  ChevronLeft,
   CalendarDays,
   Loader2,
   Target,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { fetchAdmissionsAction } from "@/lib/api/admission-actions";
 import type { AdmissionUniversityModel } from "@/lib/api/admission";
+import { type BasePagination } from "@/lib/api/common";
 import { ServiceAdBanner } from "../common/service-ad-banner";
 
 interface FilterState {
@@ -27,7 +29,10 @@ export function AdmissionClient({ isAdmin = true }: { isAdmin?: boolean }) {
   const [universities, setUniversities] = useState<AdmissionUniversityModel[]>(
     [],
   );
+  const [pagination, setPagination] = useState<BasePagination | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>({
     hasChecked: false,
@@ -36,21 +41,44 @@ export function AdmissionClient({ isAdmin = true }: { isAdmin?: boolean }) {
     group: "Science",
   });
 
-  useEffect(() => {
-    const loadUniversities = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchAdmissionsAction({ isAdmin });
+  const loadUniversities = async (targetPage: number) => {
+    if (targetPage === 1) setLoading(true);
+    else setLoadingMore(true);
+
+    try {
+      const response = await fetchAdmissionsAction({
+        isAdmin,
+        page: targetPage,
+        per_page: 12,
+      });
+      
+      if (targetPage === 1) {
         setUniversities(response.items);
-      } catch (error) {
-        console.error("Failed to load admissions", error);
-        setUniversities([]);
-      } finally {
-        setLoading(false);
+      } else {
+        setUniversities((prev) => [...prev, ...response.items]);
       }
-    };
-    loadUniversities();
+      
+      setPagination(response.pagination);
+    } catch (error) {
+      console.error("Failed to load admissions", error);
+      if (targetPage === 1) setUniversities([]);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUniversities(1);
   }, [isAdmin]);
+
+  const handleLoadMore = () => {
+    if (pagination && page < pagination.last_page) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadUniversities(nextPage);
+    }
+  };
 
   const handleEligibilityCheck = (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,132 +235,169 @@ export function AdmissionClient({ isAdmin = true }: { isAdmin?: boolean }) {
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {universities.map((uni) => {
-                const isEligible = getEligibilityStatus(uni);
-                const showMask = isEligible === false;
+            <>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                {universities.map((uni) => {
+                  const isEligible = getEligibilityStatus(uni);
+                  const showMask = isEligible === false;
 
-                return (
-                  <div
-                    key={uni.id}
-                    className={`relative rounded-3xl border transition-all duration-300 overflow-hidden ${
-                      isEligible === true
-                        ? "border-emerald-200 shadow-emerald-500/10 shadow-xl bg-white"
-                        : "border-slate-200 bg-white shadow-sm hover:shadow-md"
-                    }`}
-                  >
-                    {/* Dim Mask for Not Eligible */}
-                    {showMask && (
-                      <div className="absolute inset-0 bg-slate-100/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-                        <div className="bg-white/90 shadow-sm p-4 text-center rounded-2xl w-full border border-slate-200">
-                          <XCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                          <p className="text-slate-900 font-bold">
-                            Not Eligible
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1 leading-tight">
-                            Your GPA or academic group does not meet the minimum
-                            requirements for {uni.unit}.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="p-6 md:p-8">
-                      <div className="flex justify-between items-start mb-6">
-                        <div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="p-1.5 rounded-lg bg-indigo-50">
-                              <University className="w-4 h-4 text-indigo-600" />
-                            </div>
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                              {uni.tags[0]}
-                            </span>
-                          </div>
-                          <h2 className="text-xl font-bold text-slate-900 leading-tight mb-1">
-                            {uni.name}
-                          </h2>
-                          {uni.unit && (
-                            <p className="text-indigo-600 font-bold text-sm">
-                              {uni.unit}
+                  return (
+                    <div
+                      key={uni.id}
+                      className={`relative rounded-3xl border transition-all duration-300 overflow-hidden ${
+                        isEligible === true
+                          ? "border-emerald-200 shadow-emerald-500/10 shadow-xl bg-white"
+                          : "border-slate-200 bg-white shadow-sm hover:shadow-md"
+                      }`}
+                    >
+                      {/* Dim Mask for Not Eligible */}
+                      {showMask && (
+                        <div className="absolute inset-0 bg-slate-100/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                          <div className="bg-white/90 shadow-sm p-4 text-center rounded-2xl w-full border border-slate-200">
+                            <XCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                            <p className="text-slate-900 font-bold">
+                              Not Eligible
                             </p>
+                            <p className="text-xs text-slate-500 mt-1 leading-tight">
+                              Your GPA or academic group does not meet the minimum
+                              requirements for {uni.unit}.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="p-6 md:p-8">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-1.5 rounded-lg bg-indigo-50">
+                                <University className="w-4 h-4 text-indigo-600" />
+                              </div>
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                {uni.tags[0]}
+                              </span>
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-900 leading-tight mb-1">
+                              {uni.name}
+                            </h2>
+                            {uni.unit && (
+                              <p className="text-indigo-600 font-bold text-sm">
+                                {uni.unit}
+                              </p>
+                            )}
+                          </div>
+
+                          {isEligible === true && (
+                            <div className="bg-emerald-100 text-emerald-700 p-2 rounded-full shadow-sm animate-in zoom-in-50">
+                              <CheckCircle2 className="w-5 h-5" />
+                            </div>
                           )}
                         </div>
 
-                        {isEligible === true && (
-                          <div className="bg-emerald-100 text-emerald-700 p-2 rounded-full shadow-sm animate-in zoom-in-50">
-                            <CheckCircle2 className="w-5 h-5" />
+                        <div className="space-y-4 mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                              <CalendarDays className="w-4 h-4 text-slate-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                                Exam Date
+                              </p>
+                              <p className="text-sm font-bold text-slate-900">
+                                {new Date(uni.exam_date).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
-                        )}
-                      </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                              <Award className="w-4 h-4 text-slate-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                                Requirements
+                              </p>
+                              <p className="text-xs font-medium text-slate-600">
+                                SSC: {uni.req_ssc.toFixed(2)} | HSC:{" "}
+                                {uni.req_hsc.toFixed(2)} | Total:{" "}
+                                {uni.req_total.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
 
-                      <div className="space-y-4 mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                            <CalendarDays className="w-4 h-4 text-slate-500" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-                              Exam Date
+                        <div className="grid grid-cols-2 gap-2 mb-6">
+                          <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
+                              Exam Method
                             </p>
-                            <p className="text-sm font-bold text-slate-900">
-                              {new Date(uni.exam_date).toLocaleDateString()}
+                            <p className="text-xs font-bold text-slate-700">
+                              {uni.exam_type}
                             </p>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                            <Award className="w-4 h-4 text-slate-500" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
-                              Requirements
+                          <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
+                              Seats Target
                             </p>
-                            <p className="text-xs font-medium text-slate-600">
-                              SSC: {uni.req_ssc.toFixed(2)} | HSC:{" "}
-                              {uni.req_hsc.toFixed(2)} | Total:{" "}
-                              {uni.req_total.toFixed(2)}
+                            <p className="text-xs font-bold text-slate-700">
+                              {uni.seats}
                             </p>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="grid grid-cols-2 gap-2 mb-6">
-                        <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
-                            Exam Method
-                          </p>
-                          <p className="text-xs font-bold text-slate-700">
-                            {uni.exam_type}
-                          </p>
-                        </div>
-                        <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                          <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
-                            Seats Target
-                          </p>
-                          <p className="text-xs font-bold text-slate-700">
-                            {uni.seats}
-                          </p>
-                        </div>
+                        <a
+                          href={uni.apply_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all
+                            ${
+                              isEligible === true
+                                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            }`}
+                        >
+                          Apply Now
+                        </a>
                       </div>
-
-                      <a
-                        href={uni.apply_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all
-                           ${
-                             isEligible === true
-                               ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
-                               : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                           }`}
-                      >
-                        Apply Now
-                      </a>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Load More UI */}
+              {pagination && page < pagination.last_page && (
+                <div className="mt-12 flex flex-col items-center justify-center gap-4">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="group relative flex items-center justify-center gap-3 rounded-2xl bg-white border-2 border-slate-900 px-8 py-4 text-sm font-black text-slate-900 hover:bg-slate-900 hover:text-white transition-all shadow-xl shadow-slate-200/50 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Loading More...
+                      </>
+                    ) : (
+                      <>
+                        Load More Universities
+                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                  
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    Showing {universities.length} of {pagination.total} Universities
+                  </p>
+                </div>
+              )}
+
+              {pagination && page === pagination.last_page && pagination.total > 0 && (
+                <div className="mt-12 text-center">
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    You've reached the end — Total {pagination.total} Universities
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

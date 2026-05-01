@@ -109,14 +109,14 @@ export function AdmissionTable({ items, pagination }: AdmissionTableProps) {
       </div>
 
       {/* Pagination */}
-      {pagination.last_page > 1 && (
-        <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
-          <p className="text-sm text-slate-500">
-            Showing {(pagination.current_page - 1) * pagination.per_page + 1} to{" "}
-            {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of{" "}
-            {pagination.total} entries
-          </p>
+      <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+        <p className="text-sm text-slate-500">
+          Showing {pagination.total === 0 ? 0 : (pagination.current_page - 1) * pagination.per_page + 1} to{" "}
+          {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of{" "}
+          {pagination.total} entries
+        </p>
 
+        {pagination.last_page > 1 && (
           <div className="flex items-center gap-2">
             <Link
               href={getPageHref(Math.max(1, pagination.current_page - 1))}
@@ -154,8 +154,8 @@ export function AdmissionTable({ items, pagination }: AdmissionTableProps) {
               Next
             </Link>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

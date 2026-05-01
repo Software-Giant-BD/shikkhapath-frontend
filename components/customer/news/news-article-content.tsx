@@ -1,3 +1,4 @@
+import React, { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Clock, User, MessageCircle } from "lucide-react";
@@ -35,9 +36,8 @@ export function NewsArticleContent({
         </Link>
         <ChevronRight className="h-3 w-3" />
         {category_hierarchy?.map((category, index) => (
-          <>
+          <Fragment key={category.id}>
             <Link
-              key={category.id}
               href={`/category/${category.slug}`}
               className="text-[#b38716] hover:text-[#b38716]/80 transition-colors"
             >
@@ -46,7 +46,7 @@ export function NewsArticleContent({
             {index < category_hierarchy.length - 1 && (
               <ChevronRight className="h-3 w-3" />
             )}
-          </>
+          </Fragment>
         ))}
       </nav>
 
@@ -150,8 +150,8 @@ export function NewsArticleContent({
         </h3>
         <ul className="grid gap-3">
           {/* TODO: Implement related news fetching */}
-          {category_news.map((item, i) => (
-            <li key={i} className="group flex items-center gap-3">
+          {category_news.map((item) => (
+            <li key={item.id} className="group flex items-center gap-3">
               <ChevronRight className="h-4 w-4 shrink-0 text-[#b38716] group-hover:translate-x-1 transition-transform" />
               <Link
                 href={`/news/${item.url_slug}`}
