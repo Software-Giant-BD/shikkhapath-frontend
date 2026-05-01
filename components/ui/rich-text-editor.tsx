@@ -4,7 +4,9 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useState } from "react";
 import {
   Bold,
   Italic,
@@ -15,8 +17,12 @@ import {
   Undo,
   Redo,
   Link2,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Input } from "./input";
+import { Button } from "./button";
 
 interface RichTextEditorProps {
   value: string;
@@ -49,18 +55,47 @@ const ToolbarButton = ({
   </button>
 );
 
+const CustomLink = Link.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      title: {
+        default: null,
+      },
+    };
+  },
+});
+
 export function RichTextEditor({
   value,
   onChange,
   placeholder = "Write description here...",
   className,
 }: RichTextEditorProps) {
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    type: "link" | "image";
+    url: string;
+    alt: string;
+  }>({
+    isOpen: false,
+    type: "link",
+    url: "",
+    alt: "",
+  });
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Underline,
-      Link.configure({
+      CustomLink.configure({
         openOnClick: false,
+        HTMLAttributes: {
+          class: "text-indigo-600 underline underline-offset-4 hover:text-indigo-700 transition-colors cursor-pointer",
+        },
+      }),
+      Image.configure({
+        allowBase64: true,
       }),
       Placeholder.configure({
         placeholder,
@@ -82,26 +117,53 @@ export function RichTextEditor({
     return null;
   }
 
-  const setLink = () => {
-    const previousUrl = editor.getAttributes("link").href;
-    const url = window.prompt("URL", previousUrl);
+  const openLinkModal = () => {
+    const previousUrl = editor.getAttributes("link").href || "";
+    setModal({
+      isOpen: true,
+      type: "link",
+      url: previousUrl,
+      alt: editor.getAttributes("link").title || "",
+    });
+  };
 
-    if (url === null) {
-      return;
+  const openImageModal = () => {
+    setModal({
+      isOpen: true,
+      type: "image",
+      url: "",
+      alt: "",
+    });
+  };
+
+  const handleModalSubmit = () => {
+    if (modal.type === "link") {
+      if (modal.url === "") {
+        editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      } else {
+        editor
+          .chain()
+          .focus()
+          .extendMarkRange("link")
+          .setLink({ href: modal.url, title: modal.alt })
+          .run();
+      }
+    } else if (modal.type === "image") {
+      if (modal.url) {
+        editor
+          .chain()
+          .focus()
+          .setImage({ src: modal.url, alt: modal.alt })
+          .run();
+      }
     }
-
-    if (url === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    setModal({ ...modal, isOpen: false });
   };
 
   return (
     <div
       className={cn(
-        "flex flex-col w-full rounded-2xl border-2 border-slate-100 bg-slate-50/30 overflow-hidden transition-all focus-within:border-blue-500 focus-within:bg-white",
+        "flex flex-col w-full rounded-2xl border-2 border-slate-100 bg-slate-50/30 overflow-hidden transition-all focus-within:border-blue-500 focus-within:bg-white relative",
         className
       )}
     >
@@ -154,8 +216,19 @@ export function RichTextEditor({
 
         <div className="w-px h-4 bg-slate-200 mx-1" />
 
-        <ToolbarButton onClick={setLink} isActive={editor.isActive("link")} title="Link">
+        <ToolbarButton
+          onClick={openLinkModal}
+          isActive={editor.isActive("link")}
+          title="Link"
+        >
           <Link2 className="h-4 w-4" />
+        </ToolbarButton>
+
+        <ToolbarButton
+          onClick={openImageModal}
+          title="Insert Image URL"
+        >
+          <ImageIcon className="h-4 w-4" />
         </ToolbarButton>
 
         <div className="flex-grow" />
@@ -174,6 +247,78 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
       <EditorContent editor={editor} />
+
+      {/* Modern Modal */}
+      {modal.isOpen && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300"
+          onClick={() => setModal({ ...modal, isOpen: false })}
+        >
+          <div 
+            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300 border border-white/20"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  {modal.type === "link" ? <Link2 className="w-4 h-4" /> : <ImageIcon className="w-4 h-4" />}
+                </div>
+                <h3 className="font-black text-slate-800 tracking-tight">
+                  {modal.type === "link" ? "লিঙ্ক যুক্ত করুন" : "ছবি যুক্ত করুন"}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setModal({ ...modal, isOpen: false })} 
+                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">ইউআরএল (URL)</label>
+                <Input
+                  autoFocus
+                  placeholder="https://example.com"
+                  value={modal.url}
+                  onChange={(e) => setModal({ ...modal, url: e.target.value })}
+                  className="rounded-2xl border-slate-100 bg-slate-50 focus:bg-white focus:ring-indigo-500/10 transition-all h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                  {modal.type === "link" ? "টাইটেল (Title)" : "অল্ট টেক্সট (Alt Text)"}
+                </label>
+                <Input
+                  placeholder={modal.type === "link" ? "লিঙ্ক এর নাম" : "ছবির বর্ণনা"}
+                  value={modal.alt}
+                  onChange={(e) => setModal({ ...modal, alt: e.target.value })}
+                  className="rounded-2xl border-slate-100 bg-slate-50 focus:bg-white focus:ring-indigo-500/10 transition-all h-12"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleModalSubmit();
+                  }}
+                />
+              </div>
+              <div className="pt-2 flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setModal({ ...modal, isOpen: false })}
+                  className="flex-1 rounded-2xl h-12 font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+                >
+                  বাতিল
+                </Button>
+                <Button 
+                  onClick={handleModalSubmit}
+                  className="flex-1 rounded-2xl h-12 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                >
+                  নিশ্চিত করুন
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

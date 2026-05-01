@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 import { SiteHeader } from "@/components/customer/common/site-header";
 import { SiteFooter } from "@/components/customer/common/footer-sections";
 import { getMenuCategories } from "@/lib/api/categories";
+import { CanonicalUrl } from "@/components/seo/canonical-url";
 
 export default async function RootLayout({
   children,
@@ -45,6 +46,7 @@ export default async function RootLayout({
   return (
     <html lang="bn" className={`${notoSansBengali.variable} ${notoSerifBengali.variable}`}>
       <body className={`font-sans antialiased`}>
+        <CanonicalUrl />
         <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
           <SiteHeader navLinks={navLinks} />
           {children}

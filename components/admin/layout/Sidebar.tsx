@@ -61,6 +61,7 @@ const menuConfig: MenuSection[] = [
         icon: Newspaper,
         subItems: [
           { title: "News List", href: "/admin/news/list" },
+          { title: "Guest Articles", href: "/admin/news/guest-articles" },
           { title: "Add News", href: "/admin/news/add" },
           { title: "Media Center", href: "/admin/media-center" },
         ],
