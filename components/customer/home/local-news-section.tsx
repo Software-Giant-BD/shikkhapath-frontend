@@ -38,8 +38,10 @@ export function LocalNewsSection({
   const [upazilaId, setUpazilaId] = useState("");
 
   const [news, setNews] = useState<NewsItem[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [searched, setSearched] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Fetch divisions on mount if not provided
   useEffect(() => {
@@ -88,19 +90,46 @@ export function LocalNewsSection({
           division_id: divisionId,
           district_id: districtId,
           upazila_id: upazilaId,
+          page: 1,
         });
         if (res.ok) {
           setNews(res.news);
+          setPagination(res.pagination || null);
         } else {
           setNews([]);
+          setPagination(null);
         }
       } catch (error) {
         console.error("Search error:", error);
         setNews([]);
+        setPagination(null);
       } finally {
         setSearched(true);
       }
     });
+  }
+
+  async function handleLoadMore() {
+    if (!pagination || pagination.current_page >= pagination.last_page || isLoadingMore) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const res = await getLocalNewsAction({
+        division_id: divisionId,
+        district_id: districtId,
+        upazila_id: upazilaId,
+        page: pagination.current_page + 1,
+      });
+      
+      if (res.ok) {
+        setNews(prev => [...prev, ...res.news]);
+        setPagination(res.pagination || null);
+      }
+    } catch (error) {
+      console.error("Load more error:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
   }
 
   const selectedDivision = divisions.find((d) => d.id === divisionId);
@@ -112,12 +141,12 @@ export function LocalNewsSection({
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-600" />
+          <MapPin className="w-5 h-5 text-[#036735]" />
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             আমার এলাকার খবর
           </h2>
         </div>
-        <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-600 to-transparent" />
+        <div className="flex-1 h-0.5 bg-gradient-to-r from-[#036735] to-transparent" />
       </div>
 
       {/* Filter Box */}
@@ -209,7 +238,7 @@ export function LocalNewsSection({
         <button
           onClick={handleSearch}
           disabled={isPending || !divisionId}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors duration-200 text-sm cursor-pointer disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 bg-[#036735] hover:opacity-90 disabled:opacity-50 text-white font-semibold py-2.5 px-6 rounded-lg transition-all duration-200 text-sm cursor-pointer disabled:cursor-not-allowed"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -268,46 +297,64 @@ export function LocalNewsSection({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {news.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/news/${item.url_slug || item.slug}`}
-                  className="group flex gap-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 hover:shadow-md p-3 transition-all duration-200"
-                >
-                  {item.feature_image_url && (
-                    <div className="w-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 aspect-[4/3]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={item.feature_image_url}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    {item.category && (
-                      <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide">
-                        {item.category.title}
-                      </span>
-                    )}
-                    <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mt-0.5 leading-snug">
-                      {item.title}
-                    </h3>
-                    {item.publish_at && (
-                      <div className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
-                        <Clock className="w-3 h-3" />
-                        <span>
-                          {new Date(item.publish_at).toLocaleDateString(
-                            "bn-BD",
-                            { day: "numeric", month: "long" },
-                          )}
-                        </span>
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {news.map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/news/${item.url_slug || item.slug}`}
+                    className="group flex gap-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-[#036735]/30 dark:hover:border-[#036735]/50 hover:shadow-md p-3 transition-all duration-200"
+                  >
+                    {item.feature_image_url && (
+                      <div className="w-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 aspect-[4/3]">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={item.feature_image_url}
+                          alt={item.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
                       </div>
                     )}
-                  </div>
-                </Link>
-              ))}
+                    <div className="flex-1 min-w-0">
+                      {item.category && (
+                        <span className="text-xs font-semibold text-[#036735] dark:text-[#036735] uppercase tracking-wide">
+                          {item.category.title}
+                        </span>
+                      )}
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-2 group-hover:text-[#036735] dark:group-hover:text-[#036735] transition-colors mt-0.5 leading-snug">
+                        {item.title}
+                      </h3>
+                      {item.publish_at && (
+                        <div className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
+                          <Clock className="w-3 h-3" />
+                          <span>
+                            {new Date(item.publish_at).toLocaleDateString(
+                              "bn-BD",
+                              { day: "numeric", month: "long" },
+                            )}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {pagination && pagination.current_page < pagination.last_page && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore}
+                    className="flex items-center gap-2 px-8 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50"
+                  >
+                    {isLoadingMore ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      "আরো সংবাদ দেখুন"
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

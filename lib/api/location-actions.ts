@@ -142,16 +142,26 @@ export async function getUpazilasAction(districtId?: string): Promise<LocationOp
   }
 }
 
+export type PaginationInfo = {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+};
+
 export async function getLocalNewsAction(params: {
   division_id?: string;
   district_id?: string;
   upazila_id?: string;
-}): Promise<{ ok: boolean; news: NewsItem[] }> {
+  page?: number;
+}): Promise<{ ok: boolean; news: NewsItem[]; pagination?: PaginationInfo }> {
   try {
     const query = new URLSearchParams();
     if (params.division_id) query.set("division_id", params.division_id);
     if (params.district_id) query.set("district_id", params.district_id);
     if (params.upazila_id) query.set("upazila_id", params.upazila_id);
+    if (params.page) query.set("page", String(params.page));
+    query.set("per_page", "12");
 
     const path = query.toString() ? `/local-news?${query.toString()}` : "/local-news";
     const response = await fetchApi(path, undefined, { includeAuth: false });
@@ -161,7 +171,9 @@ export async function getLocalNewsAction(params: {
       return { ok: false, news: [] };
     }
 
-    const resources = data?.resources || data || [];
+    const resources = data?.resources?.news || data?.news || data?.resources || [];
+    const paginationData = data?.resources?.pagination || data?.pagination || null;
+
     const news = (Array.isArray(resources) ? resources : []).map((item: any) => ({
       id: String(item.id),
       title: String(item.title),
@@ -179,7 +191,18 @@ export async function getLocalNewsAction(params: {
         : undefined,
     }));
 
-    return { ok: true, news };
+    return { 
+      ok: true, 
+      news, 
+      pagination: paginationData 
+        ? {
+            current_page: Number(paginationData.current_page),
+            last_page: Number(paginationData.last_page),
+            per_page: Number(paginationData.per_page),
+            total: Number(paginationData.total),
+          }
+        : undefined
+    };
   } catch (error) {
     console.error("Fetch local news error:", error);
     return { ok: false, news: [] };
