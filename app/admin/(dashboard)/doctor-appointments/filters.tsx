@@ -7,7 +7,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 
 interface FilterProps {
-  specialties: string[];
+  specialties: readonly string[];
   doctors: { id: number; name: string }[];
 }
 

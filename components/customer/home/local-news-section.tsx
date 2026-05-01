@@ -11,6 +11,7 @@ import {
   getLocalNewsAction,
   type LocationOption,
   type NewsItem,
+  type PaginationInfo,
 } from "@/lib/api/location-actions";
 
 // Prepend an "all" option
