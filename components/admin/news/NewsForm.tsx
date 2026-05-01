@@ -1104,7 +1104,7 @@ export function NewsForm({
               rows={3}
               maxLength={170}
               value={form.meta_description}
-              placeholder="SEO description (up to 160-170 chars)"
+              placeholder="SEO description (Standard: 120-130 chars)"
               onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
@@ -1112,9 +1112,10 @@ export function NewsForm({
                 }))
               }
             />
-            <p className="text-xs text-slate-500">
-              {form.meta_description.length}/170 characters
-            </p>
+            <div className="flex justify-between text-[11px] text-slate-400">
+              <p>{form.meta_description.length}/170 characters</p>
+              <p>Standard: 120-130 characters</p>
+            </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
