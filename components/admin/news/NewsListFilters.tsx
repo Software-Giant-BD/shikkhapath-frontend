@@ -6,6 +6,7 @@ import { Search } from "lucide-react";
 
 import { Input } from "@/components/admin/ui/input";
 import { Select } from "@/components/admin/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 type CategoryOption = { id: string; title: string };
 
@@ -88,6 +89,12 @@ export function NewsListFilters({
       return;
     }
 
+    // If search state matches the current URL state (initialSearch), do nothing.
+    // This prevents infinite loops triggered by searchParams changes.
+    if (search === initialSearch) {
+      return;
+    }
+
     const trimmed = search.trim();
     if (trimmed.length > 0 && trimmed.length < 2) return;
 
@@ -102,7 +109,14 @@ export function NewsListFilters({
     }, 350);
 
     return () => clearTimeout(timeoutId);
-  }, [baseParams, navigate, search]);
+  }, [baseParams, navigate, search, initialSearch]);
+
+  const categoryOptions = useMemo(() => {
+    return [
+      { id: "", name: "All Category" },
+      ...categories.map((cat) => ({ id: cat.id, name: cat.title })),
+    ];
+  }, [categories]);
 
   return (
     <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:p-6">
@@ -151,22 +165,16 @@ export function NewsListFilters({
         </div>
 
         <div className="md:col-span-3">
-          <Select
+          <SearchableSelect
+            options={categoryOptions}
             value={categoryId}
-            onChange={(e) => {
-              const next = e.target.value;
-              setCategoryId(next);
-              applySelectFilters(status, type, next);
+            onChange={(val) => {
+              setCategoryId(val);
+              applySelectFilters(status, type, val);
             }}
-            className="h-10"
-          >
-            <option value="">All Category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.title}
-              </option>
-            ))}
-          </Select>
+            placeholder="All Category"
+            searchPlaceholder="Search category..."
+          />
         </div>
       </div>
     </div>

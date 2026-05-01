@@ -6,12 +6,15 @@ import { NewsSectionBlock } from "@/components/customer/home/news-section-block"
 import { TabSectionBlock } from "@/components/customer/home/tab-section-block"
 import { NewsletterSection } from "@/components/customer/home/newsletter-section"
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block"
+import { LocalNewsSection } from "@/components/customer/home/local-news-section"
 import { getCategories } from "@/lib/api/categories"
 import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
 } from "@/lib/api/home-page-category-news"
 import { getHeroNews, getPopularNews, getLatestNews, getTabNews, getVideoNews } from "@/lib/api/news"
+
+import { getDivisionsAction } from "@/lib/api/location-actions"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
@@ -31,7 +34,16 @@ export const metadata: Metadata = {
 }
 
 export default async function Home() {
-  const [categories, categoryNewsSections, heroNews, popularNews, latestNews, tabNews, videoNews] = await Promise.all([
+  const [
+    categories,
+    categoryNewsSections,
+    heroNews,
+    popularNews,
+    latestNews,
+    tabNews,
+    videoNews,
+    divisionsRes,
+  ] = await Promise.all([
     getCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
@@ -39,7 +51,10 @@ export default async function Home() {
     getLatestNews(),
     getTabNews(),
     getVideoNews(),
+    getDivisionsAction(),
   ])
+
+  const divisions = divisionsRes.ok ? divisionsRes.items : []
 
   const categoryNewsBySlug = new Map(
     categoryNewsSections
@@ -115,6 +130,8 @@ export default async function Home() {
             ))}
           </div>
         ) : null}
+
+        <LocalNewsSection initialDivisions={divisions} />
 
         <NewsletterSection />
       </main>

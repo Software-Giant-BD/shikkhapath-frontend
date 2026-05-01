@@ -482,6 +482,31 @@ export async function getVideoNews(): Promise<HeroNewsItem[]> {
   }
 }
 
+export async function getLocalNews(params: {
+  division_id?: string;
+  district_id?: string;
+  upazila_id?: string;
+}): Promise<HeroNewsItem[]> {
+  try {
+    const query = new URLSearchParams();
+    if (params.division_id) query.set("division_id", params.division_id);
+    if (params.district_id) query.set("district_id", params.district_id);
+    if (params.upazila_id) query.set("upazila_id", params.upazila_id);
+
+    const url = query.toString() ? `/local-news?${query.toString()}` : "/local-news";
+    const response = await fetchApi(url, undefined, { includeAuth: false });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) return [];
+
+    const resources = payload?.resources || payload;
+    return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
+  } catch (error) {
+    console.error("Failed to fetch local news:", error);
+    return [];
+  }
+}
+
 export async function getNewsDetails(urlSlug: string) {
   try {
     const response = await fetchApi(`/news/${urlSlug}`, undefined, {
