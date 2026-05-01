@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 
 export function CanonicalUrl() {
   const pathname = usePathname()
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://shikkhapath.com'
 
   useEffect(() => {
     const canonicalUrl = `${baseUrl}${pathname}`

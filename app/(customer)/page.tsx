@@ -17,7 +17,7 @@ import { getHeroNews, getPopularNews, getLatestNews, getTabNews, getVideoNews } 
 import { getDivisionsAction } from "@/lib/api/location-actions"
 
 const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ"
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.news"
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.com"
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ`,
