@@ -9,14 +9,15 @@ import { ServiceAdBanner } from "../common/service-ad-banner";
 
 export function PoliceServiceClient() {
   const [filters, setFilters] = useState({
-    division: "All",
-    city: "",
-    area: "",
+    division_id: "",
+    district_id: "",
+    upazila_id: "",
+    search: "",
     gps: undefined as { lat: number; lng: number } | undefined,
   });
 
   const handleFilterChange = (newFilters: any) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   return (

@@ -49,7 +49,7 @@ export async function getCustomerAdvertisements(params?: { category?: string; pl
   }
 
   const data = await response.json();
-  const items = Array.isArray(data.resources) ? data.resources : (Array.isArray(data.data) ? data.data : data);
+  const items = Array.isArray(data.resources) ? data.resources : [];
 
   return {
     items: items as Advertisement[],
@@ -60,5 +60,5 @@ export async function getAdvertisement(id: number | string) {
   const response = await fetchApi(`/admin/advertisements/${id}`, { cache: "no-store" });
   if (!response.ok) return null;
   const data = await response.json();
-  return (data.resources ?? data.data ?? data) as Advertisement;
+  return (data.resources ?? []) as Advertisement;
 }

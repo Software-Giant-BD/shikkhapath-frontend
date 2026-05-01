@@ -14,11 +14,14 @@ import {
 import Link from "next/link";
 import { logoutUser } from "@/lib/api/auth";
 
+import { ProfileApiModel } from "@/lib/api/profile";
+
 interface TopbarProps {
   onMenuClick: () => void;
+  profile?: ProfileApiModel | null;
 }
 
-export function Topbar({ onMenuClick }: TopbarProps) {
+export function Topbar({ onMenuClick, profile }: TopbarProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -173,13 +176,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           >
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-sm font-semibold text-slate-800 leading-none">
-                Demo User
+                {profile?.name || "Demo User"}
               </span>
-              <span className="text-xs text-slate-500 mt-1">Demo</span>
+              <span className="text-xs text-slate-500 mt-1">
+                {profile?.role_name || ""}
+              </span>
             </div>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 overflow-hidden ring-2 ring-transparent group-hover:ring-indigo-100 transition-all shrink-0">
               <img
-                src="https://i.pravatar.cc/150?img=11"
+                src="/images/user.png"
                 alt="User avatar"
                 className="w-full h-full object-cover"
               />
@@ -193,27 +198,19 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <div className="absolute right-0 mt-3 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 origin-top-right">
               <div className="px-4 py-3 border-b border-slate-100 mb-1 sm:hidden">
                 <p className="text-sm font-semibold text-slate-800">
-                  Demo User
+                  {profile?.name || "Demo User"}
                 </p>
                 <p className="text-xs text-slate-500 truncate">
-                  demo@example.com
+                  {profile?.email || "demo@example.com"}
                 </p>
               </div>
 
               <Link
-                href="/profile"
+                href="/admin/profile"
                 className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
               >
                 <User size={16} />
                 Profile
-              </Link>
-
-              <Link
-                href="/settings"
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
-              >
-                <Settings size={16} />
-                Settings
               </Link>
 
               <div className="border-t border-slate-100 mt-1 pt-1">

@@ -70,7 +70,12 @@ export default async function EditNewsPage({
           allow_comments: news.allow_comments ? "1" : "0",
           meta_title: news.meta_title,
           meta_description: news.meta_description,
-          meta_keywords: news.meta_keywords,
+          meta_keywords: news.meta_keywords
+            ? news.meta_keywords
+                .split(",")
+                .map((k) => k.trim())
+                .filter(Boolean)
+            : [],
         }}
         headerTitle="Edit News"
         headerAction={

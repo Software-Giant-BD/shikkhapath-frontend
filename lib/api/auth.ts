@@ -21,7 +21,7 @@ export async function loginUser(email: string, password: string) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data?.message || "Invalid credentials provided.");
+    return { error: data?.message || "Invalid credentials provided." };
   }
 
   if (data?.resources?.token) {

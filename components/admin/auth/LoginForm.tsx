@@ -24,6 +24,10 @@ export function LoginForm() {
 
     try {
       const data = await loginUser(email, password);
+      if (data?.error) {
+        setError(data.error);
+        return;
+      }
       router.push("/admin");
     } catch (err: any) {
       setError(
@@ -90,18 +94,6 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-3 pt-2 group">
-        <Checkbox
-          id="remember"
-          className="border-slate-700 bg-slate-900/50 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500 group-hover:border-indigo-500/50 transition-colors"
-        />
-        <Label
-          htmlFor="remember"
-          className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          Remember me for 30 days
-        </Label>
-      </div>
 
       <Button
         type="submit"

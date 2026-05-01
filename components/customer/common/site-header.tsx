@@ -30,7 +30,6 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
   const [currentDate, setCurrentDate] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [language, setLanguage] = useState<"bn" | "en">("bn");
   const pathname = usePathname();
@@ -70,7 +69,6 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
 
   useEffect(() => {
     setIsOpen(false);
-    setIsSearchOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -151,14 +149,13 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
               </Link>
               <span className="hidden sm:inline font-semibold text-slate-500">{currentDate || "লোড হচ্ছে..."}</span>
               <div className="flex items-center gap-4 bg-slate-50 rounded-full px-5 py-2 ring-1 ring-slate-100">
-                <button 
-                  onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  type="button" 
-                  className={`transition-colors ${isSearchOpen ? "text-[#b38716]" : "text-slate-600 hover:text-[#b38716]"}`}
+                <Link 
+                  href="/search"
+                  className="text-slate-600 hover:text-[#b38716] transition-colors"
                   aria-label="Search"
                 >
                   <Search className="h-5 w-5" />
-                </button>
+                </Link>
                 <div className="w-px h-4 bg-slate-200" />
                 <button 
                   onClick={toggleTheme}
@@ -180,27 +177,6 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
           </div>
         </div>
 
-        {/* Sliding Search Overlay */}
-        <div className={`overflow-hidden transition-all duration-300 ease-in-out border-b border-red-50 bg-slate-50/50 ${isSearchOpen ? "max-h-20 opacity-100" : "max-h-0 opacity-0"}`}>
-           <div className="mx-auto max-w-5xl px-4 py-4">
-              <div className="relative flex items-center">
-                 <Search className="absolute left-4 h-5 w-5 text-slate-400" />
-                 <input 
-                    type="text" 
-                    placeholder="পছন্দের সংবাদটি খুঁজুন..."
-                    autoFocus={isSearchOpen}
-                    className="w-full rounded-2xl border-none bg-white py-3.5 pl-12 pr-12 text-base font-bold text-slate-900 shadow-sm ring-1 ring-slate-200 focus:ring-2 focus:ring-[#c79a1d]"
-                 />
-                 <button 
-                  onClick={() => setIsSearchOpen(false)}
-                  className="absolute right-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 transition-colors"
-                 >
-                    <X className="h-5 w-5" />
-                 </button>
-              </div>
-           </div>
-        </div>
-
         {/* Mobile Header Row */}
         <div className="border-b border-[#e0b22f]/30 md:hidden bg-white">
           <div className="mx-auto flex w-full max-w-screen-2xl items-center justify-between px-4 py-3.5">
@@ -215,7 +191,12 @@ export function SiteHeader({ navLinks = defaultNavLinks }: { navLinks?: SiteNavL
               <Image src="/logo.png" alt="Shikkhapath" width={780} height={130} priority className="h-9 w-auto" />
             </Link>
 
-            <button type="button" className="p-2 text-slate-700"><Search className="h-5 w-5" /></button>
+            <Link 
+              href="/search"
+              className="p-2 text-slate-700"
+            >
+              <Search className="h-5 w-5" />
+            </Link>
           </div>
         </div>
 

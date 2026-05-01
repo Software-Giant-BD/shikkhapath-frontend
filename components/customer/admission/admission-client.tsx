@@ -1,10 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { University, Search, CheckCircle2, XCircle, ChevronRight, CalendarDays, Loader2, Target, Award, MapPin } from "lucide-react";
+import {
+  University,
+  CheckCircle2,
+  XCircle,
+  ChevronRight,
+  ChevronLeft,
+  CalendarDays,
+  Loader2,
+  Target,
+  Award,
+  MapPin,
+} from "lucide-react";
 import { fetchAdmissionsAction } from "@/lib/api/admission-actions";
 import type { AdmissionUniversityModel } from "@/lib/api/admission";
-import Link from "next/link";
+import { type BasePagination } from "@/lib/api/common";
 import { ServiceAdBanner } from "../common/service-ad-banner";
 
 interface FilterState {
@@ -14,60 +25,69 @@ interface FilterState {
   group: string;
 }
 
-export function AdmissionClient() {
-  const [universities, setUniversities] = useState<AdmissionUniversityModel[]>([]);
+export function AdmissionClient({ isAdmin = true }: { isAdmin?: boolean }) {
+  const [universities, setUniversities] = useState<AdmissionUniversityModel[]>(
+    [],
+  );
+  const [pagination, setPagination] = useState<BasePagination | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>({
     hasChecked: false,
     sscGpa: "",
     hscGpa: "",
-    group: "Science"
+    group: "Science",
   });
 
-  useEffect(() => {
-    const loadUniversities = async () => {
-      setLoading(true);
-      
-      const customData: AdmissionUniversityModel[] = [
-        { id: "med", name: "Medical Colleges", unit: "MBBS (Central)", exam_date: "2026-02-09T00:00:00Z", app_start_date: "2026-01-11T00:00:00Z", app_deadline: "2026-01-23T00:00:00Z", exam_type: "MCQ", seats: 5380, tags: ["MEDICAL"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "du", name: "University of Dhaka", unit: "All Units", exam_date: "2026-03-01T00:00:00Z", app_start_date: "2026-01-15T00:00:00Z", app_deadline: "2026-02-15T00:00:00Z", exam_type: "Written & MCQ", seats: 5965, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "cu", name: "University of Chittagong", unit: "All Units", exam_date: "2026-03-22T00:00:00Z", app_start_date: "2026-01-10T00:00:00Z", app_deadline: "2026-02-12T00:00:00Z", exam_type: "MCQ", seats: 4926, tags: ["PUBLIC"], req_ssc: 3.5, req_hsc: 3.5, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "ru", name: "University of Rajshahi", unit: "All Units", exam_date: "2026-03-20T00:00:00Z", app_start_date: "2026-02-05T00:00:00Z", app_deadline: "2026-03-01T00:00:00Z", exam_type: "MCQ", seats: 4000, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 7.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "cou", name: "Comilla University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1040, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "sust", name: "Shahjalal University of Sci & Tech (SUST)", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1700, tags: ["SCIENCE & TECH"], req_ssc: 3.5, req_hsc: 3.5, req_total: 8.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "bup", name: "Bangladesh Univ. of Professionals (BUP)", unit: "All Units", exam_date: "2026-03-10T00:00:00Z", app_start_date: "2026-01-20T00:00:00Z", app_deadline: "2026-02-20T00:00:00Z", exam_type: "MCQ", seats: 1250, tags: ["PUBLIC"], req_ssc: 4.0, req_hsc: 4.0, req_total: 8.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "buet", name: "BUET", unit: "Engineering", exam_date: "2026-04-10T00:00:00Z", app_start_date: "2026-01-20T00:00:00Z", app_deadline: "2026-02-25T00:00:00Z", exam_type: "Written", seats: 1305, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 5.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "cuet", name: "CUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 960, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "kuet", name: "KUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 1065, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "ruet", name: "RUET", unit: "Engineering Cluster", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written & MCQ", seats: 1235, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "duet", name: "DUET", unit: "Engineering", exam_date: "2026-05-15T00:00:00Z", app_start_date: "2026-03-20T00:00:00Z", app_deadline: "2026-04-25T00:00:00Z", exam_type: "Written", seats: 880, tags: ["ENGINEERING"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.0, allowed_groups: ["Science"], apply_url: "#" }, // DUET is for diploma
-        { id: "butex", name: "BUTEX", unit: "Engineering", exam_date: "2026-04-20T00:00:00Z", app_start_date: "2026-02-15T00:00:00Z", app_deadline: "2026-03-15T00:00:00Z", exam_type: "Written", seats: 600, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 8.5, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "gst", name: "GST Cluster", unit: "24 Universities", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 21000, tags: ["CLUSTER"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "iut", name: "IUT", unit: "Engineering", exam_date: "2026-04-05T00:00:00Z", app_start_date: "2026-01-10T00:00:00Z", app_deadline: "2026-02-10T00:00:00Z", exam_type: "MCQ", seats: 750, tags: ["INT. UNIVERSITY"], req_ssc: 4.5, req_hsc: 4.5, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "jnu", name: "Jagannath University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 2765, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "ju", name: "Jahangirnagar University", unit: "All Units", exam_date: "2026-03-25T00:00:00Z", app_start_date: "2026-02-10T00:00:00Z", app_deadline: "2026-03-10T00:00:00Z", exam_type: "MCQ", seats: 1889, tags: ["PUBLIC"], req_ssc: 3.5, req_hsc: 3.5, req_total: 7.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "ku", name: "Khulna University", unit: "GST Cluster", exam_date: "2026-04-15T00:00:00Z", app_start_date: "2026-02-20T00:00:00Z", app_deadline: "2026-03-20T00:00:00Z", exam_type: "MCQ", seats: 1200, tags: ["PUBLIC"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "agri", name: "Agriculture Cluster", unit: "9 Universities", exam_date: "2026-05-25T00:00:00Z", app_start_date: "2026-04-10T00:00:00Z", app_deadline: "2026-05-10T00:00:00Z", exam_type: "MCQ", seats: 3539, tags: ["AGRICULTURE"], req_ssc: 3.5, req_hsc: 3.5, req_total: 8.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "mist", name: "MIST", unit: "Engineering", exam_date: "2026-03-15T00:00:00Z", app_start_date: "2026-01-15T00:00:00Z", app_deadline: "2026-02-15T00:00:00Z", exam_type: "Written", seats: 570, tags: ["ENGINEERING"], req_ssc: 4.0, req_hsc: 4.0, req_total: 9.0, allowed_groups: ["Science"], apply_url: "#" },
-        { id: "nu", name: "National University", unit: "Honours", exam_date: "2026-05-10T00:00:00Z", app_start_date: "2026-04-01T00:00:00Z", app_deadline: "2026-04-30T00:00:00Z", exam_type: "GPA Based", seats: "400,000+", tags: ["NATIONAL"], req_ssc: 2.5, req_hsc: 2.5, req_total: 6.0, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" },
-        { id: "nursing", name: "Nursing Admissions", unit: "B.Sc & Diploma", exam_date: "2026-05-05T00:00:00Z", app_start_date: "2026-03-01T00:00:00Z", app_deadline: "2026-04-05T00:00:00Z", exam_type: "MCQ", seats: "3,000+", tags: ["NURSING"], req_ssc: 3.0, req_hsc: 3.0, req_total: 6.5, allowed_groups: ["Science", "Commerce", "Arts"], apply_url: "#" }
-      ];
+  const loadUniversities = async (targetPage: number) => {
+    if (targetPage === 1) setLoading(true);
+    else setLoadingMore(true);
 
-      setUniversities(customData);
+    try {
+      const response = await fetchAdmissionsAction({
+        isAdmin,
+        page: targetPage,
+        per_page: 12,
+      });
+      
+      if (targetPage === 1) {
+        setUniversities(response.items);
+      } else {
+        setUniversities((prev) => [...prev, ...response.items]);
+      }
+      
+      setPagination(response.pagination);
+    } catch (error) {
+      console.error("Failed to load admissions", error);
+      if (targetPage === 1) setUniversities([]);
+    } finally {
       setLoading(false);
-    };
-    loadUniversities();
-  }, []);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUniversities(1);
+  }, [isAdmin]);
+
+  const handleLoadMore = () => {
+    if (pagination && page < pagination.last_page) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadUniversities(nextPage);
+    }
+  };
 
   const handleEligibilityCheck = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters(prev => ({ ...prev, hasChecked: true }));
+    setFilters((prev) => ({ ...prev, hasChecked: true }));
   };
 
   const getEligibilityStatus = (uni: AdmissionUniversityModel) => {
     if (!filters.hasChecked) return null; // Neutral
-    
+
     const sscVal = parseFloat(filters.sscGpa);
     const hscVal = parseFloat(filters.hscGpa);
     const total = sscVal + hscVal;
@@ -75,7 +95,8 @@ export function AdmissionClient() {
     if (isNaN(sscVal) || isNaN(hscVal)) return false; // Invalid input means not eligible
 
     const validGroup = uni.allowed_groups.includes(filters.group);
-    const validGrades = sscVal >= uni.req_ssc && hscVal >= uni.req_hsc && total >= uni.req_total;
+    const validGrades =
+      sscVal >= uni.req_ssc && hscVal >= uni.req_hsc && total >= uni.req_total;
 
     return validGroup && validGrades;
   };
@@ -90,7 +111,9 @@ export function AdmissionClient() {
           Admission <span className="text-indigo-600">News</span>
         </h1>
         <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-          Get the latest university circulars. Enter your HSC and SSC statistics to automatically discover which universities you are eligible to apply for.
+          Get the latest university circulars. Enter your HSC and SSC statistics
+          to automatically discover which universities you are eligible to apply
+          for.
         </p>
       </div>
 
@@ -103,51 +126,73 @@ export function AdmissionClient() {
         <div className="w-full lg:w-80 lg:sticky top-24 shrink-0">
           <div className="bg-white border border-slate-200 shadow-xl shadow-slate-200/40 rounded-3xl p-6 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-purple-500"></div>
-            
+
             <div className="flex items-center gap-3 mb-6 mt-2">
               <Target className="w-6 h-6 text-indigo-500" />
-              <h2 className="text-xl font-bold text-slate-900 tracking-tight">Am I Eligible?</h2>
+              <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                Am I Eligible?
+              </h2>
             </div>
 
             <form onSubmit={handleEligibilityCheck} className="space-y-5">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">SSC GPA</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  min="0" 
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  SSC GPA
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
                   max="5"
                   required
                   placeholder="e.g. 5.00"
                   value={filters.sscGpa}
-                  onChange={(e) => setFilters({...filters, sscGpa: e.target.value, hasChecked: false})}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      sscGpa: e.target.value,
+                      hasChecked: false,
+                    })
+                  }
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">HSC GPA</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  min="0" 
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  HSC GPA
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
                   max="5"
                   required
                   placeholder="e.g. 4.50"
                   value={filters.hscGpa}
-                  onChange={(e) => setFilters({...filters, hscGpa: e.target.value, hasChecked: false})}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      hscGpa: e.target.value,
+                      hasChecked: false,
+                    })
+                  }
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Background Group</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                  Background Group
+                </label>
                 <div className="grid grid-cols-1 gap-2">
-                  {["Science", "Commerce", "Arts"].map(g => (
+                  {["Science", "Commerce", "Arts"].map((g) => (
                     <button
                       key={g}
                       type="button"
-                      onClick={() => setFilters({...filters, group: g, hasChecked: false})}
+                      onClick={() =>
+                        setFilters({ ...filters, group: g, hasChecked: false })
+                      }
                       className={`py-2 rounded-xl text-sm font-bold border transition-colors ${filters.group === g ? "bg-indigo-50 text-indigo-700 border-indigo-200" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
                     >
                       {g}
@@ -156,7 +201,7 @@ export function AdmissionClient() {
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full mt-4 flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3.5 text-sm font-black text-white hover:bg-indigo-600 transition-colors shadow-md"
               >
@@ -166,10 +211,16 @@ export function AdmissionClient() {
             </form>
 
             {filters.hasChecked && (
-               <div className="mt-6 pt-6 border-t border-slate-100 text-center animate-in zoom-in-95">
-                 <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1">Your Total GPA</p>
-                 <p className="text-3xl font-black text-indigo-600">{(parseFloat(filters.sscGpa) + parseFloat(filters.hscGpa)).toFixed(2)}</p>
-               </div>
+              <div className="mt-6 pt-6 border-t border-slate-100 text-center animate-in zoom-in-95">
+                <p className="text-xs uppercase tracking-widest font-bold text-slate-400 mb-1">
+                  Your Total GPA
+                </p>
+                <p className="text-3xl font-black text-indigo-600">
+                  {(
+                    parseFloat(filters.sscGpa) + parseFloat(filters.hscGpa)
+                  ).toFixed(2)}
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -179,107 +230,174 @@ export function AdmissionClient() {
           {loading ? (
             <div className="h-64 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/50">
               <Loader2 className="w-8 h-8 animate-spin text-indigo-500 mb-4" />
-              <p className="text-slate-500 font-bold">Scanning admission databases...</p>
+              <p className="text-slate-500 font-bold">
+                Scanning admission databases...
+              </p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {universities.map(uni => {
-                const isEligible = getEligibilityStatus(uni);
-                const showMask = isEligible === false;
+            <>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+                {universities.map((uni) => {
+                  const isEligible = getEligibilityStatus(uni);
+                  const showMask = isEligible === false;
 
-                return (
-                  <div 
-                    key={uni.id} 
-                    className={`relative rounded-3xl border transition-all duration-300 overflow-hidden ${
-                      isEligible === true 
-                        ? "border-emerald-200 shadow-emerald-500/10 shadow-xl bg-white" 
-                        : "border-slate-200 bg-white shadow-sm hover:shadow-md"
-                    }`}
-                  >
-                    {/* Dim Mask for Not Eligible */}
-                    {showMask && (
-                      <div className="absolute inset-0 bg-slate-100/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-                        <div className="bg-white/90 shadow-sm p-4 text-center rounded-2xl w-full border border-slate-200">
-                           <XCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                           <p className="text-slate-900 font-bold">Not Eligible</p>
-                           <p className="text-xs text-slate-500 mt-1 leading-tight">Your GPA or academic group does not meet the minimum requirements for {uni.unit}.</p>
+                  return (
+                    <div
+                      key={uni.id}
+                      className={`relative rounded-3xl border transition-all duration-300 overflow-hidden ${
+                        isEligible === true
+                          ? "border-emerald-200 shadow-emerald-500/10 shadow-xl bg-white"
+                          : "border-slate-200 bg-white shadow-sm hover:shadow-md"
+                      }`}
+                    >
+                      {/* Dim Mask for Not Eligible */}
+                      {showMask && (
+                        <div className="absolute inset-0 bg-slate-100/60 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+                          <div className="bg-white/90 shadow-sm p-4 text-center rounded-2xl w-full border border-slate-200">
+                            <XCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                            <p className="text-slate-900 font-bold">
+                              Not Eligible
+                            </p>
+                            <p className="text-xs text-slate-500 mt-1 leading-tight">
+                              Your GPA or academic group does not meet the minimum
+                              requirements for {uni.unit}.
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    <div className="p-6 md:p-8">
-                       <div className="flex justify-between items-start mb-6">
-                         <div>
-                           <div className="flex items-center gap-2 mb-2">
-                             <div className="p-1.5 rounded-lg bg-indigo-50">
-                               <University className="w-4 h-4 text-indigo-600" />
-                             </div>
-                             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                               {uni.tags[0]}
-                             </span>
-                           </div>
-                           <h2 className="text-xl font-bold text-slate-900 leading-tight mb-1">{uni.name}</h2>
-                           {uni.unit && <p className="text-indigo-600 font-bold text-sm">{uni.unit}</p>}
-                         </div>
-
-                         {isEligible === true && (
-                            <div className="bg-emerald-100 text-emerald-700 p-2 rounded-full shadow-sm animate-in zoom-in-50">
-                               <CheckCircle2 className="w-5 h-5" />
+                      <div className="p-6 md:p-8">
+                        <div className="flex justify-between items-start mb-6">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-1.5 rounded-lg bg-indigo-50">
+                                <University className="w-4 h-4 text-indigo-600" />
+                              </div>
+                              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                {uni.tags[0]}
+                              </span>
                             </div>
-                         )}
-                       </div>
+                            <h2 className="text-xl font-bold text-slate-900 leading-tight mb-1">
+                              {uni.name}
+                            </h2>
+                            {uni.unit && (
+                              <p className="text-indigo-600 font-bold text-sm">
+                                {uni.unit}
+                              </p>
+                            )}
+                          </div>
 
-                       <div className="space-y-4 mb-6">
-                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                             <CalendarDays className="w-4 h-4 text-slate-500" />
-                           </div>
-                           <div>
-                             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">Exam Date</p>
-                             <p className="text-sm font-bold text-slate-900">{new Date(uni.exam_date).toLocaleDateString()}</p>
-                           </div>
-                         </div>
-                         <div className="flex items-center gap-3">
-                           <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                             <Award className="w-4 h-4 text-slate-500" />
-                           </div>
-                           <div>
-                             <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">Requirements</p>
-                             <p className="text-xs font-medium text-slate-600">
-                               SSC: {uni.req_ssc.toFixed(2)} | HSC: {uni.req_hsc.toFixed(2)} | Total: {uni.req_total.toFixed(2)}
-                             </p>
-                           </div>
-                         </div>
-                       </div>
+                          {isEligible === true && (
+                            <div className="bg-emerald-100 text-emerald-700 p-2 rounded-full shadow-sm animate-in zoom-in-50">
+                              <CheckCircle2 className="w-5 h-5" />
+                            </div>
+                          )}
+                        </div>
 
-                       <div className="grid grid-cols-2 gap-2 mb-6">
+                        <div className="space-y-4 mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                              <CalendarDays className="w-4 h-4 text-slate-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                                Exam Date
+                              </p>
+                              <p className="text-sm font-bold text-slate-900">
+                                {new Date(uni.exam_date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+                              <Award className="w-4 h-4 text-slate-500" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+                                Requirements
+                              </p>
+                              <p className="text-xs font-medium text-slate-600">
+                                SSC: {uni.req_ssc.toFixed(2)} | HSC:{" "}
+                                {uni.req_hsc.toFixed(2)} | Total:{" "}
+                                {uni.req_total.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 mb-6">
                           <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                             <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Exam Method</p>
-                             <p className="text-xs font-bold text-slate-700">{uni.exam_type}</p>
+                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
+                              Exam Method
+                            </p>
+                            <p className="text-xs font-bold text-slate-700">
+                              {uni.exam_type}
+                            </p>
                           </div>
                           <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
-                             <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Seats Target</p>
-                             <p className="text-xs font-bold text-slate-700">{uni.seats}</p>
+                            <p className="text-[10px] uppercase font-bold text-slate-400 mb-1 tracking-wider">
+                              Seats Target
+                            </p>
+                            <p className="text-xs font-bold text-slate-700">
+                              {uni.seats}
+                            </p>
                           </div>
-                       </div>
+                        </div>
 
-                       <a 
-                         href={uni.apply_url} 
-                         target="_blank" 
-                         rel="noreferrer"
-                         className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all
-                           ${isEligible === true 
-                             ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700" 
-                             : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`
-                         }
-                       >
-                         Apply Now
-                       </a>
+                        <a
+                          href={uni.apply_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all
+                            ${
+                              isEligible === true
+                                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700"
+                                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            }`}
+                        >
+                          Apply Now
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Load More UI */}
+              {pagination && page < pagination.last_page && (
+                <div className="mt-12 flex flex-col items-center justify-center gap-4">
+                  <button
+                    onClick={handleLoadMore}
+                    disabled={loadingMore}
+                    className="group relative flex items-center justify-center gap-3 rounded-2xl bg-white border-2 border-slate-900 px-8 py-4 text-sm font-black text-slate-900 hover:bg-slate-900 hover:text-white transition-all shadow-xl shadow-slate-200/50 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Loading More...
+                      </>
+                    ) : (
+                      <>
+                        Load More Universities
+                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                  
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    Showing {universities.length} of {pagination.total} Universities
+                  </p>
+                </div>
+              )}
+
+              {pagination && page === pagination.last_page && pagination.total > 0 && (
+                <div className="mt-12 text-center">
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    You've reached the end — Total {pagination.total} Universities
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

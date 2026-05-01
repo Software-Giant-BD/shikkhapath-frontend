@@ -19,7 +19,7 @@ export default function AdmissionPage() {
           placement="Admission Ad"
         />
       </div>
-      <AdmissionClient />
+      <AdmissionClient isAdmin={false} />
     </>
   );
 }

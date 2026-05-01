@@ -30,11 +30,11 @@ export function DonorCard({ donor }: DonorCardProps) {
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <CardTitle className="text-lg font-bold text-slate-800">
-              {donor.name}
+              {donor.full_name}
             </CardTitle>
             <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
               <MapPin className="h-3.5 w-3.5 text-red-500" />
-              {donor.location}
+              {donor.district}
             </div>
           </div>
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-600 font-black text-white shadow-lg shadow-red-500/20">

@@ -52,6 +52,11 @@ export type NewsApiModel = {
 export type GetNewsParams = {
   page?: number;
   per_page?: number;
+  search?: string;
+  status?: NewsStatus;
+  type?: "standard" | "video";
+  category_id?: string | number;
+  language?: string;
 };
 
 export type NewsListResult = {
@@ -287,6 +292,26 @@ export async function getNewsList(
       query.set("per_page", String(params.per_page));
     }
 
+    if (params?.search) {
+      query.set("search", params.search);
+    }
+
+    if (params?.status) {
+      query.set("status", params.status);
+    }
+
+    if (params?.type) {
+      query.set("type", params.type);
+    }
+
+    if (params?.category_id !== undefined && String(params.category_id).trim()) {
+      query.set("category_id", String(params.category_id));
+    }
+
+    if (params?.language) {
+      query.set("language", params.language);
+    }
+
     const path = query.toString()
       ? `/admin/news?${query.toString()}`
       : "/admin/news";
@@ -453,6 +478,31 @@ export async function getVideoNews(): Promise<HeroNewsItem[]> {
     return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
   } catch (error) {
     console.error("Failed to fetch video news:", error);
+    return [];
+  }
+}
+
+export async function getLocalNews(params: {
+  division_id?: string;
+  district_id?: string;
+  upazila_id?: string;
+}): Promise<HeroNewsItem[]> {
+  try {
+    const query = new URLSearchParams();
+    if (params.division_id) query.set("division_id", params.division_id);
+    if (params.district_id) query.set("district_id", params.district_id);
+    if (params.upazila_id) query.set("upazila_id", params.upazila_id);
+
+    const url = query.toString() ? `/local-news?${query.toString()}` : "/local-news";
+    const response = await fetchApi(url, undefined, { includeAuth: false });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) return [];
+
+    const resources = payload?.resources || payload;
+    return Array.isArray(resources) ? resources.map(normalizeHeroItem) : [];
+  } catch (error) {
+    console.error("Failed to fetch local news:", error);
     return [];
   }
 }

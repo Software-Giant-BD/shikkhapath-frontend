@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { Select } from "@/components/admin/ui/select";
@@ -60,7 +65,9 @@ export function UserForm({
   const [submitError, setSubmitError] = useState("");
 
   const submitText = mode === "add" ? "Save User" : "Update User";
-  const shouldShowHeader = Boolean(headerTitle || headerAction || showDetailsHeader);
+  const shouldShowHeader = Boolean(
+    headerTitle || headerAction || showDetailsHeader,
+  );
 
   return (
     <form
@@ -95,7 +102,9 @@ export function UserForm({
               : await updateUserAction(userId as string, payload);
 
           if (!result.ok) {
-            setSubmitError(result.message || "Request failed. Please try again.");
+            setSubmitError(
+              result.message || "Request failed. Please try again.",
+            );
             return;
           }
 
@@ -113,13 +122,17 @@ export function UserForm({
           <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               {headerTitle ? (
-                <h2 className="text-2xl font-bold text-slate-800">{headerTitle}</h2>
+                <h2 className="text-2xl font-bold text-slate-800">
+                  {headerTitle}
+                </h2>
               ) : showDetailsHeader ? (
                 <CardTitle>User Details</CardTitle>
               ) : null}
             </div>
 
-            {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+            {headerAction ? (
+              <div className="shrink-0">{headerAction}</div>
+            ) : null}
           </CardHeader>
         ) : null}
         <CardContent className="space-y-5">
@@ -129,7 +142,9 @@ export function UserForm({
               <Input
                 id="name"
                 value={form.name}
-                onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, name: event.target.value }))
+                }
                 required
               />
             </div>
@@ -140,7 +155,9 @@ export function UserForm({
                 id="email"
                 type="email"
                 value={form.email}
-                onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, email: event.target.value }))
+                }
                 required
               />
             </div>
@@ -152,7 +169,9 @@ export function UserForm({
               <Input
                 id="phone"
                 value={form.phone}
-                onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, phone: event.target.value }))
+                }
                 required
               />
             </div>
@@ -163,21 +182,29 @@ export function UserForm({
                 id="password"
                 type="password"
                 value={form.password}
-                placeholder={mode === "edit" ? "Keep blank to leave unchanged" : "Enter password"}
-                onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                placeholder={
+                  mode === "edit"
+                    ? "Keep blank to leave unchanged"
+                    : "Enter password"
+                }
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, password: event.target.value }))
+                }
                 required={mode === "add"}
               />
             </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-3">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="role_id">Role</Label>
               <Select
                 id="role_id"
                 value={form.role_id}
                 required
-                onChange={(event) => setForm((prev) => ({ ...prev, role_id: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, role_id: event.target.value }))
+                }
               >
                 <option value="">Select Role</option>
                 {roleOptions.map((role) => (
@@ -186,7 +213,7 @@ export function UserForm({
                   </option>
                 ))}
               </Select>
-            </div>
+            </div> */}
 
             <div className="space-y-2">
               <Label htmlFor="is_active">Status</Label>
@@ -194,7 +221,11 @@ export function UserForm({
                 id="is_active"
                 value={form.is_active}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, is_active: event.target.value as UserFormValues["is_active"] }))
+                  setForm((prev) => ({
+                    ...prev,
+                    is_active: event.target
+                      .value as UserFormValues["is_active"],
+                  }))
                 }
               >
                 <option value="1">Active</option>
@@ -202,7 +233,7 @@ export function UserForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="can_manage_news">Can Manage News</Label>
               <Select
                 id="can_manage_news"
@@ -210,19 +241,22 @@ export function UserForm({
                 onChange={(event) =>
                   setForm((prev) => ({
                     ...prev,
-                    can_manage_news: event.target.value as UserFormValues["can_manage_news"],
+                    can_manage_news: event.target
+                      .value as UserFormValues["can_manage_news"],
                   }))
                 }
               >
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </Select>
-            </div>
+            </div> */}
           </div>
         </CardContent>
       </Card>
 
-      {submitError ? <p className="text-sm font-medium text-rose-600">{submitError}</p> : null}
+      {submitError ? (
+        <p className="text-sm font-medium text-rose-600">{submitError}</p>
+      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link href="/admin/users/list">

@@ -24,7 +24,7 @@ const CATEGORIES = {
     "Admission Ad",
     "CGPA Calculator Ad",
   ],
-  "News Details Page": ["Header Ad", "Content Top Ad", "In-Content Ad", "Sidebar Bottom Ad", "Footer Ad"],
+  "News Details Page": ["Header Ad", "Content Top Ad", "In-Content Square Ad", "Sidebar Bottom Ad", "Footer Ad"],
 };
 
 const AD_DIMENSIONS: Record<string, string> = {
@@ -36,7 +36,7 @@ const AD_DIMENSIONS: Record<string, string> = {
   "In-Feed second Ad": "728 x 90",
   "Right Sidebar Ad": "300 x 250",
   "Content Top Ad": "728 x 90",
-  "In-Content Ad": "728 x 90",
+  "In-Content Square Ad": "500 x 400",
   "Sidebar Bottom Ad": "300 x 250",
   "Footer Ad": "970 x 90",
   "Ambulance Ad": "300 x 250",

@@ -1,10 +1,10 @@
 import { AdBanner } from "@/components/customer/home/ad-banner";
-import { FireServiceClient } from "@/components/customer/fire-service/fire-service-client";
+import { FireServiceClient } from "@/components/customer/fire-service/fire-client";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Fire Service Directory | Shikkhapath",
-  description: "Locate and contact your nearest fire station instantly across Bangladesh. Emergency response directory.",
+  title: "Fire Station Directory | Shikkhapath",
+  description: "Locate and contact any fire station in Bangladesh instantly for emergency fire service and assistance.",
 };
 
 export default function FireServicePage() {

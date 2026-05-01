@@ -14,6 +14,10 @@ import {
   ChevronRight,
   X,
   Briefcase,
+  Shield,
+  Flame,
+  University,
+  Stethoscope,
 } from "lucide-react";
 
 type MenuItem = {
@@ -33,7 +37,6 @@ const menuConfig: MenuSection[] = [
     title: "Main",
     items: [
       { title: "Dashboard", icon: LayoutDashboard, href: "/admin" },
-      { title: "Members", icon: UserCircle, href: "/admin/members/list" },
       {
         title: "Categories",
         icon: Tags,
@@ -44,11 +47,12 @@ const menuConfig: MenuSection[] = [
           { title: "Website Menu Categories", href: "/admin/categories/menu" },
         ],
       },
+
       {
         title: "User Manage",
         icon: Users,
         subItems: [
-          { title: "Roles", href: "/admin/roles/list" },
+          // { title: "Roles", href: "/admin/roles/list" },
           { title: "Users", href: "/admin/users/list" },
         ],
       },
@@ -57,7 +61,9 @@ const menuConfig: MenuSection[] = [
         icon: Newspaper,
         subItems: [
           { title: "News List", href: "/admin/news/list" },
+          { title: "Guest Articles", href: "/admin/news/guest-articles" },
           { title: "Add News", href: "/admin/news/add" },
+          { title: "Media Center", href: "/admin/media-center" },
         ],
       },
       {
@@ -76,8 +82,32 @@ const menuConfig: MenuSection[] = [
           { title: "Candidate List", href: "/admin/candidates/list" },
         ],
       },
-      { title: "Ambulances", icon: Newspaper, href: "/admin/ambulances" },
-      { title: "Media Center", icon: FolderOpen, href: "/admin/media-center" },
+      {
+        title: "Health",
+        icon: Briefcase,
+        subItems: [
+          { title: "Ambulances", href: "/admin/ambulances" },
+          { title: "Doctors", href: "/admin/doctors" },
+          { title: "Appointments", href: "/admin/doctor-appointments" },
+          { title: "Blood Donors", href: "/admin/blood-donors" },
+        ],
+      },
+      {
+        title: "Emergency",
+        icon: Shield,
+        subItems: [
+          { title: "Police Stations", href: "/admin/police-stations" },
+          { title: "Fire Stations", href: "/admin/fire-stations" },
+        ],
+      },
+      {
+        title: "Admissions",
+        icon: University,
+        subItems: [
+          { title: "Admission List", href: "/admin/admissions" },
+          { title: "Add Admission", href: "/admin/admissions/add" },
+        ],
+      },
     ],
   },
 ];
@@ -178,7 +208,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     item.href === pathname ||
                     (hasSubItems &&
                       item.subItems?.some((sub) => sub.href === pathname));
-                  const isExpanded = expandedMenuTitle === item.title || isActive;
+                  const isExpanded =
+                    expandedMenuTitle === item.title || isActive;
                   const Icon = item.icon;
 
                   return (

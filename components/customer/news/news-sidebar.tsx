@@ -34,7 +34,7 @@ export function NewsSidebar({ title = "আরও পড়ুন", news = [], adCat
               >
                 <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <Image
-                    src={item.feature_image_url}
+                    src={item.feature_image_url || "/No_Image_Available.jpg"}
                     alt={item.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"

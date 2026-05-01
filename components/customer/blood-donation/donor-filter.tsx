@@ -1,19 +1,33 @@
-"use client";
-
-import { useState } from "react";
-import { Search, MapPin, Droplets, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Filter } from "lucide-react";
 import { BLOOD_GROUPS } from "@/lib/constants/blood-groups";
-import { BANGLADESH_DISTRICTS } from "@/lib/constants/districts";
+import { getDistrictsAction } from "@/lib/api/location-actions";
 import { Button } from "@/components/ui/button";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 
 interface DonorFilterProps {
-  onFilterChange: (filters: { group: string; location: string; availableOnly: boolean }) => void;
+  onFilterChange: (filters: {
+    group: string;
+    location: string;
+    availableOnly: boolean;
+  }) => void;
 }
 
 export function DonorFilter({ onFilterChange }: DonorFilterProps) {
-  const [group, setGroup] = useState("");
+  const [group, setGroup] = useState("All");
   const [location, setLocation] = useState("All");
   const [availableOnly, setAvailableOnly] = useState(false);
+  const [districts, setDistricts] = useState<
+    { id: string; name: string; bn_name?: string }[]
+  >([]);
+
+  useEffect(() => {
+    getDistrictsAction().then((res) => {
+      if (res.ok) {
+        setDistricts(res.items);
+      }
+    });
+  }, []);
 
   const handleGroupChange = (newGroup: string) => {
     setGroup(newGroup);
@@ -31,55 +45,51 @@ export function DonorFilter({ onFilterChange }: DonorFilterProps) {
     onFilterChange({ group, location, availableOnly: newVal });
   };
 
+  const bloodGroupOptions = [
+    { id: "All", name: "All Blood Groups" },
+    ...BLOOD_GROUPS.map(g => ({ id: g, name: g }))
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Blood Group Filter */}
         <div className="relative">
-          <Droplets className={`absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transition-colors ${group ? "text-red-500" : "text-slate-400"}`} />
-          <select
+          <SearchableSelect
+            options={bloodGroupOptions}
             value={group}
-            onChange={(e) => handleGroupChange(e.target.value)}
-            className={`w-full appearance-none rounded-2xl border bg-white py-3.5 pl-10 pr-10 text-sm font-bold outline-none transition-all focus:ring-4 ${
-              group ? "border-red-500/50 ring-red-500/5" : "border-slate-200 focus:border-red-500"
-            }`}
-          >
-            <option value="">Select Blood Group</option>
-            {BLOOD_GROUPS.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
-          {!group && (
-            <div className="absolute -bottom-5 left-1 text-[10px] font-bold text-red-500 animate-pulse">
-              * Blood group is mandatory
-            </div>
-          )}
+            onChange={handleGroupChange}
+            placeholder="Select Blood Group"
+            searchPlaceholder="Search blood group..."
+            className="w-full"
+          />
         </div>
 
         {/* Location Filter */}
         <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <select
+          <SearchableSelect
+            options={[{ id: "All", name: "All Locations" }, ...districts]}
             value={location}
-            onChange={(e) => handleLocationChange(e.target.value)}
-            className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-3.5 pl-10 pr-10 text-sm font-bold text-slate-700 outline-none transition-all focus:border-red-500 focus:ring-4 focus:ring-red-500/5"
-          >
-            <option value="All">All Locations</option>
-            {BANGLADESH_DISTRICTS.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
+            onChange={handleLocationChange}
+            placeholder="Select Location"
+            searchPlaceholder="Search districts..."
+            className="w-full"
+          />
         </div>
 
         {/* Availability Toggle */}
         <Button
           variant="outline"
           onClick={toggleAvailability}
-          className={`h-full gap-2 rounded-2xl border-slate-200 px-6 font-bold transition-all active:scale-95 ${
-            availableOnly ? "bg-emerald-50 text-emerald-600 border-emerald-200 shadow-sm" : "bg-white text-slate-600"
+          className={`h-full min-h-[54px] gap-2 rounded-2xl border-slate-200 px-6 font-bold transition-all active:scale-95 ${
+            availableOnly
+              ? "bg-red-50 text-red-600 border-red-200 shadow-sm"
+              : "bg-white text-slate-600"
           }`}
         >
-          <div className={`h-2 w-2 rounded-full ${availableOnly ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`} />
+          <div
+            className={`h-2.5 w-2.5 rounded-full ${availableOnly ? "bg-red-500 animate-pulse" : "bg-slate-300"}`}
+          />
           Available Only
         </Button>
 

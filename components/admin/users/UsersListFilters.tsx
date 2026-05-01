@@ -51,6 +51,11 @@ export function UsersListFilters({ initialSearch, title, action }: UsersListFilt
       return;
     }
 
+    // Only set timeout if search actually changed from what's in the props
+    if (search === initialSearch) {
+      return;
+    }
+
     const trimmed = search.trim();
     if (trimmed.length > 0 && trimmed.length < 2) {
       return;
@@ -63,7 +68,7 @@ export function UsersListFilters({ initialSearch, title, action }: UsersListFilt
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [navigateWithFilters, search]);
+  }, [navigateWithFilters, search, initialSearch]);
 
   return (
     <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">

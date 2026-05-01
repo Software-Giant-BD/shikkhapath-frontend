@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
-import { Noto_Sans_Bengali, Noto_Serif_Bengali } from "next/font/google";
 import "@/app/globals.css";
 
-const notoSansBengali = Noto_Sans_Bengali({
-  variable: "--font-noto-sans-bengali",
-  subsets: ["bengali"],
-});
-
-const notoSerifBengali = Noto_Serif_Bengali({
-  variable: "--font-noto-serif-bengali",
-  subsets: ["bengali"],
-});
-
 export const metadata: Metadata = {
-  title: "Shikkhapath | Modern News Portal",
-  description: "A modern, component-based company website for Shikkhapath.",
+  title: "Shikkhapath | আধুনিক শিক্ষা ও ক্যারিয়ারের ঠিকানা",
+  description:
+    "শিক্ষা ও ভর্তি পরীক্ষার সর্বশেষ আপডেট, ক্যারিয়ার গঠন এবং দেশ-বিদেশের সব খবর পেতে ভিজিট করুন শিক্ষাপথ। সঠিক বিশ্লেষণ ও নির্ভুল তথ্যই আমাদের মূল লক্ষ্য।",
+  keywords: [
+    "শিক্ষা",
+    "ভর্তি পরীক্ষা",
+    "ক্যারিয়ার",
+    "দেশ-বিদেশের খবর",
+    "শিক্ষা সংবাদ",
+    "ক্যারিয়ার গাইডলাইন",
+    "ভর্তি সার্কুলার",
+    "সরকারি চাকরি",
+    "বাংলা নিউজ পোর্টাল",
+    "Shikkhapath",
+    "Shikkhapath news",
+    "Shikkhapath admission",
+    "Shikkhapath career",
+    "Shikkhapath education",
+    "Shikkhapath news today",
+  ],
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",
@@ -24,8 +31,9 @@ export const metadata: Metadata = {
 import { SiteHeader } from "@/components/customer/common/site-header";
 import { SiteFooter } from "@/components/customer/common/footer-sections";
 import { getMenuCategories } from "@/lib/api/categories";
+import { CanonicalUrl } from "@/components/seo/canonical-url";
 
-export default async function RootLayout({
+export default async function CustomerLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -43,14 +51,13 @@ export default async function RootLayout({
   const navLinks = menuCategoryLinks;
 
   return (
-    <html lang="bn" className={`${notoSansBengali.variable} ${notoSerifBengali.variable}`}>
-      <body className={`font-sans antialiased`}>
-        <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
-          <SiteHeader navLinks={navLinks} />
-          {children}
-          <SiteFooter />
-        </div>
-      </body>
-    </html>
+    <>
+      <CanonicalUrl />
+      <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+        <SiteHeader navLinks={navLinks} />
+        {children}
+        <SiteFooter />
+      </div>
+    </>
   );
 }

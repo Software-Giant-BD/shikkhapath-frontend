@@ -12,14 +12,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { getProfile } from "@/lib/api/profile";
+
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const profile = await getProfile();
+
   return (
     <div className={`${geistSans.variable} ${geistMono.variable}`}>
-      <AdminShell>{children}</AdminShell>
+      <AdminShell profile={profile}>{children}</AdminShell>
     </div>
   );
 }

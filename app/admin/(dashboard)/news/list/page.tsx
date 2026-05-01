@@ -4,9 +4,18 @@ import { Pencil, Plus } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { NewsListFilters } from "@/components/admin/news/NewsListFilters";
 import { getNewsList } from "@/lib/api/news";
+import { getCategories } from "@/lib/api/categories";
 
-type SearchParams = Promise<{ page?: string }>;
+type SearchParams = Promise<{
+  page?: string;
+  search?: string;
+  status?: string;
+  type?: string;
+  category_id?: string;
+  language?: string;
+}>;
 
 type DisplayNewsStatus = "Draft" | "Published" | "Scheduled";
 
@@ -44,13 +53,38 @@ export default async function NewsListPage({
 }: {
   searchParams: SearchParams;
 }) {
-  const { page } = await searchParams;
+  const { page, search, status, type, category_id, language } =
+    await searchParams;
   const current_page = Math.max(1, Number(page) || 1);
+
+  const normalizedSearch = (search ?? "").trim();
+  const normalizedStatus = (status ?? "").trim().toLowerCase();
+  const normalizedType = (type ?? "").trim().toLowerCase();
+  const normalizedCategoryId = (category_id ?? "").trim();
+  const normalizedLanguage = (language ?? "").trim().toLowerCase();
 
   const { items: newsItems, pagination } = await getNewsList({
     page: current_page,
     per_page: 20,
+    search: normalizedSearch || undefined,
+    status:
+      normalizedStatus === "draft" ||
+      normalizedStatus === "published" ||
+      normalizedStatus === "scheduled"
+        ? (normalizedStatus as any)
+        : undefined,
+    type:
+      normalizedType === "standard" || normalizedType === "video"
+        ? (normalizedType as any)
+        : undefined,
+    category_id: normalizedCategoryId || undefined,
+    language: normalizedLanguage || undefined,
   });
+
+  const categories = await getCategories({ page: 1, per_page: 200 });
+  const categoryOptions = categories
+    .filter((c) => c.status === "published")
+    .map((c) => ({ id: c.id, title: c.title }));
 
   const rows = newsItems.map((item) => ({
     id: item.id,
@@ -79,8 +113,18 @@ export default async function NewsListPage({
     { length: pagination.last_page },
     (_, idx) => idx + 1,
   );
-  const getPageHref = (pageNumber: number) =>
-    `/admin/news/list?page=${pageNumber}`;
+  const getPageHref = (pageNumber: number) => {
+    const query = new URLSearchParams();
+    query.set("page", String(pageNumber));
+
+    if (normalizedSearch) query.set("search", normalizedSearch);
+    if (normalizedStatus) query.set("status", normalizedStatus);
+    if (normalizedType) query.set("type", normalizedType);
+    if (normalizedCategoryId) query.set("category_id", normalizedCategoryId);
+    if (normalizedLanguage) query.set("language", normalizedLanguage);
+
+    return `/admin/news/list?${query.toString()}`;
+  };
 
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-4 lg:px-5">
@@ -101,6 +145,14 @@ export default async function NewsListPage({
               </Button>
             </Link>
           </div>
+
+          <NewsListFilters
+            initialSearch={normalizedSearch}
+            initialStatus={normalizedStatus}
+            initialType={normalizedType}
+            initialCategoryId={normalizedCategoryId}
+            categories={categoryOptions}
+          />
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-220 text-left text-sm">

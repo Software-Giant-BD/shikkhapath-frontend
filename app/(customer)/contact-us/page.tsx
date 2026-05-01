@@ -37,7 +37,7 @@ export default function ContactPage() {
                 <p className="text-slate-600 leading-relaxed">
                   Empire Talukder Dream<br />
                   22–23 Station Road,<br />
-                  Tejgaon, Dhaka–1212
+                  Tejgaon, Dhaka–1215
                 </p>
               </div>
 

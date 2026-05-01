@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fetchApi, type FieldErrors } from "../common";
+import { fetchApi, type FieldErrors, rethrowNextErrors } from "../common";
 import { type AmbulanceService, type BasePagination } from "../ambulance";
 
 export type AmbulanceActionResult = {
@@ -27,7 +27,7 @@ export async function getAdminAmbulanceList(params: {
   per_page?: number;
   status?: string;
   search?: string;
-}): Promise<{ items: AmbulanceService[]; pagination: BasePagination }> {
+}): Promise<{ items: AmbulanceService[]; pagination: BasePagination; error?: string }> {
   const query = new URLSearchParams();
   if (params.page) query.append("page", params.page.toString());
   if (params.per_page) query.append("per_page", params.per_page.toString());
@@ -83,7 +83,8 @@ export async function updateAmbulanceStatusAction(
       ok: true,
       message: getMessage(data, "Ambulance status updated successfully."),
     };
-  } catch {
+  } catch (error) {
+    rethrowNextErrors(error);
     return {
       ok: false,
       message: "Ambulance API is unavailable.",

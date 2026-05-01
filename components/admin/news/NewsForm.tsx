@@ -24,6 +24,7 @@ import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { RichTextEditor } from "@/components/admin/news/RichTextEditor";
 import { Select } from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
@@ -57,7 +58,7 @@ type NewsFormValues = {
   allow_comments: "1" | "0";
   meta_title: string;
   meta_description: string;
-  meta_keywords: string;
+  meta_keywords: string[];
 };
 
 export type NewsFormInitialValues = Partial<NewsFormValues>;
@@ -102,7 +103,7 @@ const defaultValues: NewsFormValues = {
   allow_comments: "1",
   meta_title: "",
   meta_description: "",
-  meta_keywords: "",
+  meta_keywords: [],
 };
 
 function slugify(value: string) {
@@ -134,6 +135,12 @@ function buildInitialFormValues(
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
+    meta_keywords: Array.isArray(initialValues.meta_keywords)
+      ? initialValues.meta_keywords
+      : ((initialValues.meta_keywords as unknown as string) ?? "")
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
     publish_at: toDateTimeLocal(initialValues.publish_at ?? ""),
   };
 }
@@ -162,6 +169,7 @@ export function NewsForm({
   const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [keywordInput, setKeywordInput] = useState("");
   const [divisionOptions, setDivisionOptions] = useState<
     Array<{ id: string; name: string }>
   >([]);
@@ -297,6 +305,35 @@ export function NewsForm({
     }
   };
 
+  const addKeyword = (keyword: string) => {
+    const trimmed = keyword.trim().replace(/,/g, "");
+    if (!trimmed) return;
+
+    if (form.meta_keywords.includes(trimmed)) {
+      setKeywordInput("");
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, meta_keywords: [...prev.meta_keywords, trimmed] }));
+    setKeywordInput("");
+  };
+
+  const removeKeyword = (keywordToRemove: string) => {
+    setForm((prev) => ({
+      ...prev,
+      meta_keywords: prev.meta_keywords.filter((k) => k !== keywordToRemove),
+    }));
+  };
+
+  const onKeywordInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addKeyword(keywordInput);
+    } else if (e.key === "Backspace" && !keywordInput && form.meta_keywords.length > 0) {
+      removeKeyword(form.meta_keywords[form.meta_keywords.length - 1]);
+    }
+  };
+
   const onUploadFeatureImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0] || null;
     if (!selectedFile) {
@@ -395,7 +432,7 @@ export function NewsForm({
           allow_comments: form.allow_comments === "1",
           meta_title: form.meta_title || undefined,
           meta_description: form.meta_description || undefined,
-          meta_keywords: form.meta_keywords || undefined,
+          meta_keywords: form.meta_keywords.length > 0 ? form.meta_keywords.join(", ") : undefined,
         };
 
         const result =
@@ -478,24 +515,22 @@ export function NewsForm({
 
             <div className="space-y-2">
               <Label htmlFor="category_id">Category</Label>
-              <Select
-                id="category_id"
+              <SearchableSelect
+                options={[
+                  { id: "", name: "Select Category" },
+                  ...parentCategories.map((c) => ({ id: c.id, name: c.title })),
+                ]}
                 value={form.category_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    category_id: event.target.value,
+                    category_id: val,
                     sub_category_id: "",
                   }))
                 }
-              >
-                <option value="">Select Category</option>
-                {parentCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.title}
-                  </option>
-                ))}
-              </Select>
+                placeholder="Select Category"
+                searchPlaceholder="Search categories..."
+              />
               {fieldErrors.category_id ? (
                 <p className="text-xs font-medium text-rose-600">
                   {fieldErrors.category_id[0]}
@@ -506,30 +541,26 @@ export function NewsForm({
 
           <div className="space-y-2">
             <Label htmlFor="sub_category_id">Sub-category</Label>
-            <Select
-              id="sub_category_id"
+            <SearchableSelect
+              options={[
+                {
+                  id: "",
+                  name: isSubCategoryLoading
+                    ? "Loading..."
+                    : form.category_id
+                      ? "Select Sub-category"
+                      : "Select Category first",
+                },
+                ...subCategoryOptions.map((sc) => ({ id: sc.id, name: sc.title })),
+              ]}
               value={form.sub_category_id}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sub_category_id: event.target.value,
-                }))
+              onChange={(val) =>
+                setForm((prev) => ({ ...prev, sub_category_id: val }))
               }
+              placeholder={isSubCategoryLoading ? "Loading..." : "Select Sub-category"}
+              searchPlaceholder="Search sub-categories..."
               disabled={!form.category_id || isSubCategoryLoading}
-            >
-              <option value="">
-                {isSubCategoryLoading
-                  ? "Loading sub-categories..."
-                  : form.category_id
-                    ? "Select Sub-category"
-                    : "Select Category first"}
-              </option>
-              {subCategoryOptions.map((sc) => (
-                <option key={sc.id} value={sc.id}>
-                  {sc.title}
-                </option>
-              ))}
-            </Select>
+            />
             {fieldErrors.sub_category_id ? (
               <p className="text-xs font-medium text-rose-600">
                 {fieldErrors.sub_category_id[0]}
@@ -823,85 +854,76 @@ export function NewsForm({
           <div className="grid gap-5 md:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="division_id">Division</Label>
-              <Select
-                id="division_id"
+              <SearchableSelect
+                options={[
+                  { id: "", name: isDivisionLoading ? "Loading..." : "Select Division" },
+                  ...divisionOptions,
+                ]}
                 value={form.division_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    division_id: event.target.value,
+                    division_id: val,
                     district_id: "",
                     upazila_id: "",
                   }))
                 }
+                placeholder={isDivisionLoading ? "Loading..." : "Select Division"}
+                searchPlaceholder="Search division..."
                 disabled={isDivisionLoading}
-              >
-                <option value="">
-                  {isDivisionLoading ? "Loading..." : "Select Division"}
-                </option>
-                {divisionOptions.map((division) => (
-                  <option key={division.id} value={division.id}>
-                    {division.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="district_id">District</Label>
-              <Select
-                id="district_id"
+              <SearchableSelect
+                options={[
+                  {
+                    id: "",
+                    name: isDistrictLoading
+                      ? "Loading..."
+                      : form.division_id
+                        ? "Select District"
+                        : "Select Division first",
+                  },
+                  ...districtOptions,
+                ]}
                 value={form.district_id}
-                onChange={(event) =>
+                onChange={(val) =>
                   setForm((prev) => ({
                     ...prev,
-                    district_id: event.target.value,
+                    district_id: val,
                     upazila_id: "",
                   }))
                 }
+                placeholder={isDistrictLoading ? "Loading..." : "Select District"}
+                searchPlaceholder="Search district..."
                 disabled={!form.division_id || isDistrictLoading}
-              >
-                <option value="">
-                  {isDistrictLoading
-                    ? "Loading..."
-                    : form.division_id
-                      ? "Select District"
-                      : "Select Division first"}
-                </option>
-                {districtOptions.map((district) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="upazila_id">Upazila / Area</Label>
-              <Select
-                id="upazila_id"
+              <SearchableSelect
+                options={[
+                  {
+                    id: "",
+                    name: isUpazilaLoading
+                      ? "Loading..."
+                      : form.district_id
+                        ? "Select Upazila"
+                        : "Select District first",
+                  },
+                  ...upazilaOptions,
+                ]}
                 value={form.upazila_id}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    upazila_id: event.target.value,
-                  }))
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, upazila_id: val }))
                 }
+                placeholder={isUpazilaLoading ? "Loading..." : "Select Upazila"}
+                searchPlaceholder="Search upazila..."
                 disabled={!form.district_id || isUpazilaLoading}
-              >
-                <option value="">
-                  {isUpazilaLoading
-                    ? "Loading..."
-                    : form.district_id
-                      ? "Select Upazila"
-                      : "Select District first"}
-                </option>
-                {upazilaOptions.map((upazila) => (
-                  <option key={upazila.id} value={upazila.id}>
-                    {upazila.name}
-                  </option>
-                ))}
-              </Select>
+              />
             </div>
           </div>
         </CardContent>
@@ -1082,7 +1104,7 @@ export function NewsForm({
               rows={3}
               maxLength={170}
               value={form.meta_description}
-              placeholder="SEO description (up to 160-170 chars)"
+              placeholder="SEO description (Standard: 120-130 chars)"
               onChange={(event) =>
                 setForm((prev) => ({
                   ...prev,
@@ -1090,25 +1112,43 @@ export function NewsForm({
                 }))
               }
             />
-            <p className="text-xs text-slate-500">
-              {form.meta_description.length}/170 characters
-            </p>
+            <div className="flex justify-between text-[11px] text-slate-400">
+              <p>{form.meta_description.length}/170 characters</p>
+              <p>Standard: 120-130 characters</p>
+            </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="meta_keywords">Meta Keywords</Label>
-              <Input
-                id="meta_keywords"
-                value={form.meta_keywords}
-                placeholder="keyword one, keyword two"
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    meta_keywords: event.target.value,
-                  }))
-                }
-              />
+              <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
+                {form.meta_keywords.map((keyword) => (
+                  <span
+                    key={keyword}
+                    className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+                  >
+                    {keyword}
+                    <button
+                      type="button"
+                      onClick={() => removeKeyword(keyword)}
+                      className="hover:text-emerald-900"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  id="meta_keywords"
+                  className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-slate-400"
+                  placeholder={form.meta_keywords.length === 0 ? "Add keywords..." : ""}
+                  value={keywordInput}
+                  onChange={(e) => setKeywordInput(e.target.value)}
+                  onKeyDown={onKeywordInputKeyDown}
+                />
+              </div>
+              <p className="text-[10px] text-slate-400">
+                Press Enter or comma to add keywords
+              </p>
             </div>
           </div>
         </CardContent>

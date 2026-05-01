@@ -62,23 +62,15 @@ export function extractPagination(
   fallbackPage: number,
   fallbackper_page: number,
 ): BasePagination {
-  const pagination =
-    payload?.pagination ?? payload?.meta?.pagination ?? payload?.meta;
+  const pagination = payload?.pagination ?? {};
   const current_page = Math.max(
     1,
-    Number(
-      pagination?.current_page ?? pagination?.current_page ?? fallbackPage,
-    ) || fallbackPage,
+    Number(pagination?.current_page ?? fallbackPage),
   );
-  const last_page = Math.max(
-    1,
-    Number(pagination?.last_page ?? pagination?.last_page ?? fallbackPage) ||
-      fallbackPage,
-  );
+  const last_page = Math.max(1, Number(pagination?.last_page ?? fallbackPage));
   const per_page = Math.max(
     1,
-    Number(pagination?.per_page ?? pagination?.per_page ?? fallbackper_page) ||
-      fallbackper_page,
+    Number(pagination?.per_page ?? fallbackper_page) || fallbackper_page,
   );
   const total = Math.max(0, Number(pagination?.total ?? 0) || 0);
 

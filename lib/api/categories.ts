@@ -293,3 +293,26 @@ export async function getMenuCategories(): Promise<CategoryApiModel[]> {
     return [];
   }
 }
+
+export async function getAllCategories(): Promise<CategoryApiModel[]> {
+  try {
+    const response = await fetchApi(
+      "/categories",
+      { cache: "no-store" },
+      { includeAuth: false },
+    );
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(
+        (payload as any)?.message || "Failed to load categories.",
+      );
+    }
+
+    const items = extractList(payload);
+    return items.map(normalizeCategory);
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
+  }
+}

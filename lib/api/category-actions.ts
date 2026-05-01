@@ -155,15 +155,39 @@ export async function updateCategoryAction(catId: string, payload: FormData): Pr
 
     revalidatePath("/admin/categories/list");
     revalidatePath(`/admin/categories/${catId}/edit`);
-
-    return {
-      ok: true,
-      message: getMessage(data, "Category updated successfully."),
-    };
-  } catch {
-    return {
-      ok: false,
-      message: "Category API is unavailable.",
-    };
-  }
-}
+ 
+     return {
+       ok: true,
+       message: getMessage(data, "Category updated successfully."),
+     };
+   } catch {
+     return {
+       ok: false,
+       message: "Category API is unavailable.",
+     };
+   }
+ }
+ 
+ export async function getAllCategoriesAction() {
+   try {
+     const response = await fetchApi("/categories", { cache: "no-store" }, { includeAuth: false });
+     const payload = await response.json().catch(() => null);
+ 
+     if (!response.ok) {
+       return { ok: false, message: "Failed to load categories", items: [] };
+     }
+ 
+     const items = extractCategoryList(payload).map((item) => {
+       const row = asObject(item);
+       return {
+         id: asString(row.id),
+         title: asString(row.title),
+         slug: asString(row.slug),
+       };
+     });
+ 
+     return { ok: true, message: "Success", items };
+   } catch {
+     return { ok: false, message: "Category API is unavailable", items: [] };
+   }
+ }

@@ -32,3 +32,11 @@ export function CardContent({ children, className }: { children: ReactNode; clas
     </div>
   );
 }
+
+export function CardDescription({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <p className={cn("text-sm text-slate-500", className)}>
+      {children}
+    </p>
+  );
+}
