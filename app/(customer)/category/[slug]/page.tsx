@@ -6,6 +6,7 @@ import { AdBanner } from "@/components/customer/home/ad-banner";
 import { SelectedNewsSlider } from "@/components/customer/category/selected-news-slider";
 import { getCategoryPageData } from "@/lib/api/news";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 interface Props {
   params: {
@@ -13,6 +14,40 @@ interface Props {
   };
   searchParams?: {
     page?: string;
+  };
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getCategoryPageData(slug);
+
+  if (!data) {
+    return {
+      title: "Category Not Found | শিক্ষাপথ",
+    };
+  }
+
+  const { category } = data;
+  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "শিক্ষাপথ";
+
+  return {
+    title: category.meta_title || `${category.title} | ${siteName}`,
+    description:
+      category.meta_description ||
+      `${category.title} বিভাগের সকল খবর সবার আগে পেতে ভিজিট করুন ${siteName}।`,
+    keywords: category.meta_keywords
+      ? category.meta_keywords.split(",").map((k) => k.trim())
+      : [category.title, siteName],
+    openGraph: {
+      title: category.meta_title || `${category.title} | ${siteName}`,
+      description: category.meta_description || `${category.title} বিভাগের সর্বশেষ আপডেট।`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/category/${slug}`,
+      siteName: siteName,
+      type: "website",
+    },
+    alternates: {
+      canonical: `/category/${slug}`,
+    },
   };
 }
 

@@ -551,6 +551,9 @@ export type CategoryPageResponse = {
     id: string;
     title: string;
     slug: string;
+    meta_title: string | null;
+    meta_description: string | null;
+    meta_keywords: string | null;
   };
   sub_categories: Array<{
     id: string;
@@ -594,6 +597,9 @@ export async function getCategoryPageData(
         id: asString(resources.category?.id),
         title: asString(resources.category?.title),
         slug: asString(resources.category?.slug),
+        meta_title: asString(resources.category?.meta_title) || null,
+        meta_description: asString(resources.category?.meta_description) || null,
+        meta_keywords: asString(resources.category?.meta_keywords) || null,
       },
       sub_categories: Array.isArray(resources.sub_categories)
         ? resources.sub_categories.map((c: any) => ({
