@@ -1,6 +1,6 @@
 import "server-only";
 
-import { fetchApi } from "./common";
+import { fetchApi, isRedirectError } from "./common";
 
 export type ProfileApiModel = {
   id: string;
@@ -47,6 +47,7 @@ export async function getProfile(): Promise<ProfileApiModel | null> {
 
     return normalizeProfile(payload);
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("Failed to fetch profile:", error);
     return null;
   }

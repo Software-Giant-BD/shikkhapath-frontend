@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchApi } from "../common";
+import { fetchApi, isRedirectError } from "../common";
 
 export type KpiCard = {
   label: string;
@@ -53,6 +53,7 @@ export async function getDashboardStats(): Promise<DashboardStats | null> {
     const data = await response.json();
     return data.resources || null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("Failed to fetch dashboard stats:", error);
     return null;
   }

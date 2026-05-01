@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fetchApi } from "../common";
+import { fetchApi, isRedirectError } from "../common";
 
 export type Doctor = {
   id: number;
@@ -64,6 +64,7 @@ export async function getDoctors(
       meta: json.pagination,
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("Failed to fetch doctors:", error);
     return null;
   }
@@ -82,6 +83,7 @@ export async function getDoctor(id: string): Promise<Doctor | null> {
     const data = await response.json();
     return data.resources || null;
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(`Failed to fetch doctor ${id}:`, error);
     return null;
   }
@@ -114,6 +116,7 @@ export async function updateDoctorStatus(
 
     return { success: true };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(`Error updating doctor status ${id}:`, error);
     return { success: false, error: "An unexpected error occurred" };
   }
@@ -170,6 +173,7 @@ export async function getAppointments(
       meta: json.pagination,
     };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error("Failed to fetch appointments:", error);
     return null;
   }
@@ -197,6 +201,7 @@ export async function updateAppointmentStatus(
 
     return { success: true };
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     console.error(`Error updating appointment status ${id}:`, error);
     return { success: false, error: "An unexpected error occurred" };
   }
