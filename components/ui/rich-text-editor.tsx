@@ -138,15 +138,31 @@ export function RichTextEditor({
 
   const handleModalSubmit = () => {
     if (modal.type === "link") {
-      if (modal.url === "") {
+      let { url, alt } = modal;
+      if (url === "") {
         editor.chain().focus().extendMarkRange("link").unsetLink().run();
       } else {
-        editor
-          .chain()
-          .focus()
-          .extendMarkRange("link")
-          .setLink({ href: modal.url, title: modal.alt })
-          .run();
+        // Auto-add protocol if missing
+        if (!/^https?:\/\//i.test(url) && !url.startsWith("/") && !url.startsWith("#") && !url.startsWith("mailto:") && !url.startsWith("tel:")) {
+          url = `https://${url}`;
+        }
+
+        // If selection is empty, insert the URL as text
+        if (editor.state.selection.empty) {
+          const linkText = alt || url;
+          editor
+            .chain()
+            .focus()
+            .insertContent(`<a href="${url}" title="${alt}">${linkText}</a>`)
+            .run();
+        } else {
+          editor
+            .chain()
+            .focus()
+            .extendMarkRange("link")
+            .setLink({ href: url, title: alt })
+            .run();
+        }
       }
     } else if (modal.type === "image") {
       if (modal.url) {
@@ -301,6 +317,7 @@ export function RichTextEditor({
               </div>
               <div className="pt-2 flex gap-3">
                 <Button 
+                  type="button"
                   variant="outline" 
                   onClick={() => setModal({ ...modal, isOpen: false })}
                   className="flex-1 rounded-2xl h-12 font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
@@ -308,6 +325,7 @@ export function RichTextEditor({
                   বাতিল
                 </Button>
                 <Button 
+                  type="button"
                   onClick={handleModalSubmit}
                   className="flex-1 rounded-2xl h-12 font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
                 >
