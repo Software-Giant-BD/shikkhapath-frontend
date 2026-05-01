@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { type BasePagination, type FieldErrors } from "./api-utils";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
@@ -15,10 +15,23 @@ export async function getAdminToken() {
 }
 
 /**
- * Check if an error is a Next.js redirect error
+ * Check and rethrow Next.js internal errors (redirect, not found, etc.)
+ * This should be called at the start of every catch block.
+ */
+export function rethrowNextErrors(error: any) {
+  unstable_rethrow(error);
+}
+
+/**
+ * Check if an error is a Next.js redirect error (for backward compatibility)
  */
 export function isRedirectError(error: any): boolean {
-  return error?.digest?.startsWith("NEXT_REDIRECT");
+  if (typeof error !== "object" || error === null) return false;
+  return (
+    error.digest?.startsWith("NEXT_REDIRECT") ||
+    error.message === "NEXT_REDIRECT" ||
+    error.message?.startsWith("NEXT_REDIRECT")
+  );
 }
 
 export async function fetchApi(
@@ -45,7 +58,7 @@ export async function fetchApi(
       },
     });
   } catch (error) {
-    if (isRedirectError(error)) throw error;
+    rethrowNextErrors(error);
     
     console.error(`[fetchApi] Failed to fetch from ${path}:`, error);
     // Throw a generic error that will be caught by error.tsx boundaries

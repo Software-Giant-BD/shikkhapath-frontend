@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fetchApi, type FieldErrors } from "../common";
+import { fetchApi, type FieldErrors, rethrowNextErrors } from "../common";
 import { type AmbulanceService, type BasePagination } from "../ambulance";
 
 export type AmbulanceActionResult = {
@@ -83,7 +83,8 @@ export async function updateAmbulanceStatusAction(
       ok: true,
       message: getMessage(data, "Ambulance status updated successfully."),
     };
-  } catch {
+  } catch (error) {
+    rethrowNextErrors(error);
     return {
       ok: false,
       message: "Ambulance API is unavailable.",
