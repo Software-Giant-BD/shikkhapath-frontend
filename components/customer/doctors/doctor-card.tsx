@@ -12,7 +12,7 @@ import {
   Activity,
   X,
 } from "lucide-react";
-import { type DoctorProfile } from "@/lib/api/doctors";
+import { type DoctorProfile, bookAppointment } from "@/lib/api/doctors";
 import {
   Card,
   CardContent,
@@ -30,15 +30,57 @@ interface DoctorCardProps {
 export function DoctorCard({ doctor }: DoctorCardProps) {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    phone: "",
+    address: "",
+    selectedDay: "",
+    email: "",
+  });
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate booking API call
-    setIsSuccess(true);
-    setTimeout(() => {
-      setIsSuccess(false);
-      setIsBookingOpen(false);
-    }, 2000);
+    setIsLoading(true);
+
+    const result = await bookAppointment({
+      doctor_id: doctor.id,
+      full_name: formData.name,
+      age: parseInt(formData.age),
+      phone_number: formData.phone,
+      email: formData.email,
+      address: formData.address,
+      appointment_day: formData.selectedDay,
+    });
+
+    setIsLoading(false);
+
+    if (result.ok) {
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsBookingOpen(false);
+        // Reset form
+        setFormData({
+          name: "",
+          age: "",
+          phone: "",
+          address: "",
+          selectedDay: "",
+          email: "",
+        });
+      }, 2000);
+    } else {
+      alert(result.message || "An error occurred during booking.");
+    }
   };
 
   return (
@@ -130,7 +172,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
 
       {isBookingOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-in fade-in zoom-in duration-200">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden relative animate-in fade-in zoom-in duration-200">
             <button
               type="button"
               onClick={() => setIsBookingOpen(false)}
@@ -172,6 +214,9 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                       <input
                         required
                         type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
                         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400"
                         placeholder="Enter your name"
                       />
@@ -184,10 +229,34 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                         <input
                           required
                           type="number"
+                          name="age"
+                          value={formData.age}
+                          onChange={handleInputChange}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400"
                           placeholder="Years"
                         />
                       </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">
+                          Select Appointment Day
+                        </label>
+                        <select
+                          required
+                          name="selectedDay"
+                          value={formData.selectedDay}
+                          onChange={handleInputChange}
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all appearance-none"
+                        >
+                          <option value="">Choose a day</option>
+                          {doctor.available_days?.map((day) => (
+                            <option key={day} value={day}>
+                              {day}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">
                           Phone Number
@@ -195,8 +264,24 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                         <input
                           required
                           type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
                           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400"
                           placeholder="01XXX"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 block">
+                          Email Address (Optional)
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400"
+                          placeholder="your@email.com"
                         />
                       </div>
                     </div>
@@ -207,6 +292,9 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                       <input
                         required
                         type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
                         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-400"
                         placeholder="Your address"
                       />
@@ -224,12 +312,13 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
                   </div>
 
                   <div className="pt-2">
-                    <Button
-                      type="submit"
-                      className="w-full rounded-xl bg-blue-600 py-6 text-base font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98"
-                    >
-                      Confirm Booking Without Payment
-                    </Button>
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full rounded-xl bg-blue-600 py-6 text-base font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-blue-700 hover:scale-[1.02] active:scale-98 disabled:opacity-50 disabled:scale-100"
+                      >
+                        {isLoading ? "Confirming..." : "Confirm Booking Without Payment"}
+                      </Button>
                   </div>
                 </form>
               </>

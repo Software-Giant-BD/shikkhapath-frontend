@@ -126,3 +126,43 @@ export async function registerDoctor(
     };
   }
 }
+
+export async function bookAppointment(data: {
+  doctor_id: string;
+  full_name: string;
+  age: number;
+  phone_number: string;
+  email?: string;
+  address: string;
+  appointment_day: string;
+}): Promise<{ ok: boolean; message: string }> {
+  try {
+    const response = await fetchApi("/doctors/book-appointment", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json().catch(() => null);
+
+    if (response.ok) {
+      return {
+        ok: true,
+        message: result?.message || "Appointment booked successfully!",
+      };
+    } else {
+      return {
+        ok: false,
+        message: result?.message || "An error occurred during booking.",
+      };
+    }
+  } catch (error: any) {
+    console.error("Doctor booking error:", error);
+    return {
+      ok: false,
+      message: error.message || "An error occurred during booking.",
+    };
+  }
+}
