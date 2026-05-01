@@ -118,3 +118,86 @@ export async function updateDoctorStatus(
     return { success: false, error: "An unexpected error occurred" };
   }
 }
+
+export type Appointment = {
+  id: number;
+  serial_number: number;
+  doctor: {
+    id: number;
+    name: string;
+    specialty: string;
+  };
+  full_name: string;
+  age: number;
+  phone_number: string;
+  email: string | null;
+  address: string;
+  appointment_day: string;
+  appointment_date: string;
+  status: "pending" | "confirmed" | "cancelled" | "completed";
+  created_at: string;
+};
+
+export async function getAppointments(
+  page = 1,
+  search = "",
+  status = "",
+  doctorId = "",
+  date = "",
+  specialty = "",
+): Promise<{ data: Appointment[]; meta: any } | null> {
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      ...(search && { search }),
+      ...(status && { status }),
+      ...(doctorId && { doctor_id: doctorId }),
+      ...(date && { date }),
+      ...(specialty && { specialty }),
+    });
+
+    const response = await fetchApi(`/admin/doctor-appointments?${params.toString()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const json = await response.json();
+    return {
+      data: json.resources,
+      meta: json.pagination,
+    };
+  } catch (error) {
+    console.error("Failed to fetch appointments:", error);
+    return null;
+  }
+}
+
+export async function updateAppointmentStatus(
+  id: number,
+  status: "pending" | "confirmed" | "cancelled" | "completed",
+) {
+  try {
+    const response = await fetchApi(`/admin/doctor-appointments/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return {
+        success: false,
+        error: errorData.message || "Failed to update appointment status",
+      };
+    }
+
+    revalidatePath("/admin/doctor-appointments");
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Error updating appointment status ${id}:`, error);
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}

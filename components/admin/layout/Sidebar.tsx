@@ -47,13 +47,7 @@ const menuConfig: MenuSection[] = [
           { title: "Website Menu Categories", href: "/admin/categories/menu" },
         ],
       },
-      {
-        title: "Doctors Manage",
-        icon: Stethoscope,
-        subItems: [
-          { title: "Doctors List", href: "/admin/doctors/list" },
-        ],
-      },
+
       {
         title: "User Manage",
         icon: Users,
@@ -68,7 +62,7 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "News List", href: "/admin/news/list" },
           { title: "Add News", href: "/admin/news/add" },
-           { title: "Media Center", href: "/admin/media-center" },
+          { title: "Media Center", href: "/admin/media-center" },
         ],
       },
       {
@@ -93,6 +87,7 @@ const menuConfig: MenuSection[] = [
         subItems: [
           { title: "Ambulances", href: "/admin/ambulances" },
           { title: "Doctors", href: "/admin/doctors" },
+          { title: "Appointments", href: "/admin/doctor-appointments" },
         ],
       },
       {
@@ -111,7 +106,6 @@ const menuConfig: MenuSection[] = [
           { title: "Add Admission", href: "/admin/admissions/add" },
         ],
       },
-     
     ],
   },
 ];
