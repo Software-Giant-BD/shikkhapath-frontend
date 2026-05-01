@@ -145,20 +145,22 @@ export function NewsArticleContent({
 
       {/* Related Section */}
       <div className="mt-8 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-100">
-        <h3 className="mb-4 text-xl font-black text-slate-900 underline decoration-[#c79a1d] decoration-4 underline-offset-8">
+        <h2 className="mb-4 text-xl font-black text-slate-900 underline decoration-[#c79a1d] decoration-4 underline-offset-8">
           {news.category?.title || "জাতীয়"} এর আরও খবর
-        </h3>
+        </h2>
         <ul className="grid gap-3">
           {/* TODO: Implement related news fetching */}
           {category_news.map((item) => (
             <li key={item.id} className="group flex items-center gap-3">
               <ChevronRight className="h-4 w-4 shrink-0 text-[#b38716] group-hover:translate-x-1 transition-transform" />
-              <Link
-                href={`/news/${item.url_slug}`}
-                className="text-[15px] font-bold text-slate-700 group-hover:text-[#b38716] transition-colors line-clamp-1"
-              >
-                {item.title}
-              </Link>
+              <h3 className="text-[15px] font-bold text-slate-700 group-hover:text-[#b38716] transition-colors line-clamp-1">
+                <Link
+                  href={`/news/${item.url_slug}`}
+                  className="block"
+                >
+                  {item.title}
+                </Link>
+              </h3>
             </li>
           ))}
         </ul>

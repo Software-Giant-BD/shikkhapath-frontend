@@ -27,9 +27,9 @@ export function CategoryListGrid({
   return (
     <div className="flex flex-col gap-6 mt-12 mb-8">
       <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1.5 pt-1">
-        <h3 className="text-xl font-black tracking-tight text-slate-900">
+        <h2 className="text-xl font-black tracking-tight text-slate-900">
           {title}
-        </h3>
+        </h2>
       </div>
 
       <div className="flex flex-col gap-8">
@@ -40,9 +40,9 @@ export function CategoryListGrid({
           >
             <div className="flex flex-1 flex-col justify-center gap-3">
               <Link href={`/news/${story.url_slug}`}>
-                <h4 className="text-[20px] font-black leading-tight text-slate-900 group-hover:text-[#c00000] transition-colors line-clamp-2">
+                <h3 className="text-[20px] font-black leading-tight text-slate-900 group-hover:text-[#c00000] transition-colors line-clamp-2">
                   {story.title}
-                </h4>
+                </h3>
               </Link>
               <p className="text-[14.5px] leading-relaxed text-slate-500 line-clamp-2">
                 {story.excerpt}

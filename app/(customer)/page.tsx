@@ -79,12 +79,38 @@ export default async function Home() {
   const highlightSection = remainingSections[2] ?? null
   const bottomCompactSections = remainingSections.slice(3, 5)
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "NewsMediaOrganization",
-    name: SITE_NAME,
-    url: SITE_URL,
-  }
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": SITE_NAME,
+      "url": SITE_URL,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${SITE_URL}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": SITE_NAME,
+      "url": SITE_URL,
+      "logo": `${SITE_URL}/logo.png`,
+      "sameAs": [
+        "https://www.facebook.com/shikkhapath", // Update with actual links
+        "https://x.com/shikkhapath",
+        "https://www.youtube.com/@shikkhapath",
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+8801704-052374",
+        "contactType": "customer service",
+        "areaServed": "BD",
+        "availableLanguage": ["bn", "en"],
+      },
+    },
+  ]
 
   return (
     <>
@@ -94,6 +120,9 @@ export default async function Home() {
       />
 
       <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
+        {/* Hidden H1 for SEO */}
+        <h1 className="sr-only">{SITE_NAME} | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ</h1>
+
         <AdBanner
           label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
           className="my-4"

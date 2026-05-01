@@ -18,9 +18,9 @@ export function NewsSidebar({ title = "আরও পড়ুন", news = [], adCat
       {/* Standard Sidebar List */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between border-b-2 border-slate-900 pb-1.5 pt-1">
-          <h3 className="text-lg font-bold tracking-tight text-slate-900">
+          <h2 className="text-lg font-bold tracking-tight text-slate-900">
             {title}
-          </h3>
+          </h2>
         </div>
         <div className="flex flex-col gap-3">
           {news.map((item, i) => (
@@ -41,9 +41,9 @@ export function NewsSidebar({ title = "আরও পড়ুন", news = [], adCat
                   />
                 </div>
                 <div className="flex flex-col justify-center gap-1 min-w-0">
-                  <h4 className="line-clamp-2 text-[13px] font-bold leading-tight text-slate-800 group-hover:text-[#b38716] transition-colors">
+                  <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-slate-800 group-hover:text-[#b38716] transition-colors">
                     {item.title}
-                  </h4>
+                  </h3>
                   <p className="text-[10px] font-bold text-slate-400">
                     {formatBengaliRelativeTime(item.publish_at)}
                   </p>

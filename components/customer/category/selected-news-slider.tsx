@@ -28,9 +28,9 @@ export function SelectedNewsSlider({ title, news }: Props) {
   return (
     <div className="flex flex-col gap-6 mt-12 mb-8 relative w-full overflow-hidden">
       <div className="flex items-center justify-between border-b-2 border-[#0091ea] pb-1.5 pt-1">
-        <h3 className="text-xl font-black tracking-tight text-slate-900">
+        <h2 className="text-xl font-black tracking-tight text-slate-900">
           {title}
-        </h3>
+        </h2>
       </div>
 
       <div className="group relative w-full overflow-hidden">
@@ -57,9 +57,9 @@ export function SelectedNewsSlider({ title, news }: Props) {
                   />
                 </div>
                 <div className="flex flex-1 flex-col gap-2">
-                  <h4 className="text-[17px] font-bold leading-snug line-clamp-2 text-slate-900 group-hover:text-[#c00000] transition-colors">
+                  <h3 className="text-[17px] font-bold leading-snug line-clamp-2 text-slate-900 group-hover:text-[#c00000] transition-colors">
                     {item.title}
-                  </h4>
+                  </h3>
                   <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-3 mb-2">
                     {item.excerpt}
                   </p>
