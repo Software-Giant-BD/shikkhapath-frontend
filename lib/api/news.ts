@@ -695,3 +695,33 @@ export async function searchCustomerNews(params: {
     return { items: [], meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
   }
 }
+
+export async function getTopicNews(tagName: string, page = 1): Promise<{ items: HeroNewsItem[]; topic: string; meta: { current_page: number; last_page: number; total: number; per_page: number } }> {
+  try {
+    const response = await fetchApi(`/topic/${encodeURIComponent(tagName)}?page=${page}`, undefined, { includeAuth: false });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return { items: [], topic: tagName, meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+    }
+
+    const resources = payload?.resources || payload;
+    const news = resources?.news;
+    const pagination = resources?.pagination;
+    const topic = resources?.topic || tagName;
+
+    return {
+      items: Array.isArray(news) ? news.map(normalizeHeroItem) : [],
+      topic,
+      meta: {
+        current_page: asNumber(pagination?.current_page, 1),
+        last_page: asNumber(pagination?.last_page, 1),
+        total: asNumber(pagination?.total, 0),
+        per_page: asNumber(pagination?.per_page, 12),
+      },
+    };
+  } catch (error) {
+    console.error(`Failed to fetch topic news for ${tagName}:`, error);
+    return { items: [], topic: tagName, meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+  }
+}
