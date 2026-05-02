@@ -66,9 +66,9 @@ export function SearchableSelect({
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold transition-all focus:outline-none focus:ring-4 focus:ring-red-500/5",
-          disabled ? "cursor-not-allowed opacity-50 bg-slate-50" : "cursor-pointer hover:border-red-500",
-          isOpen && "border-red-500 ring-4 ring-red-500/5",
+          "flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold transition-all focus:outline-none focus:ring-4 focus:ring-[#036735]/5",
+          disabled ? "cursor-not-allowed opacity-50 bg-slate-50" : "cursor-pointer hover:border-[#036735]",
+          isOpen && "border-[#036735] ring-4 ring-[#036735]/5",
           triggerClassName
         )}
       >
@@ -94,7 +94,7 @@ export function SearchableSelect({
                 placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2 pl-9 pr-4 text-sm font-medium outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5"
+                className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2 pl-9 pr-4 text-sm font-medium outline-none focus:bg-white focus:ring-4 focus:ring-[#036735]/5"
               />
             </div>
           </div>
@@ -111,8 +111,8 @@ export function SearchableSelect({
                   className={cn(
                     "flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm rounded-xl transition-colors mb-1 last:mb-0",
                     value.toString() === opt.id.toString()
-                      ? "bg-red-50 text-red-600 font-bold"
-                      : "text-slate-600 hover:bg-slate-50 hover:text-red-500"
+                      ? "bg-[#036735]/5 text-[#036735] font-bold"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-[#036735]"
                   )}
                 >
                   <span className="truncate">{getDisplayName(opt)}</span>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { fetchApi, type FieldErrors } from "./common";
+import { getLatestNews } from "./news";
 
 export type NewsActionResult = {
   ok: boolean;
@@ -162,4 +163,34 @@ export async function updateNewsStatusAction(
       message: "News API is unavailable.",
     };
   }
+}
+
+export async function getInitialSearchNewsAction() {
+  try {
+    const news = await getLatestNews();
+    return {
+      ok: true,
+      items: news,
+    };
+  } catch (error) {
+    console.error("Failed to fetch initial search news:", error);
+    return {
+      ok: false,
+      items: [],
+    };
+  }
+}
+
+export async function searchCustomerNewsAction(params: {
+  q?: string;
+  category_id?: string;
+  author?: string;
+  type?: string;
+  date?: string;
+  sort?: string;
+  page?: number;
+  per_page?: number;
+}) {
+  const { searchCustomerNews } = await import("./news");
+  return await searchCustomerNews(params);
 }

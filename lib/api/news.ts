@@ -647,3 +647,51 @@ export async function getCategoryPageData(
     return null;
   }
 }
+
+export async function searchCustomerNews(params: {
+  q?: string;
+  category_id?: string;
+  author?: string;
+  type?: string;
+  date?: string;
+  sort?: string;
+  page?: number;
+  per_page?: number;
+}): Promise<{ items: HeroNewsItem[]; meta: { current_page: number; last_page: number; total: number; per_page: number } }> {
+  try {
+    const query = new URLSearchParams();
+    if (params.q) query.set("q", params.q);
+    if (params.category_id) query.set("category_id", params.category_id);
+    if (params.author) query.set("author", params.author);
+    if (params.type) query.set("type", params.type);
+    if (params.date) query.set("date", params.date);
+    if (params.sort) query.set("sort", params.sort);
+    if (params.page) query.set("page", params.page.toString());
+    if (params.per_page) query.set("per_page", params.per_page.toString());
+
+    const url = query.toString() ? `/search-news?${query.toString()}` : "/search-news";
+    const response = await fetchApi(url, undefined, { includeAuth: false });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return { items: [], meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+    }
+
+    const resources = payload?.resources || payload;
+    const news = resources?.news;
+    const pagination = resources?.pagination;
+
+    return {
+      items: Array.isArray(news) ? news.map(normalizeHeroItem) : [],
+      meta: {
+        current_page: asNumber(pagination?.current_page, 1),
+        last_page: asNumber(pagination?.last_page, 1),
+        total: asNumber(pagination?.total, 0),
+        per_page: asNumber(pagination?.per_page, 12),
+      },
+    };
+  } catch (error) {
+    console.error("Failed to search news:", error);
+    return { items: [], meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+  }
+}
