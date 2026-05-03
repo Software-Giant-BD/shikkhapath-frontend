@@ -8,7 +8,7 @@ import { TabSectionBlock } from "@/components/customer/home/tab-section-block";
 import { NewsletterSection } from "@/components/customer/home/newsletter-section";
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block";
 import { LocalNewsSection } from "@/components/customer/home/local-news-section";
-import { getCategories, getMenuCategories } from "@/lib/api/categories";
+import { getAllCategories, getMenuCategories } from "@/lib/api/categories";
 import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
@@ -51,7 +51,7 @@ export default async function Home() {
     videoNews,
     divisionsRes,
   ] = await Promise.all([
-    getCategories(),
+    getAllCategories(),
     getMenuCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
