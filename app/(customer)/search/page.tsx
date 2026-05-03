@@ -236,7 +236,7 @@ export default function SearchPage() {
                 className="group flex flex-col md:flex-row gap-6 border-b border-slate-100 pb-8 transition-all hover:opacity-90 last:border-0"
               >
                 <div className="flex flex-1 flex-col justify-center gap-3">
-                  <Link href={`/news/${story.url_slug}`}>
+                  <Link href={`/news/${story.unique_code}`}>
                     <h3 className="text-[20px] font-black leading-tight text-slate-900 group-hover:text-[#c00000] transition-colors line-clamp-2">
                       {story.title}
                     </h3>
@@ -249,7 +249,7 @@ export default function SearchPage() {
                   </p>
                 </div>
                 <Link
-                  href={`/news/${story.url_slug}`}
+                  href={`/news/${story.unique_code}`}
                   className="relative aspect-16/10 w-full md:w-64 shrink-0 overflow-hidden rounded-xl bg-slate-100 shadow-sm"
                 >
                   <Image
@@ -291,7 +291,7 @@ export default function SearchPage() {
                     className="group flex flex-col md:flex-row gap-6 border-b border-slate-100 pb-8 transition-all hover:opacity-90 last:border-0"
                   >
                     <div className="flex flex-1 flex-col justify-center gap-3">
-                      <Link href={`/news/${story.url_slug}`}>
+                      <Link href={`/news/${story.unique_code}`}>
                         <h3 className="text-[20px] font-black leading-tight text-slate-900 group-hover:text-[#c00000] transition-colors line-clamp-2">
                           {story.title}
                         </h3>
@@ -304,7 +304,7 @@ export default function SearchPage() {
                       </p>
                     </div>
                     <Link
-                      href={`/news/${story.url_slug}`}
+                      href={`/news/${story.unique_code}`}
                       className="relative aspect-16/10 w-full md:w-64 shrink-0 overflow-hidden rounded-xl bg-slate-100 shadow-sm"
                     >
                       <Image

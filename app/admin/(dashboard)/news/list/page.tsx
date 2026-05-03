@@ -89,7 +89,7 @@ export default async function NewsListPage({
   const rows = newsItems.map((item) => ({
     id: item.id,
     title: item.title,
-    slug: item.slug,
+    unique_code: item.unique_code,
     category: item.category?.title || "-",
     subCategory: item.sub_category?.title || "-",
     author: item.author_name || "-",
@@ -159,7 +159,7 @@ export default async function NewsListPage({
               <thead className="bg-slate-50 text-slate-500 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Title</th>
-                  <th className="px-6 py-4 font-semibold">Slug</th>
+                  <th className="px-6 py-4 font-semibold">Unique Code</th>
                   <th className="px-6 py-4 font-semibold">Category</th>
                   <th className="px-6 py-4 font-semibold">Sub-category</th>
                   <th className="px-6 py-4 font-semibold">Author</th>
@@ -177,7 +177,7 @@ export default async function NewsListPage({
                     <td className="max-w-90 px-6 py-4 font-medium text-slate-800">
                       {news.title}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">/{news.slug}</td>
+                    <td className="px-6 py-4 text-slate-600">/{news.unique_code}</td>
                     <td className="px-6 py-4 text-slate-600">
                       {news.category}
                     </td>

@@ -33,7 +33,7 @@ export function CategoryHero({ news }: Props) {
       {/* Left Highlight */}
       <div className="flex flex-col gap-6">
         <article className="group relative overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-lg">
-          <Link href={`/news/${main.url_slug}`} className="flex flex-col">
+          <Link href={`/news/${main.unique_code}`} className="flex flex-col">
             <div className="relative aspect-[16/10] overflow-hidden">
               <Image
                 src={main.youtube_thumbnail_url || main.feature_image_url || "/No_Image_Available.jpg"}
@@ -62,7 +62,7 @@ export function CategoryHero({ news }: Props) {
         <div className="grid gap-6 sm:grid-cols-2">
            {news.slice(3, 5).map((item) => (
              <article key={item.id} className="group flex flex-col gap-3">
-               <Link href={`/news/${item.url_slug}`} className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
+               <Link href={`/news/${item.unique_code}`} className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
                   <Image fill src={item.youtube_thumbnail_url || item.feature_image_url || "/No_Image_Available.jpg"} alt={item.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
                   {item.type === "video" && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
@@ -85,7 +85,7 @@ export function CategoryHero({ news }: Props) {
       <div className="flex flex-col gap-6">
         {secondary && (
           <article className="group flex flex-col gap-4 border-b border-slate-100 pb-6">
-            <Link href={`/news/${secondary.url_slug}`} className="relative aspect-video overflow-hidden rounded-xl">
+            <Link href={`/news/${secondary.unique_code}`} className="relative aspect-video overflow-hidden rounded-xl">
                <Image fill src={secondary.youtube_thumbnail_url || secondary.feature_image_url || "/No_Image_Available.jpg"} alt={secondary.title} className="object-cover transition-transform duration-500 group-hover:scale-105" />
                {secondary.type === "video" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">

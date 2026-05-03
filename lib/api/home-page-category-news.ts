@@ -11,8 +11,7 @@ export type HomePageCategory = {
 export type HomePageCategoryNewsItem = {
   id: string;
   title: string;
-  slug: string;
-  url_slug: string;
+  unique_code: string;
   excerpt: string;
   feature_image_url: string;
   publish_at: string;
@@ -48,17 +47,16 @@ function normalizeCategory(value: unknown): HomePageCategory {
 function normalizeNewsItem(value: unknown): HomePageCategoryNewsItem | null {
   const item = asObject(value);
   const title = asString(item.title).trim();
-  const urlSlug = asString(item.url_slug ?? item.urlSlug ?? item.slug).trim();
+  const uniqueCode = asString(item.unique_code ?? item.unique_code ?? item.urlSlug ?? item.slug).trim();
 
-  if (!title || !urlSlug) {
+  if (!title || !uniqueCode) {
     return null;
   }
 
   return {
-    id: asString(item.id, `${urlSlug}-${title}`),
+    id: asString(item.id, `${uniqueCode}-${title}`),
     title,
-    slug: asString(item.slug),
-    url_slug: urlSlug,
+    unique_code: uniqueCode,
     excerpt: asString(item.excerpt),
     feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
     publish_at: asString(item.publish_at ?? item.publishAt),

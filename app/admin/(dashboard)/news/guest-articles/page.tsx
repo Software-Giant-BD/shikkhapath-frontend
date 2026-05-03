@@ -44,7 +44,7 @@ export default async function GuestArticlesPage({
   const rows = newsItems.map((item) => ({
     id: item.id,
     title: item.title,
-    slug: item.slug,
+    unique_code: item.unique_code,
     category: item.category?.title || "-",
     author: item.author_name || "-",
     publishAt: formatDateTime(item.publish_at),

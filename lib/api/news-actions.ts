@@ -25,7 +25,7 @@ function getMessage(payload: unknown, fallback: string): string {
 
 export type CreateNewsPayload = {
   title: string;
-  slug?: string;
+  unique_code?: string;
   excerpt?: string;
   content?: string;
   category_id?: string;

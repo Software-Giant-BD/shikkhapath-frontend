@@ -3,7 +3,7 @@ import Link from "next/link"
 type BreakingNewsItem = {
   id: string
   title: string
-  url_slug: string
+  unique_code: string
 }
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -43,7 +43,7 @@ function extractList(payload: unknown): unknown[] {
 
 function normalizeBreakingNews(value: unknown): BreakingNewsItem | null {
   const item = asObject(value)
-  const urlSlug = asString(item.url_slug ?? item.urlSlug ?? item.slug).trim()
+  const urlSlug = asString(item.unique_code ?? item.urlSlug ?? item.slug).trim()
   const title = asString(item.title).trim()
 
   if (!title || !urlSlug) {
@@ -53,7 +53,7 @@ function normalizeBreakingNews(value: unknown): BreakingNewsItem | null {
   return {
     id: asString(item.id, `${urlSlug}-${title}`),
     title,
-    url_slug: urlSlug,
+    unique_code: urlSlug,
   }
 }
 
@@ -107,7 +107,7 @@ export async function BreakingTicker() {
           {[...items, ...items].map((item, i) => (
             <Link
               key={`${item.id}-${i}`}
-              href={`/news/${encodeURIComponent(item.url_slug)}`}
+              href={`/news/${encodeURIComponent(item.unique_code)}`}
               className="shrink-0 hover:text-[#b38716]"
             >
               {item.title}

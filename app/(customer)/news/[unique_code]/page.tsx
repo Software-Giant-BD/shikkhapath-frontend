@@ -13,13 +13,13 @@ import type { Metadata } from "next";
 
 interface Props {
   params: {
-    slug: string;
+    unique_code: string;
   };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const news_details = await getNewsDetails(slug);
+  const { unique_code } = await params;
+  const news_details = await getNewsDetails(unique_code);
 
   if (!news_details) {
     return {
@@ -53,8 +53,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function NewsDetailsPage({ params }: Props) {
-  const { slug } = await params;
-  const news_details = await getNewsDetails(slug);
+  const { unique_code } = await params;
+  const news_details = await getNewsDetails(unique_code);
 
   const [menuCategories] = await Promise.all([getMenuCategories()]);
 
@@ -64,7 +64,7 @@ export default async function NewsDetailsPage({ params }: Props) {
 
   const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME ?? "শিক্ষাপথ";
   const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://shikkhapath.com";
-  const currentUrl = `${SITE_URL}/news/${slug}`;
+  const currentUrl = `${SITE_URL}/news/${unique_code}`;
 
   const webSiteSchema = {
     "@context": "https://schema.org",

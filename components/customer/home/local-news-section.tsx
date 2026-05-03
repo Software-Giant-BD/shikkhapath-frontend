@@ -303,7 +303,7 @@ export function LocalNewsSection({
                 {news.map((item) => (
                   <Link
                     key={item.id}
-                    href={`/news/${item.url_slug || item.slug}`}
+                    href={`/news/${item.unique_code}`}
                     className="group flex gap-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-[#036735]/30 dark:hover:border-[#036735]/50 hover:shadow-md p-3 transition-all duration-200"
                   >
                     {item.feature_image_url && (

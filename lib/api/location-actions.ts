@@ -12,7 +12,7 @@ export type NewsItem = {
   id: string;
   title: string;
   slug: string;
-  url_slug?: string;
+  unique_code?: string;
   excerpt: string;
   feature_image_url: string | null;
   publish_at: string;
@@ -178,7 +178,7 @@ export async function getLocalNewsAction(params: {
       id: String(item.id),
       title: String(item.title),
       slug: String(item.slug),
-      url_slug: String(item.url_slug || item.urlSlug || item.slug),
+      unique_code: String(item.unique_code || item.urlSlug || item.slug),
       excerpt: String(item.excerpt || ""),
       feature_image_url: item.feature_image_url || item.featureImageUrl || null,
       publish_at: String(item.publish_at || ""),

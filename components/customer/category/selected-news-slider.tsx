@@ -45,7 +45,7 @@ export function SelectedNewsSlider({ title, news }: Props) {
               className="min-w-[280px] md:min-w-[320px] lg:min-w-[350px] snap-start flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-[#e3f2fd]/30 p-4 transition-all hover:shadow-lg"
             >
               <Link
-                href={`/news/${item.url_slug}`}
+                href={`/news/${item.unique_code}`}
                 className="flex flex-col h-full gap-4"
               >
                 <div className="relative aspect-16/10 overflow-hidden rounded-lg shadow-sm">

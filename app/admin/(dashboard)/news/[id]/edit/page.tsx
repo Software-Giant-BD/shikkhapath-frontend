@@ -47,7 +47,7 @@ export default async function EditNewsPage({
         }))}
         initialValues={{
           title: news.title,
-          slug: news.slug,
+          unique_code: news.unique_code,
           excerpt: news.excerpt,
           content: news.content,
           category_id: news.category_id,

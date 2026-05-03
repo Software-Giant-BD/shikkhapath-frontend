@@ -19,7 +19,7 @@ export function VideoSectionBlock({ data }: VideoSectionBlockProps) {
         {data.map((video) => (
           <Link
             key={video.id}
-            href={`/news/${video.url_slug}`}
+            href={`/news/${video.unique_code}`}
             className="group block overflow-hidden rounded bg-white shadow-sm"
           >
             <div className="relative">

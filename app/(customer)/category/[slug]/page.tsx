@@ -97,7 +97,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       itemListElement: data.paginated_news.map((news, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: `${siteUrl}/news/${news.slug}`,
+        url: `${siteUrl}/news/${news.unique_code}`,
         name: news.title,
       })),
     },

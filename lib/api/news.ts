@@ -13,8 +13,7 @@ export type NewsRelationCategory = {
 export type NewsApiModel = {
   id: string;
   title: string;
-  slug: string;
-  url_slug: string;
+  unique_code: string;
   type: "standard" | "video";
   youtube_video_url: string;
   institution_type: string;
@@ -67,8 +66,7 @@ export type NewsListResult = {
 export type HeroNewsItem = {
   id: string;
   title: string;
-  slug: string;
-  url_slug: string;
+  unique_code: string;
   type?: "standard" | "video";
   youtube_video_url?: string;
   youtube_thumbnail_url?: string;
@@ -150,8 +148,7 @@ function normalizeNews(value: unknown): NewsApiModel {
   return {
     id: asString(item.id),
     title: asString(item.title),
-    slug: asString(item.slug),
-    url_slug: asString(item.url_slug ?? null),
+    unique_code: asString(item.unique_code ??  null),
     type: asString(item.type, "standard") as "standard" | "video",
     youtube_video_url: asString(item.youtube_video_url ?? null),
     institution_type: asString(item.institution_type ?? null),
@@ -197,8 +194,7 @@ function normalizeHeroItem(item: any): HeroNewsItem {
   return {
     id: asString(item.id),
     title: asString(item.title),
-    slug: asString(item.slug),
-    url_slug: asString(item.url_slug ?? item.urlSlug ?? item.slug ?? item.id),
+    unique_code: asString(item.unique_code ?? item.slug ?? item.id),
     type: asString(item.type, "standard") as "standard" | "video",
     youtube_video_url: asString(item.youtube_video_url ?? item.youtubeVideoUrl),
     youtube_thumbnail_url: asString(
@@ -304,7 +300,10 @@ export async function getNewsList(
       query.set("type", params.type);
     }
 
-    if (params?.category_id !== undefined && String(params.category_id).trim()) {
+    if (
+      params?.category_id !== undefined &&
+      String(params.category_id).trim()
+    ) {
       query.set("category_id", String(params.category_id));
     }
 
@@ -493,7 +492,9 @@ export async function getLocalNews(params: {
     if (params.district_id) query.set("district_id", params.district_id);
     if (params.upazila_id) query.set("upazila_id", params.upazila_id);
 
-    const url = query.toString() ? `/local-news?${query.toString()}` : "/local-news";
+    const url = query.toString()
+      ? `/local-news?${query.toString()}`
+      : "/local-news";
     const response = await fetchApi(url, undefined, { includeAuth: false });
     const payload = await response.json().catch(() => null);
 
@@ -507,9 +508,9 @@ export async function getLocalNews(params: {
   }
 }
 
-export async function getNewsDetails(urlSlug: string) {
+export async function getNewsDetails(uniqueCode: string) {
   try {
-    const response = await fetchApi(`/news/${urlSlug}`, undefined, {
+    const response = await fetchApi(`/resolve-path/${uniqueCode}`, undefined, {
       includeAuth: false,
     });
     const payload = await response.json().catch(() => null);
@@ -541,7 +542,7 @@ export async function getNewsDetails(urlSlug: string) {
         : [],
     };
   } catch (error) {
-    console.error(`Failed to fetch news details ${urlSlug}:`, error);
+    console.error(`Failed to fetch news details ${uniqueCode}:`, error);
     return null;
   }
 }
@@ -578,7 +579,7 @@ export async function getCategoryPageData(
 ): Promise<CategoryPageResponse | null> {
   try {
     const response = await fetchApi(
-      `/category/${slug}?page=${page}`,
+      `/resolve-path/${slug}?page=${page}`,
       undefined,
       {
         includeAuth: false,
@@ -598,7 +599,8 @@ export async function getCategoryPageData(
         title: asString(resources.category?.title),
         slug: asString(resources.category?.slug),
         meta_title: asString(resources.category?.meta_title) || null,
-        meta_description: asString(resources.category?.meta_description) || null,
+        meta_description:
+          asString(resources.category?.meta_description) || null,
         meta_keywords: asString(resources.category?.meta_keywords) || null,
       },
       sub_categories: Array.isArray(resources.sub_categories)
@@ -634,7 +636,8 @@ export async function getCategoryPageData(
       if (vNews && vNews.length > 0) {
         data.paginated_news = vNews;
         if (data.latest_news.length === 0) data.latest_news = vNews;
-        if (data.popular_news.length === 0) data.popular_news = vNews.slice(0, 5);
+        if (data.popular_news.length === 0)
+          data.popular_news = vNews.slice(0, 5);
         data.meta.total = vNews.length;
         data.meta.per_page = vNews.length;
         data.meta.last_page = 1;
@@ -657,7 +660,15 @@ export async function searchCustomerNews(params: {
   sort?: string;
   page?: number;
   per_page?: number;
-}): Promise<{ items: HeroNewsItem[]; meta: { current_page: number; last_page: number; total: number; per_page: number } }> {
+}): Promise<{
+  items: HeroNewsItem[];
+  meta: {
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
+}> {
   try {
     const query = new URLSearchParams();
     if (params.q) query.set("q", params.q);
@@ -669,12 +680,17 @@ export async function searchCustomerNews(params: {
     if (params.page) query.set("page", params.page.toString());
     if (params.per_page) query.set("per_page", params.per_page.toString());
 
-    const url = query.toString() ? `/search-news?${query.toString()}` : "/search-news";
+    const url = query.toString()
+      ? `/search-news?${query.toString()}`
+      : "/search-news";
     const response = await fetchApi(url, undefined, { includeAuth: false });
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      return { items: [], meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+      return {
+        items: [],
+        meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 },
+      };
     }
 
     const resources = payload?.resources || payload;
@@ -692,17 +708,40 @@ export async function searchCustomerNews(params: {
     };
   } catch (error) {
     console.error("Failed to search news:", error);
-    return { items: [], meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+    return {
+      items: [],
+      meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 },
+    };
   }
 }
 
-export async function getTopicNews(tagName: string, page = 1): Promise<{ items: HeroNewsItem[]; topic: string; meta: { current_page: number; last_page: number; total: number; per_page: number } }> {
+export async function getTopicNews(
+  tagName: string,
+  page = 1,
+): Promise<{
+  items: HeroNewsItem[];
+  topic: string;
+  meta: {
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
+}> {
   try {
-    const response = await fetchApi(`/topic/${encodeURIComponent(tagName)}?page=${page}`, undefined, { includeAuth: false });
+    const response = await fetchApi(
+      `/topic/${encodeURIComponent(tagName)}?page=${page}`,
+      undefined,
+      { includeAuth: false },
+    );
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      return { items: [], topic: tagName, meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+      return {
+        items: [],
+        topic: tagName,
+        meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 },
+      };
     }
 
     const resources = payload?.resources || payload;
@@ -722,6 +761,10 @@ export async function getTopicNews(tagName: string, page = 1): Promise<{ items: 
     };
   } catch (error) {
     console.error(`Failed to fetch topic news for ${tagName}:`, error);
-    return { items: [], topic: tagName, meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 } };
+    return {
+      items: [],
+      topic: tagName,
+      meta: { current_page: 1, last_page: 1, total: 0, per_page: 12 },
+    };
   }
 }

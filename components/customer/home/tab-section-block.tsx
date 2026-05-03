@@ -29,7 +29,7 @@ export function TabSectionBlock({ data }: TabSectionBlockProps) {
         image: item.feature_image_url,
         title: item.title,
         time: "", // Keeping this empty as before
-        url_slug: item.url_slug,
+        unique_code: item.unique_code,
       });
       return acc;
     },
@@ -74,7 +74,7 @@ export function TabSectionBlock({ data }: TabSectionBlockProps) {
       <div className="grid gap-3 bg-white p-3 sm:grid-cols-2 md:grid-cols-4">
         {tabsToRender[activeTab].stories.map((story) => (
           <article key={story.title} className="group">
-            <Link href={`/news/${story.url_slug}`} className="block">
+            <Link href={`/news/${story.unique_code}`} className="block">
               <div className="overflow-hidden rounded">
                 <Image
                   src={story.image}

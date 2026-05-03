@@ -29,7 +29,7 @@ import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
   title: string;
-  slug: string;
+  unique_code: string;
   excerpt: string;
   content: string;
   category_id: string;
@@ -74,7 +74,7 @@ type NewsFormProps = {
 
 const defaultValues: NewsFormValues = {
   title: "",
-  slug: "",
+  unique_code: "",
   excerpt: "",
   content: "",
   category_id: "",
@@ -106,7 +106,7 @@ const defaultValues: NewsFormValues = {
   meta_keywords: [],
 };
 
-function slugify(value: string) {
+function uniqueCodeify(value: string) {
   return value
     .toLowerCase()
     .trim()
@@ -166,7 +166,7 @@ export function NewsForm({
   >([]);
   const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
-  const [slugEdited, setSlugEdited] = useState(Boolean(initialValues?.slug));
+  const [uniqueCodeEdited, setUniqueCodeEdited] = useState(Boolean(initialValues?.unique_code));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
@@ -194,7 +194,7 @@ export function NewsForm({
 
   useEffect(() => {
     setForm(buildInitialFormValues(initialValues));
-    setSlugEdited(Boolean(initialValues?.slug));
+    setUniqueCodeEdited(Boolean(initialValues?.unique_code));
   }, [initialValues]);
 
   useEffect(() => {
@@ -396,7 +396,7 @@ export function NewsForm({
 
         const payload = {
           title: form.title,
-          slug: form.slug || undefined,
+          unique_code: form.unique_code || undefined,
           excerpt: form.excerpt || undefined,
           content: form.content || undefined,
           category_id: form.category_id || undefined,
@@ -478,7 +478,7 @@ export function NewsForm({
                 setForm((prev) => ({
                   ...prev,
                   title,
-                  slug: slugEdited ? prev.slug : slugify(title),
+                  unique_code: uniqueCodeEdited ? prev.unique_code : uniqueCodeify(title),
                 }));
               }}
               required
@@ -492,23 +492,23 @@ export function NewsForm({
 
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="unique_code">Unique Code</Label>
               <Input
-                id="slug"
-                value={form.slug}
-                placeholder="headline-url-slug"
+                id="unique_code"
+                value={form.unique_code}
+                placeholder="headline-url-unique_code"
                 onChange={(event) => {
-                  setSlugEdited(true);
+                  setUniqueCodeEdited(true);
                   setForm((prev) => ({
                     ...prev,
-                    slug: slugify(event.target.value),
+                    unique_code: uniqueCodeify(event.target.value),
                   }));
                 }}
                 required
               />
-              {fieldErrors.slug ? (
+              {fieldErrors.unique_code ? (
                 <p className="text-xs font-medium text-rose-600">
-                  {fieldErrors.slug[0]}
+                  {fieldErrors.unique_code[0]}
                 </p>
               ) : null}
             </div>
