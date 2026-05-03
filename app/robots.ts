@@ -1,12 +1,14 @@
-import { MetadataRoute } from 'next'
+import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://shikkhapath.com";
+
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/admin', '/api'],
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/admin", "/api"],
     },
-    sitemap: 'https://shikkhapath.com/sitemap.xml',
-  }
+    sitemap: `${appUrl}/sitemap.xml`,
+  };
 }
