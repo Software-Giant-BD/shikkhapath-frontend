@@ -12,7 +12,7 @@ export function SectionHeader({ title, href }: Props) {
         {title}
       </h2>
       <Link 
-        href={`/category/${href}`} 
+        href={`/${href}`} 
         className="text-[13px] font-bold text-[#b38716] transition-colors hover:text-slate-900"
       >
         আরও দেখুন »

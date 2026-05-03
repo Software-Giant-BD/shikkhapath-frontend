@@ -102,7 +102,7 @@ export const getWebSiteSchema = (menuCategories: any[] = []) => {
       hasPart: menuCategories.map((category) => ({
         "@type": "WebPage",
         name: category.title,
-        url: `${SITE_URL}/category/${category.slug}`,
+        url: `${SITE_URL}/${category.slug}`,
       })),
     }),
   };

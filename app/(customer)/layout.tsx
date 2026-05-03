@@ -29,7 +29,7 @@ export default async function CustomerLayout({
     .sort((a, b) => Number(a.sort_order || "0") - Number(b.sort_order || "0"))
     .map((category) => ({
       label: category.title,
-      href: `/category/${category.slug}`,
+      href: `/${category.slug}`,
       hasDropdown: (category.children_count ?? 0) > 0,
     }));
 

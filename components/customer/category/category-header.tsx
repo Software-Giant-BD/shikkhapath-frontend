@@ -2,6 +2,7 @@ import Link from "next/link";
 
 interface Props {
   title: string;
+  currentPath?: string;
   subCategories?: Array<{
     id: string;
     title: string;
@@ -9,7 +10,7 @@ interface Props {
   }>;
 }
 
-export function CategoryHeader({ title, subCategories = [] }: Props) {
+export function CategoryHeader({ title, currentPath, subCategories = [] }: Props) {
   return (
     <div className="flex flex-col gap-6 mb-8 mt-4">
       <div className="flex items-center gap-4">
@@ -22,7 +23,7 @@ export function CategoryHeader({ title, subCategories = [] }: Props) {
           {subCategories.map((sub) => (
             <Link
               key={sub.id}
-              href={`/category/${sub.slug}`}
+              href={currentPath ? `/${currentPath}/${sub.slug}` : `/${sub.slug}`}
               className="text-[13.5px] font-bold text-slate-500 hover:text-[#c00000] transition-colors"
             >
               {sub.title}

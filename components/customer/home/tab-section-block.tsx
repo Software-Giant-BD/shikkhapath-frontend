@@ -63,7 +63,7 @@ export function TabSectionBlock({ data }: TabSectionBlockProps) {
         ))}
         <div className="flex-1 bg-white" />
         <Link
-          href={`/category/${tabsToRender[activeTab].slug}`}
+          href={`/${tabsToRender[activeTab].slug}`}
           className="flex items-center bg-white px-3 text-xs font-semibold text-[#b38716] hover:underline"
         >
           আরও দেখুন »
@@ -74,7 +74,7 @@ export function TabSectionBlock({ data }: TabSectionBlockProps) {
       <div className="grid gap-3 bg-white p-3 sm:grid-cols-2 md:grid-cols-4">
         {tabsToRender[activeTab].stories.map((story) => (
           <article key={story.title} className="group">
-            <Link href={`/news/${story.unique_code}`} className="block">
+            <Link href={`/${tabsToRender[activeTab].slug}/${story.unique_code}`} className="block">
               <div className="overflow-hidden rounded">
                 <Image
                   src={story.image}

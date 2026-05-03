@@ -81,7 +81,7 @@ export function CategoryListGrid({
       {pagination.current_page < pagination.last_page && (
         <div className="mt-6 flex justify-center">
           <Link
-            href={`/category/${categorySlug}?page=${pagination.current_page + 1}`}
+            href={`/${categorySlug}?page=${pagination.current_page + 1}`}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-10 py-3.5 text-sm font-black text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-[#c00000] hover:text-[#c00000]"
           >
             আরও খবর <ChevronRight className="h-4 w-4" />

@@ -16,9 +16,8 @@ export function getNewsUrl(news: {
     if (news.sub_category_slug) {
       segments.push(news.sub_category_slug);
     }
-  } else {
-    segments.push("news");
-  }
+  } 
+  
   segments.push(news.unique_code);
   return `/${segments.join("/")}`;
 }

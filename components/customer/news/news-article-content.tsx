@@ -38,7 +38,7 @@ export function NewsArticleContent({
         {category_hierarchy?.map((category, index) => (
           <Fragment key={category.id}>
             <Link
-              href={`/category/${category.slug}`}
+              href={`/${category.slug}`}
               className="text-[#b38716] hover:text-[#b38716]/80 transition-colors"
             >
               {category.name}
@@ -155,7 +155,7 @@ export function NewsArticleContent({
               <ChevronRight className="h-4 w-4 shrink-0 text-[#b38716] group-hover:translate-x-1 transition-transform" />
               <h3 className="text-[15px] font-bold text-slate-700 group-hover:text-[#b38716] transition-colors line-clamp-1">
                 <Link
-                  href={`/news/${item.unique_code}`}
+                  href={`/${item.category_slug || "news"}/${item.unique_code}`}
                   className="block"
                 >
                   {item.title}

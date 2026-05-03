@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import { HeroNewsItem } from "@/lib/api/news";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
+import { getNewsUrl } from "@/lib/utils";
 
 interface Props {
   title: string;
@@ -20,7 +21,10 @@ export function SelectedNewsSlider({ title, news }: Props) {
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
       const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === "left" ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      const scrollTo =
+        direction === "left"
+          ? scrollLeft - clientWidth
+          : scrollLeft + clientWidth;
       scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
     }
   };
@@ -45,13 +49,16 @@ export function SelectedNewsSlider({ title, news }: Props) {
               className="min-w-[280px] md:min-w-[320px] lg:min-w-[350px] snap-start flex flex-col overflow-hidden rounded-xl border border-slate-100 bg-[#e3f2fd]/30 p-4 transition-all hover:shadow-lg"
             >
               <Link
-                href={`/news/${item.unique_code}`}
+                href={getNewsUrl(item)}
                 className="flex flex-col h-full gap-4"
               >
                 <div className="relative aspect-16/10 overflow-hidden rounded-lg shadow-sm">
                   <Image
                     fill
-                    src={item.feature_image_url || "https://picsum.photos/seed/cs4/400/300"}
+                    src={
+                      item.feature_image_url ||
+                      "https://picsum.photos/seed/cs4/400/300"
+                    }
                     alt={item.title}
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />

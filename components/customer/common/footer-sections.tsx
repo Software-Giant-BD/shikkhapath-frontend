@@ -13,7 +13,7 @@ export async function SiteFooter() {
     .sort((a, b) => Number(a.sort_order || "0") - Number(b.sort_order || "0"))
     .map((category) => ({
       label: category.title,
-      href: `/category/${category.slug}`,
+      href: `/${category.slug}`,
     }));
 
   // Fallback to static if API returns empty, otherwise use dynamic
@@ -21,17 +21,17 @@ export async function SiteFooter() {
     dynamicCategories.length > 0
       ? dynamicCategories
       : [
-          { label: "শিক্ষাঙ্গন", href: "/category/education" },
-          { label: "উচ্চশিক্ষা", href: "/category/higher-education" },
-          { label: "ভর্তি পরীক্ষা", href: "/category/admission" },
-          { label: "কর্মজীবন", href: "/category/career" },
-          { label: "জাতীয়", href: "/category/national" },
-          { label: "আন্তর্জাতিক", href: "/category/international" },
-          { label: "বিজ্ঞান ও প্রযুক্তি", href: "/category/science" },
-          { label: "খেলাধুলা", href: "/category/sports" },
-          { label: "অর্থনীতি", href: "/category/economy" },
-          { label: "মুক্তমত", href: "/category/opinion" },
-          { label: "ভিডিও", href: "/category/video" },
+          { label: "শিক্ষাঙ্গন", href: "/education" },
+          { label: "উচ্ছেশিক্ষা", href: "/higher-education" },
+          { label: "ভর্তি পরীক্ষা", href: "/admission" },
+          { label: "কর্মজীবন", href: "/career" },
+          { label: "জাতীয়", href: "/national" },
+          { label: "আন্তর্জাতিক", href: "/international" },
+          { label: "বিজ্ঞান ও প্রযুক্তি", href: "/science" },
+          { label: "খেলাধুলা", href: "/sports" },
+          { label: "অর্থনীতি", href: "/economy" },
+          { label: "মুক্তমত", href: "/opinion" },
+          { label: "ভিডিও", href: "/video" },
         ];
 
   // Divide into two columns
