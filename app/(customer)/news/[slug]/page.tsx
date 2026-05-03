@@ -80,6 +80,7 @@ export default async function NewsDetailsPage({ params }: Props) {
     keywords: news_details.main_news.meta_keywords
       ? news_details.main_news.meta_keywords.split(",").map((k) => k.trim())
       : news_details.main_news.tags,
+    about: news_details.main_news.tags,
     description:
       news_details.main_news.meta_description || news_details.main_news.excerpt,
     articleBody: news_details.main_news.content

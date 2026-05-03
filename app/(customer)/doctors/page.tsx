@@ -1,15 +1,76 @@
 import { AdBanner } from "@/components/customer/home/ad-banner";
 import { DoctorClient } from "@/components/customer/doctors/doctor-client";
 import { Metadata } from "next";
+import { getMenuCategories } from "@/lib/api/categories";
+import {
+  getNewsMediaOrganizationSchema,
+  getWebSiteSchema,
+} from "@/lib/constants/seo";
 
 export const metadata: Metadata = {
   title: "Doctor Appointment Service | Shikkhapath",
-  description: "Access the best medical professionals in Bangladesh. Book appointments instantly and consult with verified specialists.",
+  description:
+    "Access the best medical professionals in Bangladesh. Book appointments instantly and consult with verified specialists.",
 };
 
-export default function DoctorPage() {
+export default async function DoctorPage() {
+  const [menuCategories] = await Promise.all([getMenuCategories()]);
+
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://shikkhapath.com";
+  const currentUrl = `${siteUrl}/doctors`;
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    ...getWebSiteSchema(menuCategories),
+  };
+
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: "Doctor Appointment Service",
+    provider: getNewsMediaOrganizationSchema(),
+    areaServed: {
+      "@type": "Country",
+      name: "Bangladesh",
+    },
+    description:
+      "Access the best medical professionals in Bangladesh. Book appointments instantly and consult with verified specialists.",
+    name: "Shikkhapath Doctor Appointment Service",
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: siteUrl,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Doctors",
+        item: currentUrl,
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="container mx-auto px-4 pt-8">
         <AdBanner
           label="[ বিজ্ঞাপন — ৯৭০×৯০ ]"
@@ -23,3 +84,4 @@ export default function DoctorPage() {
     </>
   );
 }
+
