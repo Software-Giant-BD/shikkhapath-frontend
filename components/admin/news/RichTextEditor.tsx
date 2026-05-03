@@ -59,7 +59,7 @@ type ToolbarButtonProps = {
   children: ReactNode;
 };
 
-type MediaDialogType = "image" | "video";
+type MediaDialogType = "image" | "video" | "link";
 
 const DEFAULT_IMAGE_WIDTH = "1200";
 const DEFAULT_IMAGE_HEIGHT = "675";
@@ -72,6 +72,17 @@ const ResizableImage = Image.extend({
         default: null,
       },
       height: {
+        default: null,
+      },
+    };
+  },
+});
+
+const CustomLink = Link.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      title: {
         default: null,
       },
     };
@@ -169,10 +180,13 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
         allowBase64: true,
       }),
       VideoNode,
-      Link.configure({
+      CustomLink.configure({
         openOnClick: false,
         autolink: true,
         defaultProtocol: "https",
+        HTMLAttributes: {
+          class: "text-indigo-600 underline underline-offset-4 hover:text-indigo-700 transition-colors cursor-pointer",
+        },
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -365,7 +379,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
             height: mediaHeight,
           })
           .run();
-      } else {
+      } else if (dialogType === "video") {
         editor
           .chain()
           .focus()
@@ -379,6 +393,32 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
             },
           })
           .run();
+      } else if (dialogType === "link") {
+        if (src === "") {
+          editor.chain().focus().extendMarkRange("link").unsetLink().run();
+        } else {
+          let url = src;
+          // Auto-add protocol if missing
+          if (!/^https?:\/\//i.test(url) && !url.startsWith("/") && !url.startsWith("#") && !url.startsWith("mailto:") && !url.startsWith("tel:")) {
+            url = `https://${url}`;
+          }
+
+          if (editor.state.selection.empty) {
+            const linkText = altText.trim() || url;
+            editor
+              .chain()
+              .focus()
+              .insertContent(`<a href="${url}" title="${altText.trim()}">${linkText}</a>`)
+              .run();
+          } else {
+            editor
+              .chain()
+              .focus()
+              .extendMarkRange("link")
+              .setLink({ href: url, title: altText.trim() })
+              .run();
+          }
+        }
       }
 
       closeMediaDialog();
@@ -393,20 +433,13 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
       return;
     }
 
-    const previousUrl = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("Enter URL", previousUrl || "https://");
+    const previousUrl = (editor.getAttributes("link").href as string) || "";
+    const previousTitle = (editor.getAttributes("link").title as string) || "";
 
-    if (url === null) {
-      return;
-    }
-
-    const trimmed = url.trim();
-    if (!trimmed) {
-      editor.chain().focus().unsetLink().run();
-      return;
-    }
-
-    editor.chain().focus().setLink({ href: trimmed }).run();
+    setSource(previousUrl);
+    setAltText(previousTitle);
+    setDialogType("link");
+    setUploadError("");
   };
 
   return (
@@ -610,7 +643,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
           <div className="relative z-10 w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-2xl font-semibold text-slate-800">
-                {dialogType === "image" ? "Select Image" : "Select Video"}
+                {dialogType === "image" ? "Select Image" : dialogType === "video" ? "Select Video" : "Add Link"}
               </h3>
               <button
                 type="button"
@@ -624,73 +657,86 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
 
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label htmlFor="media-source">Source</Label>
+                <Label htmlFor="media-source">{dialogType === "link" ? "URL" : "Source"}</Label>
                 <div className="flex items-center gap-2">
                   <Input
                     id="media-source"
                     value={source}
-                    placeholder={dialogType === "image" ? "https://example.com/photo.jpg" : "https://example.com/video.mp4"}
+                    placeholder={
+                      dialogType === "link"
+                        ? "https://example.com"
+                        : dialogType === "image"
+                          ? "https://example.com/photo.jpg"
+                          : "https://example.com/video.mp4"
+                    }
                     onChange={(event) => setSource(event.target.value)}
                   />
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept={dialogType === "image" ? "image/*" : "video/*"}
-                    className="hidden"
-                    onChange={onPickFile}
-                  />
-                  <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
-                    <Upload size={14} />
-                    Upload
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setIsMediaPickerOpen(true)}
-                  >
-                    Media Center
-                  </Button>
+                  {dialogType !== "link" && (
+                    <>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept={dialogType === "image" ? "image/*" : "video/*"}
+                        className="hidden"
+                        onChange={onPickFile}
+                      />
+                      <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
+                        <Upload size={14} />
+                        Upload
+                      </Button>
+                      <Button type="button" variant="secondary" onClick={() => setIsMediaPickerOpen(true)}>
+                        Media Center
+                      </Button>
+                    </>
+                  )}
                 </div>
-                {selectedFile ? (
+                {selectedFile && dialogType !== "link" ? (
                   <p className="text-xs text-emerald-700">Selected: {selectedFile.name}</p>
                 ) : null}
               </div>
 
-              {dialogType === "image" ? (
+              {dialogType === "image" || dialogType === "link" ? (
                 <div className="space-y-1.5">
-                  <Label htmlFor="media-alt">Alternative description</Label>
+                  <Label htmlFor="media-alt">
+                    {dialogType === "link" ? "Title / Display Text" : "Alternative description"}
+                  </Label>
                   <Input
                     id="media-alt"
                     value={altText}
                     onChange={(event) => setAltText(event.target.value)}
-                    placeholder="Describe the image"
+                    placeholder={dialogType === "link" ? "Enter link text or title" : "Describe the image"}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void saveMedia();
+                    }}
                   />
                 </div>
               ) : null}
 
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="media-width">Width</Label>
-                  <Input
-                    id="media-width"
-                    value={width}
-                    onChange={(event) => setWidth(event.target.value)}
-                    placeholder="e.g. 720"
-                    inputMode="numeric"
-                  />
-                </div>
+              {dialogType !== "link" ? (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="media-width">Width</Label>
+                    <Input
+                      id="media-width"
+                      value={width}
+                      onChange={(event) => setWidth(event.target.value)}
+                      placeholder="e.g. 720"
+                      inputMode="numeric"
+                    />
+                  </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="media-height">Height</Label>
-                  <Input
-                    id="media-height"
-                    value={height}
-                    onChange={(event) => setHeight(event.target.value)}
-                    placeholder="e.g. 420"
-                    inputMode="numeric"
-                  />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="media-height">Height</Label>
+                    <Input
+                      id="media-height"
+                      value={height}
+                      onChange={(event) => setHeight(event.target.value)}
+                      placeholder="e.g. 420"
+                      inputMode="numeric"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               {uploadError ? (
                 <p className="text-sm font-medium text-rose-600">{uploadError}</p>
