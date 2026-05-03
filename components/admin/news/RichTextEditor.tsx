@@ -37,7 +37,7 @@ import { Color } from "@tiptap/extension-color";
 import Placeholder from "@tiptap/extension-placeholder";
 import { mergeAttributes, Node } from "@tiptap/core";
 
-import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
+import { getMediaItems, saveMediaItems, type MediaType } from "@/lib/admin/media-library";
 import { MediaPickerDialog } from "@/components/admin/media/MediaPickerDialog";
 import { Button } from "@/components/admin/ui/button";
 import { Input } from "@/components/admin/ui/input";
@@ -755,10 +755,10 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your cont
         </div>
       ) : null}
 
-      {dialogType ? (
+      {dialogType && dialogType !== "link" ? (
         <MediaPickerDialog
           isOpen={isMediaPickerOpen}
-          mediaType={dialogType}
+          mediaType={dialogType as MediaType}
           onClose={() => setIsMediaPickerOpen(false)}
           onSelect={(item) => {
             setSource(item.url);

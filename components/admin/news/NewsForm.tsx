@@ -29,6 +29,7 @@ import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
   title: string;
+  unique_code: string;
   excerpt: string;
   content: string;
   category_id: string;
@@ -73,6 +74,7 @@ type NewsFormProps = {
 
 const defaultValues: NewsFormValues = {
   title: "",
+  unique_code: "",
   excerpt: "",
   content: "",
   category_id: "",
@@ -384,6 +386,7 @@ export function NewsForm({
 
         const payload = {
           title: form.title,
+          unique_code: form.unique_code || undefined,
           excerpt: form.excerpt || undefined,
           content: form.content || undefined,
           category_id: form.category_id || undefined,
@@ -472,6 +475,26 @@ export function NewsForm({
             {fieldErrors.title ? (
               <p className="text-xs font-medium text-rose-600">
                 {fieldErrors.title[0]}
+              </p>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="unique_code">Unique Code (Slug)</Label>
+            <Input
+              id="unique_code"
+              value={form.unique_code}
+              placeholder="e.g. news-headline-2024 (leave empty for auto-generation)"
+              onChange={(event) => {
+                setForm((prev) => ({
+                  ...prev,
+                  unique_code: event.target.value,
+                }));
+              }}
+            />
+            {fieldErrors.unique_code ? (
+              <p className="text-xs font-medium text-rose-600">
+                {fieldErrors.unique_code[0]}
               </p>
             ) : null}
           </div>
