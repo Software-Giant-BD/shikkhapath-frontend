@@ -14,8 +14,6 @@ export function CategoryHero({ news }: Props) {
 
   const main = news[0];
   const secondary = news[1];
-  const remaining = news.slice(2, 5);
-  const sideRemaining = news.slice(2, 5); // Just to follow the existing structure if possible
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
@@ -135,18 +133,23 @@ export function CategoryHero({ news }: Props) {
         <div className="flex flex-col gap-4">
           {news.slice(2, 3).map((item) => (
             <article key={item.id} className="group flex gap-3 items-center">
-              <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
-                <Image
-                  fill
-                  src={
-                    item.youtube_thumbnail_url ||
-                    item.feature_image_url ||
-                    "/No_Image_Available.jpg"
-                  }
-                  alt={item.title}
-                  className="object-cover"
-                />
-              </div>
+              <Link
+                href={getNewsUrl(secondary)}
+                className="relative aspect-video overflow-hidden rounded-xl"
+              >
+                <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
+                  <Image
+                    fill
+                    src={
+                      item.youtube_thumbnail_url ||
+                      item.feature_image_url ||
+                      "/No_Image_Available.jpg"
+                    }
+                    alt={item.title}
+                    className="object-cover"
+                  />
+                </div>
+              </Link>
               <div>
                 <h4 className="text-[13px] font-bold leading-tight line-clamp-2 group-hover:text-[#c00000]">
                   {item.title}

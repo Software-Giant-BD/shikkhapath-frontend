@@ -110,6 +110,7 @@ export async function CategoryView({ data, path }: CategoryViewProps) {
               title={data.category.title}
               currentPath={path.join("/")}
               subCategories={data.sub_categories}
+              categoryHierarchy={data.category_hierarchy}
             />
 
             <CategoryHero news={data.latest_news.slice(0, 5)} />

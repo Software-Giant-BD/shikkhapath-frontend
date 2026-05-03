@@ -38,7 +38,10 @@ export function NewsArticleContent({
         {category_hierarchy?.map((category, index) => (
           <Fragment key={category.id}>
             <Link
-              href={`/${category.slug}`}
+              href={`/${category_hierarchy
+                .slice(0, index + 1)
+                .map((c) => c.slug)
+                .join("/")}`}
               className="text-[#b38716] hover:text-[#b38716]/80 transition-colors"
             >
               {category.name}
