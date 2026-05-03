@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import type { HomePageCategoryNewsSection } from "@/lib/api/home-page-category-news"
 import { SectionHeader } from "@/components/customer/home/section-header"
+import { getNewsUrl } from "@/lib/utils"
 
 interface Props {
   sectionData: HomePageCategoryNewsSection
@@ -80,7 +81,7 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
       <div className={`grid gap-5 ${compact ? "grid-cols-1" : "lg:grid-cols-[1.6fr_1fr]"}`}>
         {/* Featured story */}
         <article className="group overflow-hidden rounded-xl border border-slate-100 bg-white transition-all hover:shadow-lg">
-          <Link href={`/news/${encodeURIComponent(featured.unique_code)}`} className="flex flex-col">
+          <Link href={getNewsUrl(featured)} className="flex flex-col">
             <div className="relative overflow-hidden">
               <img
                 src={getImageUrl(featured.feature_image_url)}
@@ -109,7 +110,7 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
         <div className="flex flex-col gap-4">
           {sideItems.map((item) => (
             <article key={item.id} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
-              <Link href={`/news/${encodeURIComponent(item.unique_code)}`} className="flex gap-4 p-3">
+              <Link href={getNewsUrl(item)} className="flex gap-4 p-3">
                 <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                   <img
                     src={getImageUrl(item.feature_image_url)}

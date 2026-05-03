@@ -1,9 +1,12 @@
 import Link from "next/link"
+import { getNewsUrl } from "@/lib/utils"
 
 type BreakingNewsItem = {
   id: string
   title: string
   unique_code: string
+  category_slug?: string
+  sub_category_slug?: string
 }
 
 function asObject(value: unknown): Record<string, unknown> {
@@ -54,6 +57,8 @@ function normalizeBreakingNews(value: unknown): BreakingNewsItem | null {
     id: asString(item.id, `${urlSlug}-${title}`),
     title,
     unique_code: urlSlug,
+    category_slug: asString(item.category_slug ?? null),
+    sub_category_slug: asString(item.sub_category_slug ?? null),
   }
 }
 
@@ -107,7 +112,7 @@ export async function BreakingTicker() {
           {[...items, ...items].map((item, i) => (
             <Link
               key={`${item.id}-${i}`}
-              href={`/news/${encodeURIComponent(item.unique_code)}`}
+              href={getNewsUrl(item)}
               className="shrink-0 hover:text-[#b38716]"
             >
               {item.title}

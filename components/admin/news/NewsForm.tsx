@@ -29,7 +29,6 @@ import { uploadImageAction } from "@/lib/api/image-actions";
 
 type NewsFormValues = {
   title: string;
-  unique_code: string;
   excerpt: string;
   content: string;
   category_id: string;
@@ -74,7 +73,6 @@ type NewsFormProps = {
 
 const defaultValues: NewsFormValues = {
   title: "",
-  unique_code: "",
   excerpt: "",
   content: "",
   category_id: "",
@@ -106,14 +104,6 @@ const defaultValues: NewsFormValues = {
   meta_keywords: [],
 };
 
-function uniqueCodeify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
 
 function toDateTimeLocal(value: string) {
   if (!value) return "";
@@ -166,7 +156,6 @@ export function NewsForm({
   >([]);
   const [isSubCategoryLoading, setIsSubCategoryLoading] = useState(false);
   const [isUploadingFeatureImage, setIsUploadingFeatureImage] = useState(false);
-  const [uniqueCodeEdited, setUniqueCodeEdited] = useState(Boolean(initialValues?.unique_code));
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [keywordInput, setKeywordInput] = useState("");
@@ -194,7 +183,6 @@ export function NewsForm({
 
   useEffect(() => {
     setForm(buildInitialFormValues(initialValues));
-    setUniqueCodeEdited(Boolean(initialValues?.unique_code));
   }, [initialValues]);
 
   useEffect(() => {
@@ -396,7 +384,6 @@ export function NewsForm({
 
         const payload = {
           title: form.title,
-          unique_code: form.unique_code || undefined,
           excerpt: form.excerpt || undefined,
           content: form.content || undefined,
           category_id: form.category_id || undefined,
@@ -478,7 +465,6 @@ export function NewsForm({
                 setForm((prev) => ({
                   ...prev,
                   title,
-                  unique_code: uniqueCodeEdited ? prev.unique_code : uniqueCodeify(title),
                 }));
               }}
               required
@@ -491,28 +477,6 @@ export function NewsForm({
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="unique_code">Unique Code</Label>
-              <Input
-                id="unique_code"
-                value={form.unique_code}
-                placeholder="headline-url-unique_code"
-                onChange={(event) => {
-                  setUniqueCodeEdited(true);
-                  setForm((prev) => ({
-                    ...prev,
-                    unique_code: uniqueCodeify(event.target.value),
-                  }));
-                }}
-                required
-              />
-              {fieldErrors.unique_code ? (
-                <p className="text-xs font-medium text-rose-600">
-                  {fieldErrors.unique_code[0]}
-                </p>
-              ) : null}
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="category_id">Category</Label>
               <SearchableSelect
@@ -537,35 +501,35 @@ export function NewsForm({
                 </p>
               ) : null}
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sub_category_id">Sub-category</Label>
-            <SearchableSelect
-              options={[
-                {
-                  id: "",
-                  name: isSubCategoryLoading
-                    ? "Loading..."
-                    : form.category_id
-                      ? "Select Sub-category"
-                      : "Select Category first",
-                },
-                ...subCategoryOptions.map((sc) => ({ id: sc.id, name: sc.title })),
-              ]}
-              value={form.sub_category_id}
-              onChange={(val) =>
-                setForm((prev) => ({ ...prev, sub_category_id: val }))
-              }
-              placeholder={isSubCategoryLoading ? "Loading..." : "Select Sub-category"}
-              searchPlaceholder="Search sub-categories..."
-              disabled={!form.category_id || isSubCategoryLoading}
-            />
-            {fieldErrors.sub_category_id ? (
-              <p className="text-xs font-medium text-rose-600">
-                {fieldErrors.sub_category_id[0]}
-              </p>
-            ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="sub_category_id">Sub-category</Label>
+              <SearchableSelect
+                options={[
+                  {
+                    id: "",
+                    name: isSubCategoryLoading
+                      ? "Loading..."
+                      : form.category_id
+                        ? "Select Sub-category"
+                        : "Select Category first",
+                  },
+                  ...subCategoryOptions.map((sc) => ({ id: sc.id, name: sc.title })),
+                ]}
+                value={form.sub_category_id}
+                onChange={(val) =>
+                  setForm((prev) => ({ ...prev, sub_category_id: val }))
+                }
+                placeholder={isSubCategoryLoading ? "Loading..." : "Select Sub-category"}
+                searchPlaceholder="Search sub-categories..."
+                disabled={!form.category_id || isSubCategoryLoading}
+              />
+              {fieldErrors.sub_category_id ? (
+                <p className="text-xs font-medium text-rose-600">
+                  {fieldErrors.sub_category_id[0]}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="space-y-2">

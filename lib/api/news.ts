@@ -45,6 +45,8 @@ export type NewsApiModel = {
   meta_keywords: string;
   category?: NewsRelationCategory;
   sub_category?: NewsRelationCategory;
+  category_slug?: string;
+  sub_category_slug?: string;
   created_at: string;
 };
 
@@ -78,6 +80,8 @@ export type HeroNewsItem = {
     title: string;
     slug: string;
   };
+  category_slug?: string;
+  sub_category_slug?: string;
 };
 
 export type HeroNewsResponse = {
@@ -186,6 +190,8 @@ function normalizeNews(value: unknown): NewsApiModel {
     meta_keywords: asString(item.meta_keywords ?? null),
     category: normalizeRelationCategory(item.category),
     sub_category: normalizeRelationCategory(item.sub_category ?? null),
+    category_slug: asString(item.category_slug ?? null),
+    sub_category_slug: asString(item.sub_category_slug ?? null),
     created_at: asString(item.created_at ?? null),
   };
 }
@@ -205,6 +211,8 @@ function normalizeHeroItem(item: any): HeroNewsItem {
       asString(item.feature_image_url ?? item.featureImageUrl) || null,
     publish_at: asString(item.publish_at ?? item.publishAt),
     category: normalizeRelationCategory(item.category),
+    category_slug: asString(item.category_slug ?? null),
+    sub_category_slug: asString(item.sub_category_slug ?? null),
   };
 }
 
@@ -508,9 +516,10 @@ export async function getLocalNews(params: {
   }
 }
 
-export async function getNewsDetails(uniqueCode: string) {
+export async function getNewsDetails(path: string | string[]) {
   try {
-    const response = await fetchApi(`/resolve-path/${uniqueCode}`, undefined, {
+    const pathString = Array.isArray(path) ? path.join("/") : path;
+    const response = await fetchApi(`/resolve-path/${pathString}`, undefined, {
       includeAuth: false,
     });
     const payload = await response.json().catch(() => null);
@@ -525,7 +534,9 @@ export async function getNewsDetails(uniqueCode: string) {
     const resources = payload?.resources;
     const main_news = resources?.main_news;
     const item = extractOne(main_news);
-    if (!item) {
+    
+    // Check if it's actually news details
+    if (resources?.content_type !== 'news_details' || !item) {
       return null;
     }
 
@@ -542,7 +553,7 @@ export async function getNewsDetails(uniqueCode: string) {
         : [],
     };
   } catch (error) {
-    console.error(`Failed to fetch news details ${uniqueCode}:`, error);
+    console.error(`Failed to fetch news details for ${path}:`, error);
     return null;
   }
 }
@@ -574,12 +585,13 @@ export type CategoryPageResponse = {
 };
 
 export async function getCategoryPageData(
-  slug: string,
+  path: string | string[],
   page: number = 1,
 ): Promise<CategoryPageResponse | null> {
   try {
+    const pathString = Array.isArray(path) ? path.join("/") : path;
     const response = await fetchApi(
-      `/resolve-path/${slug}?page=${page}`,
+      `/resolve-path/${pathString}?page=${page}`,
       undefined,
       {
         includeAuth: false,

@@ -15,6 +15,8 @@ export type HomePageCategoryNewsItem = {
   excerpt: string;
   feature_image_url: string;
   publish_at: string;
+  category_slug?: string;
+  sub_category_slug?: string;
 };
 
 export type HomePageCategoryNewsSection = {
@@ -60,6 +62,8 @@ function normalizeNewsItem(value: unknown): HomePageCategoryNewsItem | null {
     excerpt: asString(item.excerpt),
     feature_image_url: asString(item.feature_image_url ?? item.featureImageUrl),
     publish_at: asString(item.publish_at ?? item.publishAt),
+    category_slug: asString(item.category_slug ?? null),
+    sub_category_slug: asString(item.sub_category_slug ?? null),
   };
 }
 

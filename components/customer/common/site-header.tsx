@@ -13,24 +13,24 @@ export type SiteNavLink = {
 };
 
 const defaultNavLinks: SiteNavLink[] = [
-  { label: "সর্বশেষ", href: "/category/latest" },
-  { label: "শিক্ষাঙ্গন", href: "/category/education", hasDropdown: true },
+  { label: "সর্বশেষ", href: "/latest" },
+  { label: "শিক্ষাঙ্গন", href: "/education", hasDropdown: true },
   {
     label: "উচ্চশিক্ষা",
-    href: "/category/higher-education",
+    href: "/higher-education",
     hasDropdown: true,
   },
   {
     label: "শিক্ষা প্রশাসন",
-    href: "/category/administration",
+    href: "/administration",
     hasDropdown: true,
   },
-  { label: "ভর্তি পরীক্ষা", href: "/category/admission", hasDropdown: true },
-  { label: "কর্মসংস্থান", href: "/category/career", hasDropdown: true },
-  { label: "বিনোদন", href: "/category/entertainment" },
-  { label: "খেলাধুলা", href: "/category/sports" },
-  { label: "অর্থনীতি", href: "/category/economy" },
-  { label: "জাতীয়", href: "/category/national", hasDropdown: true },
+  { label: "ভর্তি পরীক্ষা", href: "/admission", hasDropdown: true },
+  { label: "কর্মসংস্থান", href: "/career", hasDropdown: true },
+  { label: "বিনোদন", href: "/entertainment" },
+  { label: "খেলাধুলা", href: "/sports" },
+  { label: "অর্থনীতি", href: "/economy" },
+  { label: "জাতীয়", href: "/national", hasDropdown: true },
   { label: "আরও", href: "#", hasDropdown: true },
 ];
 

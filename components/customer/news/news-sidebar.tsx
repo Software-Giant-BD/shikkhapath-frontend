@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 import { type HeroNewsItem } from "@/lib/api/news";
+import { getNewsUrl } from "@/lib/utils";
 
 import { AdBanner } from "@/components/customer/home/ad-banner";
 
@@ -29,7 +30,7 @@ export function NewsSidebar({ title = "আরও পড়ুন", news = [], adCat
               className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
             >
               <Link
-                href={`/news/${item.unique_code}`}
+                href={getNewsUrl(item)}
                 className="flex gap-3 p-2.5"
               >
                 <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">

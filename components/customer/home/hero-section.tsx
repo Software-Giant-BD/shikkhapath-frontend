@@ -4,6 +4,7 @@ import { Play, Clock, ChevronRight } from "lucide-react";
 import { type HeroNewsResponse, type PopularNewsResponse, type LatestNewsResponse, type HeroNewsItem } from "@/lib/api/news";
 import { AdBanner } from "@/components/customer/home/ad-banner";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
+import { getNewsUrl } from "@/lib/utils";
 
 const HOME_LAYOUT_CONFIG = {
   leftNewsCount: 6,
@@ -71,6 +72,8 @@ export function HeroSection({
           title: item.title,
           time: formatBengaliRelativeTime(item.publish_at),
           unique_code: item.unique_code,
+          category_slug: item.category_slug,
+          sub_category_slug: item.sub_category_slug,
         }))
       : []
           .slice(0, HOME_LAYOUT_CONFIG.leftNewsCount)
@@ -85,6 +88,8 @@ export function HeroSection({
           excerpt: item.excerpt,
           time: formatBengaliRelativeTime(item.publish_at),
           unique_code: item.unique_code,
+          category_slug: item.category_slug,
+          sub_category_slug: item.sub_category_slug,
         }))
       : []
           .slice(0, HOME_LAYOUT_CONFIG.heroCardCount)
@@ -98,6 +103,8 @@ export function HeroSection({
             image: item.feature_image_url,
             title: item.title,
             unique_code: item.unique_code,
+            category_slug: item.category_slug,
+            sub_category_slug: item.sub_category_slug,
           }))
       : []
           .slice(0, HOME_LAYOUT_CONFIG.centerGridCount)
@@ -112,18 +119,24 @@ export function HeroSection({
             title: latestNews[0].title,
             time: formatBengaliRelativeTime(latestNews[0].publish_at),
             unique_code: latestNews[0].unique_code,
+            category_slug: latestNews[0].category_slug,
+            sub_category_slug: latestNews[0].sub_category_slug,
           },
           left: latestNews.slice(1, 3).map((item) => ({
             image: item.feature_image_url,
             title: item.title,
             time: formatBengaliRelativeTime(item.publish_at),
             unique_code: item.unique_code,
+            category_slug: item.category_slug,
+            sub_category_slug: item.sub_category_slug,
           })),
           right: latestNews.slice(3, 5).map((item) => ({
             image: item.feature_image_url,
             title: item.title,
             time: formatBengaliRelativeTime(item.publish_at),
             unique_code: item.unique_code,
+            category_slug: item.category_slug,
+            sub_category_slug: item.sub_category_slug,
           })),
         }
       : null;
@@ -138,7 +151,7 @@ export function HeroSection({
             className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
           >
             <Link
-              href={`/news/${story.unique_code}`}
+              href={getNewsUrl(story)}
               className="flex flex-col gap-2 p-2"
             >
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
@@ -170,7 +183,7 @@ export function HeroSection({
               className="group overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-xl"
             >
               <Link
-                href={`/news/${story.unique_code}`}
+                href={getNewsUrl(story)}
                 className="flex flex-col h-full"
               >
                 <div className="relative overflow-hidden shrink-0">
@@ -244,7 +257,7 @@ export function HeroSection({
                 {topicData.left.map((item, i) => (
                   <article key={i} className="group flex flex-col gap-2">
                     <Link
-                      href={`/news/${item.unique_code}`}
+                      href={getNewsUrl(item)}
                       className="relative aspect-video overflow-hidden rounded-lg"
                     >
                       <Image
@@ -264,7 +277,7 @@ export function HeroSection({
               {/* Middle (Main Focus) */}
               <article className="group flex flex-col text-center">
                 <Link
-                  href={`/news/${topicData.main.unique_code}`}
+                  href={getNewsUrl(topicData.main)}
                   className="flex flex-col h-full gap-4"
                 >
                   <div className="relative aspect-16/10 overflow-hidden rounded-xl border border-slate-100">
@@ -294,7 +307,7 @@ export function HeroSection({
                 {topicData.right.map((item, i) => (
                   <article key={i} className="group flex flex-col gap-2">
                     <Link
-                      href={`/news/${item.unique_code}`}
+                      href={getNewsUrl(item)}
                       className="relative aspect-video overflow-hidden rounded-lg"
                     >
                       <Image
@@ -322,7 +335,7 @@ export function HeroSection({
               className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
             >
               <Link
-                href={`/news/${story.unique_code}`}
+                href={getNewsUrl(story)}
                 className="flex gap-3 p-2.5"
               >
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
@@ -420,7 +433,7 @@ export function HeroSection({
               {videoNews.slice(0, 2).map((video, vIdx) => (
                 <Link
                   key={vIdx}
-                  href={`/news/${video.unique_code}`}
+                  href={getNewsUrl(video)}
                   className="group flex flex-col gap-2"
                 >
                   <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-100">
