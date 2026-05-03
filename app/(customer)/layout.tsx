@@ -1,27 +1,12 @@
 import type { Metadata } from "next";
+import { SITE_KEYWORDS } from "@/lib/constants/seo";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: "Shikkhapath | আধুনিক শিক্ষা ও ক্যারিয়ারের ঠিকানা",
   description:
     "শিক্ষা ও ভর্তি পরীক্ষার সর্বশেষ আপডেট, ক্যারিয়ার গঠন এবং দেশ-বিদেশের সব খবর পেতে ভিজিট করুন শিক্ষাপথ। সঠিক বিশ্লেষণ ও নির্ভুল তথ্যই আমাদের মূল লক্ষ্য।",
-  keywords: [
-    "শিক্ষা",
-    "ভর্তি পরীক্ষা",
-    "ক্যারিয়ার",
-    "দেশ-বিদেশের খবর",
-    "শিক্ষা সংবাদ",
-    "ক্যারিয়ার গাইডলাইন",
-    "ভর্তি সার্কুলার",
-    "সরকারি চাকরি",
-    "বাংলা নিউজ পোর্টাল",
-    "Shikkhapath",
-    "Shikkhapath news",
-    "Shikkhapath admission",
-    "Shikkhapath career",
-    "Shikkhapath education",
-    "Shikkhapath news today",
-  ],
+  keywords: SITE_KEYWORDS,
   icons: {
     icon: "/favicon.png",
     apple: "/favicon.png",

@@ -1,0 +1,17 @@
+export const SITE_KEYWORDS = [
+  "শিক্ষা",
+  "ভর্তি পরীক্ষা",
+  "ক্যারিয়ার",
+  "দেশ-বিদেশের খবর",
+  "শিক্ষা সংবাদ",
+  "ক্যারিয়ার গাইডলাইন",
+  "ভর্তি সার্কুলার",
+  "সরকারি চাকরি",
+  "বাংলা নিউজ পোর্টাল",
+  "Shikkhapath",
+  "Shikkhapath news",
+  "Shikkhapath admission",
+  "Shikkhapath career",
+  "Shikkhapath education",
+  "Shikkhapath news today",
+];
