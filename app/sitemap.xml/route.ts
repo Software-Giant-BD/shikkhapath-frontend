@@ -19,6 +19,22 @@ export async function GET() {
         let xml = '<?xml version="1.0" encoding="UTF-8"?>';
         xml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
+        // Static Sitemaps
+        xml += '<sitemap>';
+        xml += `<loc>${appUrl}/sitemap/sitemap-category.xml</loc>`;
+        xml += `<lastmod>${new Date().toISOString()}</lastmod>`;
+        xml += '</sitemap>';
+
+        xml += '<sitemap>';
+        xml += `<loc>${appUrl}/sitemap/sitemap-topic.xml</loc>`;
+        xml += `<lastmod>${new Date().toISOString()}</lastmod>`;
+        xml += '</sitemap>';
+
+        xml += '<sitemap>';
+        xml += `<loc>${appUrl}/sitemap/sitemap-static-pages.xml</loc>`;
+        xml += `<lastmod>${new Date().toISOString()}</lastmod>`;
+        xml += '</sitemap>';
+
         daily.forEach((date: string) => {
             xml += '<sitemap>';
             xml += `<loc>${appUrl}/sitemap/sitemap-daily-${date}.xml</loc>`;
