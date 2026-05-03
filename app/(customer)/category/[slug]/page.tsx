@@ -88,6 +88,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     description:
       data.category.meta_description ||
       `${data.category.title} বিভাগের সর্বশেষ আপডেট।`,
+    keywords: data.category.meta_keywords
+      ? data.category.meta_keywords.split(",").map((k) => k.trim())
+      : [data.category.title, siteName],
     publisher: getNewsMediaOrganizationSchema(),
     mainEntity: {
       "@type": "ItemList",
