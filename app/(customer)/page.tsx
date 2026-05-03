@@ -23,6 +23,7 @@ import {
   getTabNews,
   getVideoNews,
 } from "@/lib/api/news";
+import { getCustomerAdvertisements } from "@/lib/api/advertisements";
 
 import { getDivisionsAction } from "@/lib/api/location-actions";
 
@@ -53,6 +54,7 @@ export default async function Home() {
     tabNews,
     videoNews,
     divisionsRes,
+    adsRes,
   ] = await Promise.all([
     getAllCategories(),
     getMenuCategories(),
@@ -63,8 +65,10 @@ export default async function Home() {
     getTabNews(),
     getVideoNews(),
     getDivisionsAction(),
+    getCustomerAdvertisements({ category: "Home page" }),
   ]);
 
+  const ads = adsRes?.items || [];
   const divisions = divisionsRes.ok ? divisionsRes.items : [];
 
   const categoryNewsBySlug = new Map(
@@ -149,6 +153,7 @@ export default async function Home() {
           heightClass="h-24 sm:h-28"
           category="Home page"
           placement="Top Banner Ad"
+          initialAd={ads.find((ad) => ad.placement === "Top Banner Ad")}
         />
 
         <HeroSection
@@ -156,6 +161,7 @@ export default async function Home() {
           popularNews={popularNews}
           latestNews={latestNews}
           videoNews={videoNews}
+          advertisements={ads}
         />
 
         {primarySections.map((section) => (
@@ -180,6 +186,7 @@ export default async function Home() {
           category="Home page"
           placement="In-Feed / Mid-Page Ad"
           heightClass="h-24 sm:h-32"
+          initialAd={ads.find((ad) => ad.placement === "In-Feed / Mid-Page Ad")}
         />
 
         <TabSectionBlock data={tabNews} />

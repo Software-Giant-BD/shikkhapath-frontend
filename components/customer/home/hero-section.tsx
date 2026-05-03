@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Play, Clock, ChevronRight } from "lucide-react";
 import { type HeroNewsResponse, type PopularNewsResponse, type LatestNewsResponse, type HeroNewsItem } from "@/lib/api/news";
+import { type Advertisement } from "@/lib/api/advertisements";
 import { AdBanner } from "@/components/customer/home/ad-banner";
 import { formatBengaliRelativeTime } from "@/lib/formatters";
 import { getNewsUrl } from "@/lib/utils";
@@ -55,6 +56,7 @@ interface HeroSectionProps {
   popularNews?: PopularNewsResponse;
   latestNews?: LatestNewsResponse;
   videoNews?: HeroNewsItem[];
+  advertisements?: Advertisement[];
 }
 
 export function HeroSection({
@@ -62,6 +64,7 @@ export function HeroSection({
   popularNews,
   latestNews,
   videoNews,
+  advertisements = [],
 }: HeroSectionProps) {
   console.log(data?.home_left);
 
@@ -419,6 +422,7 @@ export function HeroSection({
           heightClass="h-[250px]"
           fit="contain"
           className="my-0"
+          initialAd={advertisements.find((ad) => ad.placement === "Sidebar Ad")}
         />
 
         {/* Video News Sidebar Section */}
@@ -466,6 +470,7 @@ export function HeroSection({
           heightClass="h-[150px]"
           fit="contain"
           className="my-0"
+          initialAd={advertisements.find((ad) => ad.placement === "Sidebar Bottom Ad")}
         />
       </aside>
     </section>

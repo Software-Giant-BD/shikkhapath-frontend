@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getCustomerAdvertisements } from "@/lib/api/advertisements";
+import { getCustomerAdvertisements, type Advertisement } from "@/lib/api/advertisements";
 
 interface Props {
   label: string
@@ -10,6 +10,7 @@ interface Props {
   category?: string
   placement?: string
   variant?: "default" | "leaderboard"
+  initialAd?: Advertisement | null
 }
 
 export async function AdBanner({
@@ -20,10 +21,11 @@ export async function AdBanner({
   category,
   placement,
   variant = "default",
+  initialAd,
 }: Props) {
-  let ad = null;
+  let ad = initialAd;
   
-  if (category && placement) {
+  if (!ad && category && placement) {
     try {
       // Fetch all ads for this category. 
       // Next.js will deduplicate this call if multiple AdBanners use the same category.
