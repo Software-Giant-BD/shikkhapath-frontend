@@ -18,7 +18,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { path } = await params;
-  
+
+  if (path[0] === "sitemap" || path[0] === "sitemap.xml") {
+    return { title: "Sitemap" };
+  }
+
   const result = await resolveAnyPath(path);
 
   if (result?.contentType === "news_details") {
@@ -36,6 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CatchAllPage({ params, searchParams }: Props) {
   const { path } = await params;
+
+  if (path[0] === "sitemap" || path[0] === "sitemap.xml") {
+    return notFound();
+  }
+
   const page = parseInt((await searchParams)?.page || "1");
 
   const result = await resolveAnyPath(path, page);
