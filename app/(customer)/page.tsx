@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { SITE_KEYWORDS } from "@/lib/constants/seo";
+import {
+  getNewsMediaOrganizationSchema,
+  getWebSiteSchema,
+} from "@/lib/constants/seo";
 
 import { HeroSection } from "@/components/customer/home/hero-section";
 import { AdBanner } from "@/components/customer/home/ad-banner";
@@ -94,83 +97,12 @@ export default async function Home() {
 
   const webSiteSchema = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    interactivityType: "mixed",
-    name: SITE_NAME,
-    headline: `${SITE_NAME} |শিক্ষা, ক্যাম্পাস, কর্মসংস্থান, জাতীয় ও আন্তর্জাতিক সর্বশেষ সংবাদ`,
-    keywords: SITE_KEYWORDS.join(", "),
-    url: SITE_URL,
-    copyrightHolder: {
-      "@type": "NewsMediaOrganization",
-      name: SITE_NAME,
-    },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/search?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": SITE_URL,
-    },
-    hasPart: menuCategories.map((category) => ({
-      "@type": "WebPage",
-      name: category.title,
-      url: `${SITE_URL}/category/${category.slug}`,
-    })),
+    ...getWebSiteSchema(menuCategories),
   };
 
   const newsMediaOrganizationSchema = {
     "@context": "https://schema.org",
-    "@type": ["Organization", "NewsMediaOrganization"],
-    name: SITE_NAME,
-    alternateName: "Shikkhapath",
-    foundingDate: "2026-05-01",
-    url: SITE_URL,
-    logo: {
-      "@type": "ImageObject",
-      url: `${SITE_URL}/logo.png`,
-    },
-    image: `${SITE_URL}/logo.png`,
-    sameAs: [
-      "https://www.facebook.com/shikkhapath", // Update with actual links
-      "https://x.com/shikkhapath",
-      "https://www.youtube.com/@shikkhapath",
-    ],
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        telephone: "+8801704-052374",
-        contactType: "customer service",
-        areaServed: "BD",
-        availableLanguage: ["bn", "en"],
-        email: "support@shikkhapath.com",
-      },
-      {
-        "@type": "ContactPoint",
-        contactType: "editorial",
-        email: "editor@shikkhapath.com",
-      }
-    ],
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Empire Talukder Dream,22–23 Station Road",
-      addressLocality: "Tejgaon",
-      addressRegion: "Dhaka",
-      postalCode: "1215",
-      addressCountry: "Bangladesh",
-    },
-    employee: {
-      "@type": "Person",
-      name: "Nafis Chonchol",
-      jobTitle: "Developer",
-      sameAs: ["https://www.facebook.com/nafis.chonchol"],
-    },
-    publishingPrinciples: [
-      `${SITE_URL}/about`,
-      `${SITE_URL}/editorial-policy`,
-      `${SITE_URL}/privacy`,
-    ],
+    ...getNewsMediaOrganizationSchema(),
   };
 
   const BreadcrumbListSchema = {
