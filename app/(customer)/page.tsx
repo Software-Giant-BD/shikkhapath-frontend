@@ -8,7 +8,7 @@ import { TabSectionBlock } from "@/components/customer/home/tab-section-block";
 import { NewsletterSection } from "@/components/customer/home/newsletter-section";
 import { VideoSectionBlock } from "@/components/customer/home/video-section-block";
 import { LocalNewsSection } from "@/components/customer/home/local-news-section";
-import { getCategories } from "@/lib/api/categories";
+import { getCategories, getMenuCategories } from "@/lib/api/categories";
 import {
   getHomePageCategoryNews,
   type HomePageCategoryNewsSection,
@@ -42,6 +42,7 @@ export const metadata: Metadata = {
 export default async function Home() {
   const [
     categories,
+    menuCategories,
     categoryNewsSections,
     heroNews,
     popularNews,
@@ -51,6 +52,7 @@ export default async function Home() {
     divisionsRes,
   ] = await Promise.all([
     getCategories(),
+    getMenuCategories(),
     getHomePageCategoryNews(),
     getHeroNews(),
     getPopularNews(),
@@ -111,6 +113,11 @@ export default async function Home() {
       "@type": "WebPage",
       "@id": SITE_URL,
     },
+    hasPart: menuCategories.map((category) => ({
+      "@type": "WebPage",
+      name: category.title,
+      url: `${SITE_URL}/category/${category.slug}`,
+    })),
   };
 
   const newsMediaOrganizationSchema = {
@@ -130,20 +137,21 @@ export default async function Home() {
       "https://x.com/shikkhapath",
       "https://www.youtube.com/@shikkhapath",
     ],
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/search?q={q}`,
-      "query-input": "required name=q",
-    },
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+8801704-052374",
-      contactType: "customer service",
-      areaServed: "BD",
-      availableLanguage: ["bn", "en"],
-      supportEmail: "support@shikkhapath.com",
-      editorEmail: "editor@shikkhapath.com",
-    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: "+8801704-052374",
+        contactType: "customer service",
+        areaServed: "BD",
+        availableLanguage: ["bn", "en"],
+        email: "support@shikkhapath.com",
+      },
+      {
+        "@type": "ContactPoint",
+        contactType: "editorial",
+        email: "editor@shikkhapath.com",
+      }
+    ],
     address: {
       "@type": "PostalAddress",
       streetAddress: "Empire Talukder Dream,22–23 Station Road",
