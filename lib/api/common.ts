@@ -1,6 +1,6 @@
 import "server-only";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { type BasePagination, type FieldErrors } from "./api-utils";
 
@@ -46,6 +46,12 @@ export async function fetchApi(
   const includeAuth = options?.includeAuth ?? true;
   const token = includeAuth ? await getAdminToken() : undefined;
 
+  // Get client IP from request headers
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  const realIp = headerList.get("x-real-ip");
+  const clientIp = forwardedFor || realIp;
+
   let response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
@@ -54,6 +60,7 @@ export async function fetchApi(
         Accept: "application/json",
         ...(init?.body && typeof init.body === "string" ? { "Content-Type": "application/json" } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(clientIp ? { "X-Forwarded-For": clientIp } : {}),
         ...(init?.headers ?? {}),
       },
     });
