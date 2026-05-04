@@ -5,7 +5,7 @@ export function FinalCtaSection() {
   return null;
 }
 
-export async function SiteFooter() {
+export async function SiteFooter({ settings }: { settings?: any }) {
   const categories = await getMenuCategories();
 
   // Create dynamic category links from the API
@@ -42,6 +42,13 @@ export async function SiteFooter() {
   // Add Contact link to the right column
   rightCategories.push({ label: "যোগাযোগ", href: "/contact-us" });
 
+  const socialLinks = [
+    { icon: "f", href: settings?.facebook_url || "#" },
+    { icon: "▶", href: settings?.youtube_url || "#" },
+    { icon: "𝕏", href: settings?.twitter_url || "#" },
+    { icon: "in", href: settings?.linkedin_url || "#" },
+  ];
+
   return (
     <footer className="bg-[#1a1a1a] text-slate-300">
       {/* Main footer grid */}
@@ -49,22 +56,22 @@ export async function SiteFooter() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
           {/* Brand column */}
           <div>
-            <p className="text-lg font-bold text-white">শিক্ষাপথ</p>
-            <p className="mt-2 text-sm leading-relaxed text-slate-400">
-              Shikkhapath <br />
-              Empire Talukder Dream <br />
-              22–23 Station Road, <br />
-              Tejgaon, Dhaka–1215 <br />
-              01704-052374
-            </p>
+            <p className="text-lg font-bold text-white">{settings?.site_name || "শিক্ষাপথ"}</p>
+            <div className="mt-2 text-sm leading-relaxed text-slate-400 whitespace-pre-line">
+              {settings?.contact_address || "Empire Talukder Dream \n 22–23 Station Road, \n Tejgaon, Dhaka–1215"}
+              {settings?.contact_phone && `\n${settings.contact_phone}`}
+              {settings?.contact_email && `\n${settings.contact_email}`}
+            </div>
             <div className="mt-4 flex gap-3">
-              {["f", "▶", "𝕏", "in"].map((icon) => (
-                <span
-                  key={icon}
-                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-white/10 text-sm text-white transition-colors hover:bg-[#c79a1d]"
+              {socialLinks.map((social) => (
+                <Link
+                  key={social.icon}
+                  href={social.href}
+                  target="_blank"
+                  className="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-sm text-white transition-colors hover:bg-[#c79a1d]"
                 >
-                  {icon}
-                </span>
+                  {social.icon}
+                </Link>
               ))}
             </div>
           </div>
@@ -136,7 +143,7 @@ export async function SiteFooter() {
       {/* Bottom bar */}
       <div className="border-t border-white/10">
         <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-center gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
-          <p>© ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>{settings?.footer_text || "© ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।"}</p>
         </div>
       </div>
     </footer>

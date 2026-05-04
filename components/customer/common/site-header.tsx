@@ -36,8 +36,12 @@ const defaultNavLinks: SiteNavLink[] = [
 
 export function SiteHeader({
   navLinks = defaultNavLinks,
+  siteLogo,
+  siteName,
 }: {
   navLinks?: SiteNavLink[];
+  siteLogo?: string;
+  siteName?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
@@ -153,8 +157,8 @@ export function SiteHeader({
               className="inline-flex items-center transition-opacity hover:opacity-90"
             >
               <Image
-                src="/logo.png"
-                alt="Shikkhapath"
+                src={siteLogo || "/logo.png"}
+                alt={siteName || "Shikkhapath"}
                 width={780}
                 height={130}
                 priority
@@ -218,8 +222,8 @@ export function SiteHeader({
 
             <Link href="/" className="inline-flex items-center">
               <Image
-                src="/logo.png"
-                alt="Shikkhapath"
+                src={siteLogo || "/logo.png"}
+                alt={siteName || "Shikkhapath"}
                 width={780}
                 height={130}
                 priority
@@ -242,8 +246,8 @@ export function SiteHeader({
             >
               <Link href="/" className="inline-flex shrink-0 items-center">
                 <Image
-                  src="/logo.png"
-                  alt="Logo"
+                  src={siteLogo || "/logo.png"}
+                  alt={siteName || "Logo"}
                   width={780}
                   height={130}
                   className="h-8 w-auto"
@@ -297,8 +301,8 @@ export function SiteHeader({
             <div className="flex items-center justify-between border-b px-5 py-5 bg-white sticky top-0">
               <Link href="/" onClick={() => setIsOpen(false)}>
                 <Image
-                  src="/logo.png"
-                  alt="Logo"
+                  src={siteLogo || "/logo.png"}
+                  alt={siteName || "Logo"}
                   width={780}
                   height={130}
                   className="h-9 w-auto"

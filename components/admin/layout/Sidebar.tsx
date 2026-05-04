@@ -17,7 +17,7 @@ import {
   Shield,
   Flame,
   University,
-  Stethoscope,
+  Settings,
 } from "lucide-react";
 
 type MenuItem = {
@@ -108,6 +108,7 @@ const menuConfig: MenuSection[] = [
           { title: "Add Admission", href: "/admin/admissions/add" },
         ],
       },
+      { title: "Settings", icon: Settings, href: "/admin/settings" },
     ],
   },
 ];
