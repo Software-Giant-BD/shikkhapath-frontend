@@ -6,8 +6,7 @@ export type EventType =
   | "Seminar"
   | "Workshop"
   | "Competition"
-  | "Webinar"
-  | "Campus Program";
+  | "Webinar";
 
 export interface UniversityEventModel {
   id: string;

@@ -13,7 +13,7 @@ function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-const EVENT_TYPES = ["All", "Admission Event", "Seminar", "Workshop", "Competition", "Webinar", "Campus Program"];
+const EVENT_TYPES = ["All", "Admission Event", "Seminar", "Workshop", "Competition", "Webinar"];
 const CITIES = ["All", "Dhaka", "Rajshahi", "Savar", "Chattogram", "Sylhet"];
 
 export function EventsClient() {
@@ -94,7 +94,7 @@ export function EventsClient() {
           University <span className="text-rose-600">Events</span>
         </h1>
         <p className="text-slate-500 font-medium max-w-2xl mx-auto">
-          Discover admission timelines, workshops, tech olympiads, and campus seminars matching your interests. Keep track of crucial academic dates easily.
+          Discover admission timelines, workshops, tech olympiads, and academic seminars matching your interests. Keep track of crucial academic dates easily.
         </p>
       </div>
 

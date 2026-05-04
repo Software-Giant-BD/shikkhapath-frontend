@@ -21,7 +21,6 @@ export async function GET(
             '/admission',
             '/ambulance',
             '/blood-donation',
-            '/campus',
             '/cgpa-calculator',
             '/doctors',
             '/fire-service',
