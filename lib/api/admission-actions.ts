@@ -19,24 +19,24 @@ export async function fetchAdmissionsAction(params?: GetFilters): Promise<Admiss
 export async function createAdmissionAction(data: Omit<AdmissionUniversityModel, "id">) {
   const result = await createAdmission(data);
   revalidateTag("admissions", "max");
-  revalidatePath("/admin/admissions", "page");
-  revalidatePath("/admission", "page");
+  revalidatePath("/admin/admissions");
+  revalidatePath("/admission");
   return result;
 }
 
 export async function updateAdmissionAction(id: string, data: Partial<AdmissionUniversityModel>) {
   const result = await updateAdmission(id, data);
   revalidateTag("admissions", "max");
-  revalidatePath("/admin/admissions", "page");
-  revalidatePath("/admission", "page");
+  revalidatePath("/admin/admissions");
+  revalidatePath("/admission");
   return result;
 }
 
 export async function deleteAdmissionAction(id: string) {
   await deleteAdmission(id);
   revalidateTag("admissions", "max");
-  revalidatePath("/admin/admissions", "page");
-  revalidatePath("/admission", "page");
+  revalidatePath("/admin/admissions");
+  revalidatePath("/admission");
 }
 
 export async function getAdmissionAction(id: string) {

@@ -53,7 +53,11 @@ export default function SettingsPage() {
       try {
         const result = await getSettingsAction();
         if (result.success && result.resources) {
-          setSettings((prev) => ({ ...prev, ...result.resources }));
+          const sanitized = Object.entries(result.resources).reduce((acc, [key, value]) => {
+            acc[key] = value ?? "";
+            return acc;
+          }, {} as Record<string, string>);
+          setSettings((prev) => ({ ...prev, ...sanitized }));
         }
       } catch (error) {
         toast.error("Failed to load settings");

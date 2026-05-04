@@ -55,7 +55,7 @@ export async function updateSettingsAction(settings: Record<string, any>): Promi
 
     revalidatePath("/admin/settings");
     // Also revalidate public pages that use settings
-    revalidatePath("/", "layout"); 
+    revalidatePath("/"); 
 
     return {
       success: true,

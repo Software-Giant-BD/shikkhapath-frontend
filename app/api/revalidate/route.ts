@@ -8,8 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "Tag is required" }, { status: 400 });
   }
 
-  // @ts-ignore - 'max' is a new argument in some Next.js versions to handle deprecation
-  revalidateTag(tag, 'max');
+  revalidateTag(tag, "max");
 
   return NextResponse.json({ revalidated: true, now: Date.now(), tag });
 }
