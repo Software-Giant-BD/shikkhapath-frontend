@@ -17,6 +17,7 @@ import {
   Shield,
   Flame,
   University,
+  Mail,
   Settings,
 } from "lucide-react";
 
@@ -108,6 +109,7 @@ const menuConfig: MenuSection[] = [
           { title: "Add Admission", href: "/admin/admissions/add" },
         ],
       },
+      { title: "Newsletters", icon: Mail, href: "/admin/newsletters/list" },
       { title: "Settings", icon: Settings, href: "/admin/settings" },
     ],
   },
