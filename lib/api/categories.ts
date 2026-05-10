@@ -1,6 +1,6 @@
 import "server-only";
 
-import { extractPagination, fetchApi, type BasePagination } from "./common";
+import { extractPagination, fetchApi, rethrowNextErrors, type BasePagination } from "./common";
 
 export type CategoryStatus = "published" | "draft";
 
@@ -224,6 +224,7 @@ export async function getCategoriesList(
       pagination: extractPagination(payload, fallbackPage, fallbackper_page),
     };
   } catch (error) {
+    rethrowNextErrors(error);
     console.error("Failed to fetch categories:", error);
     return {
       items: [],
@@ -266,6 +267,7 @@ export async function getCategoryById(
 
     return normalizeCategory(item);
   } catch (error) {
+    rethrowNextErrors(error);
     console.error(`Failed to fetch category ${catId}:`, error);
     return null;
   }
@@ -275,7 +277,7 @@ export async function getMenuCategories(): Promise<CategoryApiModel[]> {
   try {
     const response = await fetchApi(
       "/menu-categories",
-      { cache: "no-store" },
+      { next: { revalidate: 3600 } },
       { includeAuth: false },
     );
     const payload = await response.json().catch(() => null);
@@ -289,6 +291,7 @@ export async function getMenuCategories(): Promise<CategoryApiModel[]> {
     const items = extractList(payload);
     return items.map(normalizeCategory);
   } catch (error) {
+    rethrowNextErrors(error);
     console.error("Failed to fetch menu categories:", error);
     return [];
   }
@@ -298,7 +301,7 @@ export async function getAllCategories(): Promise<CategoryApiModel[]> {
   try {
     const response = await fetchApi(
       "/categories",
-      { cache: "no-store" },
+      { next: { revalidate: 3600 } },
       { includeAuth: false },
     );
     const payload = await response.json().catch(() => null);
@@ -312,6 +315,7 @@ export async function getAllCategories(): Promise<CategoryApiModel[]> {
     const items = extractList(payload);
     return items.map(normalizeCategory);
   } catch (error) {
+    rethrowNextErrors(error);
     console.error("Failed to fetch categories:", error);
     return [];
   }

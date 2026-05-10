@@ -33,7 +33,9 @@ function getMessage(payload: unknown, fallback: string): string {
 }
 
 function asObject(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function asString(value: unknown, fallback = ""): string {
@@ -53,7 +55,13 @@ function extractCategoryList(payload: unknown): unknown[] {
   }
 
   const resources = asObject(root.resources);
-  const candidates = [resources.categories, resources.items, resources.data, root.categories, root.data];
+  const candidates = [
+    resources.categories,
+    resources.items,
+    resources.data,
+    root.categories,
+    root.data,
+  ];
 
   for (const candidate of candidates) {
     if (Array.isArray(candidate)) {
@@ -64,7 +72,9 @@ function extractCategoryList(payload: unknown): unknown[] {
   return [];
 }
 
-export async function createCategoryAction(payload: FormData): Promise<CategoryActionResult> {
+export async function createCategoryAction(
+  payload: FormData,
+): Promise<CategoryActionResult> {
   try {
     const response = await fetchApi("/admin/categories", {
       method: "POST",
@@ -104,7 +114,9 @@ export async function getCategoriesByParentAction(
   }
 
   try {
-    const response = await fetchApi(`/admin/categories?parent_id=${encodeURIComponent(parentId)}`);
+    const response = await fetchApi(
+      `/admin/categories?parent_id=${encodeURIComponent(parentId)}`,
+    );
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
@@ -138,7 +150,10 @@ export async function getCategoriesByParentAction(
   }
 }
 
-export async function updateCategoryAction(catId: string, payload: FormData): Promise<CategoryActionResult> {
+export async function updateCategoryAction(
+  catId: string,
+  payload: FormData,
+): Promise<CategoryActionResult> {
   try {
     const response = await fetchApi(`/admin/categories/${catId}`, {
       method: "PUT",
@@ -155,39 +170,43 @@ export async function updateCategoryAction(catId: string, payload: FormData): Pr
 
     revalidatePath("/admin/categories/list");
     revalidatePath(`/admin/categories/${catId}/edit`);
- 
-     return {
-       ok: true,
-       message: getMessage(data, "Category updated successfully."),
-     };
-   } catch {
-     return {
-       ok: false,
-       message: "Category API is unavailable.",
-     };
-   }
- }
- 
- export async function getAllCategoriesAction() {
-   try {
-     const response = await fetchApi("/categories", { cache: "no-store" }, { includeAuth: false });
-     const payload = await response.json().catch(() => null);
- 
-     if (!response.ok) {
-       return { ok: false, message: "Failed to load categories", items: [] };
-     }
- 
-     const items = extractCategoryList(payload).map((item) => {
-       const row = asObject(item);
-       return {
-         id: asString(row.id),
-         title: asString(row.title),
-         slug: asString(row.slug),
-       };
-     });
- 
-     return { ok: true, message: "Success", items };
-   } catch {
-     return { ok: false, message: "Category API is unavailable", items: [] };
-   }
- }
+
+    return {
+      ok: true,
+      message: getMessage(data, "Category updated successfully."),
+    };
+  } catch {
+    return {
+      ok: false,
+      message: "Category API is unavailable.",
+    };
+  }
+}
+
+export async function getAllCategoriesAction() {
+  try {
+    const response = await fetchApi(
+      "/categories",
+      { next: { revalidate: 120 } },
+      { includeAuth: false },
+    );
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      return { ok: false, message: "Failed to load categories", items: [] };
+    }
+
+    const items = extractCategoryList(payload).map((item) => {
+      const row = asObject(item);
+      return {
+        id: asString(row.id),
+        title: asString(row.title),
+        slug: asString(row.slug),
+      };
+    });
+
+    return { ok: true, message: "Success", items };
+  } catch {
+    return { ok: false, message: "Category API is unavailable", items: [] };
+  }
+}

@@ -57,12 +57,12 @@ npm run dev
 - `components/customer`: Customer-facing UI components.
 - `components/admin`: Admin UI, forms, and layout components.
 - `lib/api`: Server-side API helper utilities.
-- `proxy.ts`: Auth guard logic for admin routes.
+- `middleware.ts`: Auth guard logic for admin routes.
 
 ## Authentication Notes
 
 - Admin login stores an `admin_token` HTTP-only cookie.
-- Proxy protects `/admin` routes and redirects unauthorized users to `/admin/login`.
+- Middleware protects `/admin` routes and redirects unauthorized users to `/admin/login`.
 
 ## Deployment Notes
 

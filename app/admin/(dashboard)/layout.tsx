@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { AdminShell } from "@/components/admin/layout/AdminShell";

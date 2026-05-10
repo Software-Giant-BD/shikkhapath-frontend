@@ -5,14 +5,33 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Upload, Trash2, Save, X, ImageIcon } from "lucide-react";
 
-import { createAdvertisementAction, updateAdvertisementAction } from "@/lib/api/advertisement-actions";
+import {
+  createAdvertisementAction,
+  updateAdvertisementAction,
+} from "@/lib/api/advertisement-actions";
 import { Advertisement } from "@/lib/api/advertisements";
 import { Button } from "@/components/admin/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/admin/ui/card";
 
 const CATEGORIES = {
-  "Home Page": ["Top Banner Ad", "Sidebar Ad", "In-Feed / Mid-Page Ad", "Sidebar Bottom Ad"],
-  "Category Page": ["Header Ad", "In-Feed Ad", "In-Feed second Ad", "Right Sidebar Ad", "Sidebar Bottom Ad"],
+  "Home Page": [
+    "Top Banner Ad",
+    "Sidebar Ad",
+    "In-Feed / Mid-Page Ad",
+    "Sidebar Bottom Ad",
+  ],
+  "Category Page": [
+    "Header Ad",
+    "In-Feed Ad",
+    "In-Feed second Ad",
+    "Right Sidebar Ad",
+    "Sidebar Bottom Ad",
+  ],
   "Services Pages": [
     "Ambulance Ad",
     "Police Ad",
@@ -20,11 +39,16 @@ const CATEGORIES = {
     "Blood Ad",
     "Doctor Ad",
     "Jobs Ad",
-    "SSC/HSC (রুটিন | রেজাল্ট) Ad",
     "Admission Ad",
     "CGPA Calculator Ad",
   ],
-  "News Details Page": ["Header Ad", "Content Top Ad", "In-Content Square Ad", "Sidebar Bottom Ad", "Footer Ad"],
+  "News Details Page": [
+    "Header Ad",
+    "Content Top Ad",
+    "In-Content Square Ad",
+    "Sidebar Bottom Ad",
+    "Footer Ad",
+  ],
 };
 
 const AD_DIMENSIONS: Record<string, string> = {
@@ -45,7 +69,6 @@ const AD_DIMENSIONS: Record<string, string> = {
   "Blood Ad": "300 x 250",
   "Doctor Ad": "300 x 250",
   "Jobs Ad": "300 x 250",
-  "SSC/HSC (রুটিন | রেজাল্ট) Ad": "300 x 250",
   "Admission Ad": "300 x 250",
   "CGPA Calculator Ad": "300 x 250",
 };
@@ -56,18 +79,29 @@ type AdvertisementFormProps = {
   headerAction?: React.ReactNode;
 };
 
-export function AdvertisementForm({ initialData, headerTitle, headerAction }: AdvertisementFormProps) {
+export function AdvertisementForm({
+  initialData,
+  headerTitle,
+  headerAction,
+}: AdvertisementFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
 
   const [name, setName] = useState(initialData?.name || "");
-  const [category, setCategory] = useState(initialData?.category || Object.keys(CATEGORIES)[0]);
-  const [placement, setPlacement] = useState(initialData?.placement || CATEGORIES[Object.keys(CATEGORIES)[0] as keyof typeof CATEGORIES][0]);
+  const [category, setCategory] = useState(
+    initialData?.category || Object.keys(CATEGORIES)[0],
+  );
+  const [placement, setPlacement] = useState(
+    initialData?.placement ||
+      CATEGORIES[Object.keys(CATEGORIES)[0] as keyof typeof CATEGORIES][0],
+  );
   const [previewUrl, setPreviewUrl] = useState(initialData?.image || "");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [redirectUrl, setRedirectUrl] = useState(initialData?.redirect_url || "");
+  const [redirectUrl, setRedirectUrl] = useState(
+    initialData?.redirect_url || "",
+  );
   const [status, setStatus] = useState(initialData?.status ?? true);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -132,7 +166,9 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
       <Card className="border-none shadow-sm overflow-hidden">
         <CardHeader className="bg-white border-b border-slate-100 py-6 px-8">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl font-bold text-slate-800">{headerTitle}</CardTitle>
+            <CardTitle className="text-xl font-bold text-slate-800">
+              {headerTitle}
+            </CardTitle>
             {headerAction}
           </div>
         </CardHeader>
@@ -141,7 +177,9 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
             {/* Left Column: Form Fields */}
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-600">Advertisement Name</label>
+                <label className="text-sm font-semibold text-slate-600">
+                  Advertisement Name
+                </label>
                 <input
                   type="text"
                   required
@@ -153,7 +191,9 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-600">Redirect URL</label>
+                <label className="text-sm font-semibold text-slate-600">
+                  Redirect URL
+                </label>
                 <input
                   type="url"
                   placeholder="https://example.com"
@@ -165,7 +205,9 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-600">Category</label>
+                  <label className="text-sm font-semibold text-slate-600">
+                    Category
+                  </label>
                   <select
                     required
                     value={category}
@@ -181,18 +223,22 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-600">Placement</label>
+                  <label className="text-sm font-semibold text-slate-600">
+                    Placement
+                  </label>
                   <select
                     required
                     value={placement}
                     onChange={(e) => setPlacement(e.target.value)}
                     className="w-full h-12 rounded-lg border border-slate-200 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none bg-white transition-all appearance-none cursor-pointer"
                   >
-                    {CATEGORIES[category as keyof typeof CATEGORIES]?.map((place) => (
-                      <option key={place} value={place}>
-                        {place}
-                      </option>
-                    ))}
+                    {CATEGORIES[category as keyof typeof CATEGORIES]?.map(
+                      (place) => (
+                        <option key={place} value={place}>
+                          {place}
+                        </option>
+                      ),
+                    )}
                   </select>
                 </div>
               </div>
@@ -209,8 +255,12 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
                     <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                   <div className="space-y-1">
-                    <span className="text-sm font-bold text-slate-800">Active</span>
-                    <p className="text-xs text-slate-500">This advertisement will be visible to users once saved.</p>
+                    <span className="text-sm font-bold text-slate-800">
+                      Active
+                    </span>
+                    <p className="text-xs text-slate-500">
+                      This advertisement will be visible to users once saved.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -218,11 +268,19 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
 
             {/* Right Column: Image Upload */}
             <div className="space-y-4">
-              <label className="text-sm font-semibold text-slate-600 block">Image</label>
+              <label className="text-sm font-semibold text-slate-600 block">
+                Image
+              </label>
               <div className="relative group">
                 <div className="aspect-video w-full rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden flex items-center justify-center transition-all group-hover:border-blue-300">
                   {previewUrl ? (
-                    <Image src={previewUrl} alt="Preview" fill className="object-contain" unoptimized />
+                    <Image
+                      src={previewUrl}
+                      alt="Preview"
+                      fill
+                      className="object-contain"
+                      unoptimized
+                    />
                   ) : (
                     <div className="flex flex-col items-center text-slate-400">
                       <ImageIcon size={48} strokeWidth={1} />
@@ -260,7 +318,11 @@ export function AdvertisementForm({ initialData, headerTitle, headerAction }: Ad
               </div>
 
               <p className="text-center text-xs text-slate-500 font-medium">
-                Recommended size: <span className="text-slate-800 font-bold">{recommendedDimensions} pixels</span>. Max file size: 2MB.
+                Recommended size:{" "}
+                <span className="text-slate-800 font-bold">
+                  {recommendedDimensions} pixels
+                </span>
+                . Max file size: 2MB.
               </p>
             </div>
           </div>

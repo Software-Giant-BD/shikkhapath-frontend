@@ -27,9 +27,6 @@ export async function GET(
             '/jobs',
             '/namaz-time',
             '/police',
-            '/ssc-hsc',
-            '/trains',
-            '/university-events',
         ];
 
         let xml = '<?xml version="1.0" encoding="UTF-8"?>';

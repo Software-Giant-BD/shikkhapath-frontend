@@ -43,3 +43,41 @@ export async function logoutUser() {
   cookieStore.delete("admin_token");
   redirect("/admin/login");
 }
+
+export async function forgotPassword(email: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/forgot-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return { error: data?.message || "Something went wrong." };
+  }
+
+  return data;
+}
+
+export async function resetPassword(formData: any) {
+  const response = await fetch(`${API_BASE_URL}/admin/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(formData),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    return { error: data?.message || "Something went wrong." };
+  }
+
+  return data;
+}

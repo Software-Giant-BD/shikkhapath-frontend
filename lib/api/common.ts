@@ -10,8 +10,13 @@ export { type BasePagination, type FieldErrors };
 export { extractPagination, extractFieldErrors, normalizeImageUrl, parseStringArray } from "./api-utils";
 
 export async function getAdminToken() {
-  const cookieStore = await cookies();
-  return cookieStore.get("admin_token")?.value;
+  try {
+    const cookieStore = await cookies();
+    return cookieStore.get("admin_token")?.value;
+  } catch (e) {
+    // During static generation, cookies() will throw.
+    return undefined;
+  }
 }
 
 /**
@@ -46,11 +51,17 @@ export async function fetchApi(
   const includeAuth = options?.includeAuth ?? true;
   const token = includeAuth ? await getAdminToken() : undefined;
 
-  // Get client IP from request headers
-  const headerList = await headers();
-  const forwardedFor = headerList.get("x-forwarded-for");
-  const realIp = headerList.get("x-real-ip");
-  const clientIp = forwardedFor || realIp;
+  // Get client IP from request headers - wrapped in try-catch to avoid build errors during static generation
+  let clientIp = undefined;
+  try {
+    const headerList = await headers();
+    const forwardedFor = headerList.get("x-forwarded-for");
+    const realIp = headerList.get("x-real-ip");
+    clientIp = forwardedFor || realIp;
+  } catch (e) {
+    // During static generation (build time), headers() will throw a DynamicServerError.
+    // We catch it here to allow static rendering to proceed.
+  }
 
   let response;
   try {
