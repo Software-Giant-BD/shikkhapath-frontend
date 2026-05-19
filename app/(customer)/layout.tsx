@@ -14,6 +14,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: settings.site_title || "Shikkhapath",
     description: settings.site_description || "আধুনিক শিক্ষা ও ক্যারিয়ারের ঠিকানা",
     keywords: settings.site_keywords || SITE_KEYWORDS,
+    verification: {
+      google: "ffYxKGVQdinfA1A13P7Ezo4PwLKYhizJetuLKZgN0DY",
+    },
     icons: {
       icon: settings.favicon_url || "/favicon.png",
       apple: settings.favicon_url || "/favicon.png",
