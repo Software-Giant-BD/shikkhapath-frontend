@@ -1163,38 +1163,36 @@ export function NewsForm({
             </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="meta_keywords">Meta Keywords</Label>
-              <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
-                {form.meta_keywords.map((keyword) => (
-                  <span
-                    key={keyword}
-                    className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+          <div className="space-y-2">
+            <Label htmlFor="meta_keywords">Meta Keywords</Label>
+            <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
+              {form.meta_keywords.map((keyword) => (
+                <span
+                  key={keyword}
+                  className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700"
+                >
+                  {keyword}
+                  <button
+                    type="button"
+                    onClick={() => removeKeyword(keyword)}
+                    className="hover:text-emerald-900"
                   >
-                    {keyword}
-                    <button
-                      type="button"
-                      onClick={() => removeKeyword(keyword)}
-                      className="hover:text-emerald-900"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-                <input
-                  id="meta_keywords"
-                  className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-slate-400"
-                  placeholder={form.meta_keywords.length === 0 ? "Add keywords..." : ""}
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  onKeyDown={onKeywordInputKeyDown}
-                />
-              </div>
-              <p className="text-[10px] text-slate-400">
-                Press Enter or comma to add keywords
-              </p>
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              <input
+                id="meta_keywords"
+                className="flex-1 bg-transparent text-sm outline-hidden placeholder:text-slate-400"
+                placeholder={form.meta_keywords.length === 0 ? "Add keywords..." : ""}
+                value={keywordInput}
+                onChange={(e) => setKeywordInput(e.target.value)}
+                onKeyDown={onKeywordInputKeyDown}
+              />
             </div>
+            <p className="text-[10px] text-slate-400">
+              Press Enter or comma to add keywords
+            </p>
           </div>
         </CardContent>
       </Card>
