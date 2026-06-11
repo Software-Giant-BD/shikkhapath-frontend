@@ -3,7 +3,7 @@
 import type { ChangeEvent } from "react";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Image as ImageIcon, Save, X } from "lucide-react";
+import { ArrowLeft, Image as ImageIcon, Save, WandSparkles, X } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
@@ -11,6 +11,7 @@ import { getMediaItems, saveMediaItems } from "@/lib/admin/media-library";
 import { getCategoriesByParentAction } from "@/lib/api/category-actions";
 import { getDistrictsAction, getDivisionsAction, getUpazilasAction } from "@/lib/api/location-actions";
 import { createNewsAction, updateNewsAction } from "@/lib/api/news-actions";
+import { generateSeoAction } from "@/lib/api/generate-seo-actions";
 import { Button } from "@/components/admin/ui/button";
 import {
   Card,
@@ -149,6 +150,7 @@ export function NewsForm({
     buildInitialFormValues(initialValues),
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingSeo, setIsGeneratingSeo] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -321,6 +323,37 @@ export function NewsForm({
       addKeyword(keywordInput);
     } else if (e.key === "Backspace" && !keywordInput && form.meta_keywords.length > 0) {
       removeKeyword(form.meta_keywords[form.meta_keywords.length - 1]);
+    }
+  };
+
+  const generateSeo = async () => {
+    if (!form.title) return;
+
+    setIsGeneratingSeo(true);
+    try {
+      const selectedCategory = categoryOptions.find((c) => c.id === form.category_id);
+      const result = await generateSeoAction({
+        title: form.title,
+        description: form.excerpt || form.content?.replace(/<[^>]*>/g, "").slice(0, 500) || "",
+        category: selectedCategory?.title || "",
+      });
+
+      if (result.ok && result.data) {
+        const { meta_title, meta_description, meta_keywords, topics } = result.data;
+        setForm((prev) => ({
+          ...prev,
+          meta_title: meta_title || prev.meta_title,
+          meta_description: meta_description || prev.meta_description,
+          meta_keywords: Array.isArray(meta_keywords) ? meta_keywords : prev.meta_keywords,
+          tags: Array.isArray(topics)
+            ? [...new Set([...prev.tags, ...topics])]
+            : prev.tags,
+        }));
+      }
+    } catch {
+      // Silently fail - user can fill manually
+    } finally {
+      setIsGeneratingSeo(false);
     }
   };
 
@@ -1035,7 +1068,19 @@ export function NewsForm({
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="tags">Tags</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isGeneratingSeo || !form.title}
+                onClick={generateSeo}
+              >
+                <WandSparkles size={14} />
+                {isGeneratingSeo ? "Generating..." : "AI Generate"}
+              </Button>
+            </div>
             <div className="flex flex-wrap gap-2 rounded-md border border-slate-200 bg-white p-2 focus-within:ring-2 focus-within:ring-indigo-500/20">
               {form.tags.map((tag) => (
                 <span
@@ -1069,7 +1114,19 @@ export function NewsForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>SEO & Discovery</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>SEO & Discovery</CardTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isGeneratingSeo || !form.title}
+              onClick={generateSeo}
+            >
+              <WandSparkles size={14} />
+              {isGeneratingSeo ? "Generating..." : "AI Generate"}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
