@@ -1139,6 +1139,7 @@ export function NewsForm({
                 setForm((prev) => ({ ...prev, meta_title: event.target.value }))
               }
             />
+            <p className="text-[11px] text-slate-400">{form.meta_title.length}/60 characters</p>
           </div>
 
           <div className="space-y-2">
