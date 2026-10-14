@@ -64,6 +64,7 @@ const menuConfig: MenuSection[] = [
           { title: "News List", href: "/admin/news/list" },
           { title: "Guest Articles", href: "/admin/news/guest-articles" },
           { title: "Add News", href: "/admin/news/add" },
+          { title: "Auto News (AI)", href: "/admin/settings/auto-news" },
           { title: "Media Center", href: "/admin/media-center" },
         ],
       },
