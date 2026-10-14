@@ -447,7 +447,6 @@ export default function AutoNewsPage() {
   const [settings, setSettings] = useState<AutoNewsSettings>({
     enabled: true,
     daily_limit: 20,
-    category_daily_limit: 0,
     calculated_category_limit: 4,
     base_category_share: 2,
     active_categories_count: 12,
@@ -574,7 +573,6 @@ export default function AutoNewsPage() {
       const res = await updateAutoNewsSettingsAction({
         enabled: settings.enabled,
         daily_limit: Number(settings.daily_limit),
-        category_daily_limit: Number(settings.category_daily_limit ?? 0),
         default_status: settings.default_status,
         generate_image: settings.generate_image,
         image_provider: settings.image_provider,
@@ -1385,7 +1383,7 @@ export default function AutoNewsPage() {
                 />
               </div>
 
-              {/* Daily Limit & Category Quota Grid */}
+              {/* Daily Limit & Auto-calculated Category Quota */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Daily Limit Input */}
                 <div className="space-y-1.5">
@@ -1407,31 +1405,22 @@ export default function AutoNewsPage() {
                   <p className="text-[11px] text-slate-400">Typically 15 to 20 articles per day is optimal</p>
                 </div>
 
-                {/* Category Max Limit Input */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="category_daily_limit" className="text-xs font-semibold text-slate-700 flex items-center justify-between">
-                    <span>Category Max Limit (ক্যাটাগরি ভিত্তিক দৈনিক সীমা)</span>
-                    <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded">
-                      {settings.category_daily_limit && settings.category_daily_limit > 0 ? "Manual Cap" : "Auto 2x Base"}
+                {/* Auto Calculated Category Cap Card */}
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-700">Category Max Limit (স্বয়ংক্রিয় হিসাব)</span>
+                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                      Auto 2x Rule
                     </span>
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="category_daily_limit"
-                      type="number"
-                      min={0}
-                      max={50}
-                      value={settings.category_daily_limit ?? 0}
-                      onChange={(e) => setSettings({ ...settings, category_daily_limit: Number(e.target.value) })}
-                      className="font-bold text-base"
-                    />
-                    <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">max / category</span>
                   </div>
-                  <p className="text-[11px] text-slate-500">
-                    {settings.category_daily_limit && settings.category_daily_limit > 0
-                      ? `ম্যানুয়ালি নির্ধারিত: সর্বোচ্চ ${settings.category_daily_limit}টি পোস্ট`
-                      : `অটো হিসাব: বেস ${settings.base_category_share ?? 2} + বাফার ${settings.base_category_share ?? 2} = সর্বোচ্চ ${settings.calculated_category_limit ?? 4}টি`}
-                    {" (০ রাখলে অটো হিসাব কার্যকর থাকবে)"}
+                  <div className="my-1 flex items-baseline gap-1.5">
+                    <span className="text-xl font-bold text-slate-800">
+                      সর্বোচ্চ {Math.max(2, Math.round((Number(settings.daily_limit) || 20) / Math.max(1, settings.active_categories_count || 10)) * 2)}টি
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium">/ ক্যাটাগরি</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-tight">
+                    হিসাব: (দৈনিক কোটা {settings.daily_limit || 20} ÷ মোট ক্যাটাগরি {settings.active_categories_count || 10}) × ২
                   </p>
                 </div>
               </div>

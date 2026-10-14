@@ -22,6 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
       icon: settings.favicon_url || "/favicon.png",
       apple: settings.favicon_url || "/favicon.png",
     },
+    alternates: {
+      types: {
+        "application/rss+xml": "/rss.xml",
+      },
+    },
   };
 }
 

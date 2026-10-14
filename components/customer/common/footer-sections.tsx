@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Rss } from "lucide-react";
 import { getMenuCategories } from "@/lib/api/categories";
 
 export function FinalCtaSection() {
@@ -43,10 +44,11 @@ export async function SiteFooter({ settings }: { settings?: any }) {
   rightCategories.push({ label: "যোগাযোগ", href: "/contact-us" });
 
   const socialLinks = [
-    { icon: "f", href: settings?.facebook_url || "#" },
-    { icon: "▶", href: settings?.youtube_url || "#" },
-    { icon: "𝕏", href: settings?.twitter_url || "#" },
-    { icon: "in", href: settings?.linkedin_url || "#" },
+    { icon: "f", href: settings?.facebook_url || "#", title: "Facebook" },
+    { icon: "▶", href: settings?.youtube_url || "#", title: "YouTube" },
+    { icon: "𝕏", href: settings?.twitter_url || "#", title: "Twitter / X" },
+    { icon: "in", href: settings?.linkedin_url || "#", title: "LinkedIn" },
+    { icon: "rss", href: "/rss.xml", title: "RSS ফিড" },
   ];
 
   return (
@@ -67,10 +69,12 @@ export async function SiteFooter({ settings }: { settings?: any }) {
                 <Link
                   key={social.icon}
                   href={social.href}
-                  target="_blank"
+                  target={social.href.startsWith("http") ? "_blank" : undefined}
+                  rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  title={social.title}
                   className="flex h-8 w-8 items-center justify-center rounded bg-white/10 text-sm text-white transition-colors hover:bg-[#c79a1d]"
                 >
-                  {social.icon}
+                  {social.icon === "rss" ? <Rss className="h-4 w-4" /> : social.icon}
                 </Link>
               ))}
             </div>

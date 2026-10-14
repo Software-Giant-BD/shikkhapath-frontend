@@ -18,6 +18,7 @@ import { Textarea } from "@/components/admin/ui/textarea";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import { getSettingsAction, updateSettingsAction } from "@/lib/api/admin/setting-actions";
 import { uploadImageAction } from "@/lib/api/image-actions";
+import { SyndicationGuideCard } from "@/components/admin/settings/syndication-guide-card";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Record<string, string>>({
@@ -346,6 +347,8 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          <SyndicationGuideCard />
         </div>
 
         {/* Branding Sidebar */}
