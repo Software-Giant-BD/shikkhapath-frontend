@@ -1600,22 +1600,6 @@ export default function AutoNewsPage() {
                 </select>
               </div>
 
-              {/* Image Provider */}
-              <div className="space-y-1.5">
-                <Label htmlFor="image_provider" className="text-xs font-semibold text-slate-700">
-                  Image Generator Engine
-                </Label>
-                <select
-                  id="image_provider"
-                  value={settings.image_provider || "pollinations"}
-                  onChange={(e) => setSettings({ ...settings, image_provider: e.target.value })}
-                  className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2.5 font-medium text-slate-800"
-                >
-                  <option value="pollinations">FLUX / Pollinations.ai (Fast, Photorealistic & Free)</option>
-                  <option value="gemini">Google Imagen 3 (Via Gemini)</option>
-                </select>
-              </div>
-
               {/* Save Button */}
               <div className="pt-2">
                 <Button
