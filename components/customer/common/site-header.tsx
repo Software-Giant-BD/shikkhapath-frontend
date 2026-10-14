@@ -48,7 +48,12 @@ export function SiteHeader({
   const [currentDate, setCurrentDate] = useState("");
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [language, setLanguage] = useState<"bn" | "en">("bn");
+  const [logoSrc, setLogoSrc] = useState(siteLogo || "/logo.png");
   const pathname = usePathname();
+
+  useEffect(() => {
+    setLogoSrc(siteLogo || "/logo.png");
+  }, [siteLogo]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -157,12 +162,13 @@ export function SiteHeader({
               className="inline-flex items-center transition-opacity hover:opacity-90"
             >
               <Image
-                src={siteLogo || "/logo.png"}
+                src={logoSrc}
                 alt={siteName || "Shikkhapath"}
                 width={780}
                 height={130}
                 priority
                 className="h-[56px] w-auto drop-shadow-sm"
+                onError={() => setLogoSrc("/logo.png")}
               />
             </Link>
 
@@ -222,12 +228,13 @@ export function SiteHeader({
 
             <Link href="/" className="inline-flex items-center">
               <Image
-                src={siteLogo || "/logo.png"}
+                src={logoSrc}
                 alt={siteName || "Shikkhapath"}
                 width={780}
                 height={130}
                 priority
                 className="h-9 w-auto"
+                onError={() => setLogoSrc("/logo.png")}
               />
             </Link>
 
@@ -246,11 +253,12 @@ export function SiteHeader({
             >
               <Link href="/" className="inline-flex shrink-0 items-center">
                 <Image
-                  src={siteLogo || "/logo.png"}
+                  src={logoSrc}
                   alt={siteName || "Logo"}
                   width={780}
                   height={130}
                   className="h-8 w-auto"
+                  onError={() => setLogoSrc("/logo.png")}
                 />
               </Link>
             </div>
@@ -301,11 +309,12 @@ export function SiteHeader({
             <div className="flex items-center justify-between border-b px-5 py-5 bg-white sticky top-0">
               <Link href="/" onClick={() => setIsOpen(false)}>
                 <Image
-                  src={siteLogo || "/logo.png"}
+                  src={logoSrc}
                   alt={siteName || "Logo"}
                   width={780}
                   height={130}
                   className="h-9 w-auto"
+                  onError={() => setLogoSrc("/logo.png")}
                 />
               </Link>
               <button
