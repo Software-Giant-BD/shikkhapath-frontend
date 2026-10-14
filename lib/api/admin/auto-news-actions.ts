@@ -3,9 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { fetchApi } from "../common";
 
+export type CategoryDistributionItem = {
+  id: number;
+  title: string;
+  slug: string;
+  count: number;
+  max_limit: number;
+};
+
 export type AutoNewsSettings = {
   enabled: boolean;
   daily_limit: number;
+  category_daily_limit?: number;
+  calculated_category_limit?: number;
+  base_category_share?: number;
+  active_categories_count?: number;
+  categories_distribution?: CategoryDistributionItem[];
   default_status: "published" | "draft";
   generate_image: boolean;
   image_provider: string;
@@ -45,6 +58,7 @@ export type NewsSourceItem = {
   default_category_id: number | null;
   filter_mode: "none" | "keyword";
   target_section_name: string | null;
+  priority?: number;
   status: "active" | "inactive";
   last_fetched_at: string | null;
   total_fetched: number;
@@ -293,6 +307,26 @@ export async function toggleNewsSourceAction(id: number) {
   }
 }
 
+export async function reorderNewsSourcesAction(sourceIds: number[]) {
+  try {
+    const res = await fetchApi("/admin/news-sources/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source_ids: sourceIds }),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { success: false, message: data?.message || "Failed to reorder sources" };
+    }
+
+    revalidatePath("/admin/settings/auto-news");
+    return { success: true, message: data?.message || "Sources priority reordered successfully" };
+  } catch {
+    return { success: false, message: "Server connection failed" };
+  }
+}
+
 export async function getCategoryKeywordsAction() {
   try {
     const res = await fetchApi("/admin/auto-news/category-keywords", {
@@ -331,9 +365,47 @@ export async function updateCategoryKeywordsAction(categoryId: number, keywords:
   }
 }
 
-export async function getAutoNewsLogsAction(page = 1, perPage = 15) {
+export async function generateCategoryKeywordsAction(categoryId: number, autoSave: boolean = false) {
   try {
-    const res = await fetchApi(`/admin/auto-news/logs?page=${page}&per_page=${perPage}`, {
+    const res = await fetchApi("/admin/auto-news/category-keywords/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ category_id: categoryId, auto_save: autoSave }),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "Failed to generate AI keywords",
+        keywords: [] as string[],
+      };
+    }
+
+    if (autoSave) {
+      revalidatePath("/admin/settings/auto-news");
+    }
+
+    const resources = data.resources || {};
+    return {
+      success: true,
+      message: data?.message || "AI tags generated successfully",
+      categoryId: (resources.category_id as number) ?? categoryId,
+      keywords: (resources.match_keywords as string[]) || [],
+    };
+  } catch {
+    return {
+      success: false,
+      message: "Server connection failed",
+      keywords: [] as string[],
+    };
+  }
+}
+
+export async function getAutoNewsLogsAction(page = 1, perPage = 15, status?: string) {
+  try {
+    const statusParam = status && status !== "all" ? `&status=${encodeURIComponent(status)}` : "";
+    const res = await fetchApi(`/admin/auto-news/logs?page=${page}&per_page=${perPage}${statusParam}`, {
       method: "GET",
       cache: "no-store",
     });
@@ -343,10 +415,19 @@ export async function getAutoNewsLogsAction(page = 1, perPage = 15) {
       return { success: false, message: data?.message || "Failed to fetch logs", items: [], pagination: null };
     }
 
+    const items = Array.isArray(data.resources)
+      ? data.resources
+      : (data.resources?.items || []);
+    const pagination = data.pagination || data.resources?.pagination;
+
     return {
       success: true,
-      items: (data.resources?.items || []) as AutoNewsLogItem[],
-      pagination: data.resources?.pagination,
+      items: items as AutoNewsLogItem[],
+      pagination: {
+        total: Number(pagination?.total || items.length || 0),
+        current_page: Number(pagination?.current_page || 1),
+        last_page: Number(pagination?.last_page || 1),
+      },
     };
   } catch {
     return { success: false, message: "Server connection failed", items: [], pagination: null };
@@ -470,3 +551,83 @@ export async function toggleNewsSourceSectionAction(sourceId: number, sectionId:
     return { success: false, message: "Server connection failed" };
   }
 }
+
+export type AiDetectedCategoryItem = {
+  external_name: string;
+  section_url: string;
+  feed_type: "scraper" | "rss";
+  matched_category_id: number | null;
+  matched_category_title: string | null;
+  confidence: "high" | "medium" | "low" | "none";
+  filter_mode: "none" | "keyword";
+  already_linked?: boolean;
+};
+
+export async function aiDetectPortalSectionsAction(sourceId: number) {
+  try {
+    const res = await fetchApi(`/admin/news-sources/${sourceId}/ai-detect-categories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "Failed to auto-detect categories",
+        categories: [] as AiDetectedCategoryItem[],
+        total_detected: 0,
+      };
+    }
+
+    const resources = data.resources || {};
+    return {
+      success: true,
+      message: data?.message || "AI detected categories successfully",
+      categories: (resources.categories || []) as AiDetectedCategoryItem[],
+      total_detected: resources.total_detected || 0,
+    };
+  } catch {
+    return {
+      success: false,
+      message: "Server connection failed",
+      categories: [] as AiDetectedCategoryItem[],
+      total_detected: 0,
+    };
+  }
+}
+
+export async function batchSaveNewsSourceSectionsAction(
+  sourceId: number,
+  sections: Array<{
+    name: string;
+    section_url: string;
+    feed_type: "scraper" | "rss";
+    category_id: number | null;
+    filter_mode: "none" | "keyword";
+    status?: "active" | "inactive";
+  }>
+) {
+  try {
+    const res = await fetchApi(`/admin/news-sources/${sourceId}/batch-sections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sections }),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { success: false, message: data?.message || "Failed to batch save sections", sections: [] };
+    }
+
+    revalidatePath("/admin/settings/auto-news");
+    return {
+      success: true,
+      message: data?.message || "Sections imported successfully",
+      sections: (data.resources?.sections || []) as NewsSourceSectionItem[],
+    };
+  } catch {
+    return { success: false, message: "Server connection failed", sections: [] };
+  }
+}
+

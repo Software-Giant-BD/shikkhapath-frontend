@@ -766,18 +766,20 @@ export function NewsForm({
                     htmlFor="source_name"
                     className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
                   >
-                    Source Name
+                    Source Name {isEditMode && <span className="normal-case tracking-normal font-normal text-slate-400">(Read-only)</span>}
                   </Label>
                   <Input
                     id="source_name"
                     value={form.source_name}
                     placeholder="e.g. Shikkhapath Daily"
-                    onChange={(event) =>
+                    readOnly={isEditMode}
+                    onChange={(event) => {
+                      if (isEditMode) return;
                       setForm((prev) => ({
                         ...prev,
                         source_name: event.target.value,
-                      }))
-                    }
+                      }));
+                    }}
                   />
                 </div>
 
@@ -786,19 +788,21 @@ export function NewsForm({
                     htmlFor="source_url"
                     className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500"
                   >
-                    Source URL
+                    Source URL {isEditMode && <span className="normal-case tracking-normal font-normal text-slate-400">(Read-only)</span>}
                   </Label>
                   <Input
                     id="source_url"
                     type="url"
                     value={form.source_url}
                     placeholder="https://example.com/source"
-                    onChange={(event) =>
+                    readOnly={isEditMode}
+                    onChange={(event) => {
+                      if (isEditMode) return;
                       setForm((prev) => ({
                         ...prev,
                         source_url: event.target.value,
-                      }))
-                    }
+                      }));
+                    }}
                   />
                 </div>
               </div>

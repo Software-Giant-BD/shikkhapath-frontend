@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Save, Image as ImageIcon, Globe, Share2, Info, Mail, X } from "lucide-react";
+import { Save, Image as ImageIcon, Globe, Share2, Info, Mail, X, Activity } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/admin/ui/button";
@@ -37,6 +37,9 @@ export default function SettingsPage() {
     contact_phone: "",
     contact_address: "",
     footer_text: "",
+    gtm_id: "",
+    meta_pixel_id: "",
+    google_analytics_id: "",
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -429,6 +432,56 @@ export default function SettingsPage() {
                 >
                   {isUploadingFavicon ? "Uploading..." : "Upload Favicon"}
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200/60 shadow-sm">
+            <CardHeader className="flex flex-row items-center space-x-2">
+              <Activity className="h-5 w-5 text-indigo-600" />
+              <div>
+                <CardTitle className="text-lg">Analytics & Tracking</CardTitle>
+                <CardDescription>GTM & Meta Pixel configuration.</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="gtm_id">Google Tag Manager (GTM) ID</Label>
+                <Input
+                  id="gtm_id"
+                  value={settings.gtm_id}
+                  onChange={(e) => handleChange("gtm_id", e.target.value)}
+                  placeholder="e.g. GTM-XXXXXXX"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Container ID. Leave blank to disable.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meta_pixel_id">Meta (Facebook) Pixel ID</Label>
+                <Input
+                  id="meta_pixel_id"
+                  value={settings.meta_pixel_id}
+                  onChange={(e) => handleChange("meta_pixel_id", e.target.value)}
+                  placeholder="e.g. 123456789012345"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Pixel ID. Leave blank to disable.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="google_analytics_id">
+                  GA4 Measurement ID <span className="text-slate-400 font-normal text-[11px]">(Optional)</span>
+                </Label>
+                <Input
+                  id="google_analytics_id"
+                  value={settings.google_analytics_id}
+                  onChange={(e) => handleChange("google_analytics_id", e.target.value)}
+                  placeholder="e.g. G-XXXXXXXXXX"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Direct GA4 ID. Leave blank if using GTM.
+                </p>
               </div>
             </CardContent>
           </Card>

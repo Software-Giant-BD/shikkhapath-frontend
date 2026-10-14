@@ -18,8 +18,6 @@ import {
   Save,
   CheckCircle2,
   XCircle,
-  Eye,
-  EyeOff,
   Radio,
   Image as ImageIcon,
   Play,
@@ -28,8 +26,30 @@ import {
   ChevronRight,
   ListPlus,
   X,
+  GripVertical,
+  ArrowUp,
+  ArrowDown,
+  Crown,
+  Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/admin/ui/card";
@@ -45,22 +65,378 @@ import {
   updateNewsSourceAction,
   deleteNewsSourceAction,
   toggleNewsSourceAction,
+  reorderNewsSourcesAction,
   createNewsSourceSectionAction,
   updateNewsSourceSectionAction,
   deleteNewsSourceSectionAction,
   toggleNewsSourceSectionAction,
+  aiDetectPortalSectionsAction,
+  batchSaveNewsSourceSectionsAction,
   getCategoryKeywordsAction,
   updateCategoryKeywordsAction,
+  generateCategoryKeywordsAction,
   getAutoNewsLogsAction,
   triggerAutoNewsAction,
   type AutoNewsSettings,
   type NewsSourceItem,
   type NewsSourceSectionItem,
+  type AiDetectedCategoryItem,
   type CategoryWithKeywords,
   type AutoNewsLogItem,
 } from "@/lib/api/admin/auto-news-actions";
 
-type ActiveTab = "settings" | "sources" | "categories" | "logs";
+type ActiveTab = "settings" | "sources" | "categories";
+
+type SortableNewsSourceTBodyProps = {
+  source: NewsSourceItem;
+  index: number;
+  total: number;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onMove: (index: number, direction: -1 | 1) => void;
+  onToggleStatus: () => void;
+  onOpenAddSection: () => void;
+  onEditSection?: (source: NewsSourceItem, section: NewsSourceSectionItem) => void;
+  onDeleteSource: () => void;
+  onDeleteSection: (sourceId: number, sectionId: number) => void;
+  onToggleSection: (sourceId: number, sectionId: number) => void;
+};
+
+function SortableNewsSourceTBody({
+  source,
+  index,
+  total,
+  isExpanded,
+  onToggleExpand,
+  onMove,
+  onToggleStatus,
+  onOpenAddSection,
+  onEditSection,
+  onDeleteSource,
+  onDeleteSection,
+  onToggleSection,
+}: SortableNewsSourceTBodyProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: source.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+    zIndex: isDragging ? 40 : undefined,
+    position: isDragging ? "relative" : undefined,
+    opacity: isDragging ? 0.6 : 1,
+  };
+
+  const sectionsCount = source.sections?.length || 0;
+
+  return (
+    <tbody
+      ref={setNodeRef}
+      style={style}
+      className={`divide-y divide-slate-100 transition-colors ${
+        isDragging ? "bg-indigo-50/80 shadow-md ring-1 ring-indigo-300" : ""
+      }`}
+    >
+      {/* Portal Main Row */}
+      <tr className={`transition-colors ${isExpanded ? "bg-slate-50/90 font-medium" : "hover:bg-slate-50/70"}`}>
+        {/* Order / Priority Controls */}
+        <td className="p-3 text-center whitespace-nowrap">
+          <div className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              aria-label={`Drag to reorder ${source.name}`}
+              className="p-1 rounded text-slate-400 hover:text-slate-800 hover:bg-slate-200/70 cursor-grab active:cursor-grabbing touch-none transition-colors"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="w-4 h-4" />
+            </button>
+            <div className="flex flex-col">
+              <button
+                type="button"
+                disabled={index === 0}
+                onClick={() => onMove(index, -1)}
+                title="Move Up"
+                className="p-0.5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/70 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+              >
+                <ArrowUp className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                disabled={index === total - 1}
+                onClick={() => onMove(index, 1)}
+                title="Move Down"
+                className="p-0.5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/70 transition-colors disabled:opacity-20 disabled:pointer-events-none"
+              >
+                <ArrowDown className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </td>
+
+        {/* Expand Caret */}
+        <td className="p-3 text-center">
+          <button
+            type="button"
+            onClick={onToggleExpand}
+            className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-transform"
+            title={isExpanded ? "Collapse" : "View category sections"}
+          >
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4 text-slate-700" />
+            ) : (
+              <ChevronRight className="w-4 h-4 text-slate-500" />
+            )}
+          </button>
+        </td>
+
+        {/* News Portal Name & Link */}
+        <td className="p-3.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-bold text-slate-900 text-xs sm:text-sm">{source.name}</span>
+            {index === 0 ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                <Crown className="w-3 h-3 text-amber-600 shrink-0" />
+                #1 Top Priority
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                #{index + 1}
+              </span>
+            )}
+          </div>
+          <a
+            href={source.website_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-indigo-600 mt-0.5"
+          >
+            {source.website_url.replace(/^https?:\/\//, "")}
+            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+          </a>
+        </td>
+
+        {/* Linked Category Sections */}
+        <td className="p-3.5">
+          {sectionsCount > 0 ? (
+            <button
+              type="button"
+              onClick={onToggleExpand}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-colors"
+              title={isExpanded ? "Collapse sections" : "Click to view sections"}
+            >
+              <Layers className="w-3.5 h-3.5 text-indigo-600" />
+              <span>
+                {sectionsCount} {sectionsCount === 1 ? "section" : "sections"}
+              </span>
+              {isExpanded ? (
+                <ChevronDown className="w-3.5 h-3.5 text-indigo-500" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5 text-indigo-500" />
+              )}
+            </button>
+          ) : (
+            <span className="text-xs text-slate-400 italic">0 sections</span>
+          )}
+        </td>
+
+        {/* Type */}
+        <td className="p-3.5">
+          {source.has_rss ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <Rss className="w-3 h-3" /> RSS Feed
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              <Globe className="w-3 h-3" /> Scraper
+            </span>
+          )}
+        </td>
+
+        {/* Total Fetched */}
+        <td className="p-3.5 font-bold text-slate-900">{source.total_fetched || 0} items</td>
+
+        {/* Status */}
+        <td className="p-3.5">
+          <button
+            onClick={onToggleStatus}
+            className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors ${
+              source.status === "active"
+                ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+            }`}
+          >
+            {source.status === "active" ? "Active" : "Inactive"}
+          </button>
+        </td>
+
+        {/* Actions */}
+        <td className="p-3.5 text-right whitespace-nowrap">
+          <div className="inline-flex items-center gap-1.5">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onOpenAddSection}
+              className="h-7 text-[11px] px-2 text-indigo-700 border-indigo-200 hover:bg-indigo-50"
+              title="Add new category section to this portal"
+            >
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              Link Section
+            </Button>
+            <button
+              onClick={onDeleteSource}
+              className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
+              title="Delete portal"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      {/* Nested Accordion for Linked Category Sections */}
+      {isExpanded && (
+        <tr className="bg-slate-50/50 border-b border-slate-200">
+          <td colSpan={8} className="p-3 sm:p-4">
+            <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
+              <div className="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xs text-slate-800">
+                    {source.name} Category Pages & Feeds ({sectionsCount})
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onOpenAddSection}
+                  className="h-6 text-[11px] px-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
+                >
+                  <Plus className="w-3 h-3 mr-1" /> Add Section
+                </Button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/50 text-slate-500 border-b border-slate-100 text-[10px] uppercase font-semibold">
+                    <tr>
+                      <th className="p-2.5 pl-4">Section Name</th>
+                      <th className="p-2.5">Target Category</th>
+                      <th className="p-2.5">Filter Policy</th>
+                      <th className="p-2.5">Feed Type</th>
+                      <th className="p-2.5">Page / Feed Link</th>
+                      <th className="p-2.5">Fetched</th>
+                      <th className="p-2.5">Status</th>
+                      <th className="p-2.5 text-right pr-4">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {!source.sections || source.sections.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="p-4 text-center text-slate-400 italic">
+                          No category sections added yet. Click &apos;Add Section&apos; to add one.
+                        </td>
+                      </tr>
+                    ) : (
+                      source.sections.map((section) => (
+                        <tr key={section.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="p-2.5 pl-4 font-bold text-slate-900">{section.name}</td>
+                          <td className="p-2.5">
+                            {section.category ? (
+                              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {section.category.title}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic">General</span>
+                            )}
+                          </td>
+                          <td className="p-2.5">
+                            {section.filter_mode === "none" ? (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                No Filter (Direct)
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                Keyword Filter
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-2.5">
+                            {section.feed_type === "rss" ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
+                                <Rss className="w-3 h-3" /> RSS
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-blue-700 font-medium">
+                                <Globe className="w-3 h-3" /> Scraper
+                              </span>
+                            )}
+                          </td>
+                          <td className="p-2.5 max-w-[220px] truncate">
+                            <a
+                              href={section.section_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-slate-600 hover:text-indigo-600 hover:underline"
+                              title={section.section_url}
+                            >
+                              <span className="truncate">{section.section_url.replace(/^https?:\/\//, "")}</span>
+                              <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                            </a>
+                          </td>
+                          <td className="p-2.5 font-semibold text-slate-800">{section.total_fetched || 0} items</td>
+                          <td className="p-2.5">
+                            <button
+                              onClick={() => onToggleSection(source.id, section.id)}
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                                section.status === "active"
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                              }`}
+                            >
+                              {section.status === "active" ? "Active" : "Inactive"}
+                            </button>
+                          </td>
+                          <td className="p-2.5 text-right pr-4">
+                            <div className="inline-flex items-center gap-1">
+                              {onEditSection && (
+                                <button
+                                  type="button"
+                                  onClick={() => onEditSection(source, section)}
+                                  className="p-1 text-slate-400 hover:text-indigo-600 transition-colors"
+                                  title="Edit section"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => onDeleteSection(source.id, section.id)}
+                                className="p-1 text-slate-400 hover:text-rose-600 transition-colors"
+                                title="Delete section"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </tbody>
+  );
+}
 
 export default function AutoNewsPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("settings");
@@ -71,6 +447,11 @@ export default function AutoNewsPage() {
   const [settings, setSettings] = useState<AutoNewsSettings>({
     enabled: true,
     daily_limit: 20,
+    category_daily_limit: 0,
+    calculated_category_limit: 4,
+    base_category_share: 2,
+    active_categories_count: 12,
+    categories_distribution: [],
     default_status: "published",
     generate_image: true,
     image_provider: "pollinations",
@@ -82,7 +463,6 @@ export default function AutoNewsPage() {
     active_sources_count: 0,
     total_sources_count: 0,
   });
-  const [showApiKey, setShowApiKey] = useState(false);
 
   // Sources state
   const [sources, setSources] = useState<NewsSourceItem[]>([]);
@@ -109,36 +489,41 @@ export default function AutoNewsPage() {
   // Section Management State
   const [expandedSources, setExpandedSources] = useState<Record<number, boolean>>({});
   const [activePortalForSection, setActivePortalForSection] = useState<NewsSourceItem | null>(null);
+  const [editingSectionId, setEditingSectionId] = useState<number | null>(null);
   const [newSection, setNewSection] = useState({
     name: "",
     section_url: "",
     feed_type: "scraper" as "scraper" | "rss",
     category_id: "" as string | number,
     filter_mode: "none" as "none" | "keyword",
+    status: "active" as "active" | "inactive",
   });
+
+  // AI Category Detection State
+  const [isDetectingAi, setIsDetectingAi] = useState(false);
+  const [isBatchSaving, setIsBatchSaving] = useState(false);
+  const [aiDetectedList, setAiDetectedList] = useState<
+    (AiDetectedCategoryItem & { selected: boolean })[]
+  >([]);
 
   // Categories state
   const [categories, setCategories] = useState<CategoryWithKeywords[]>([]);
   const [newKeywordInput, setNewKeywordInput] = useState<Record<number, string>>({});
-
-  // Logs state
-  const [logs, setLogs] = useState<AutoNewsLogItem[]>([]);
-  const [logPage, setLogPage] = useState(1);
-  const [logPagination, setLogPagination] = useState<any>(null);
+  const [generatingCatId, setGeneratingCatId] = useState<number | null>(null);
+  const [isGeneratingAll, setIsGeneratingAll] = useState(false);
 
   // Manual Trigger state
   const [isTriggering, setIsTriggering] = useState(false);
-  const [triggerLimit, setTriggerLimit] = useState<number>(3);
+  const [triggerLimit, setTriggerLimit] = useState<number>(1);
 
   // Load Initial Data
   async function loadData() {
     setIsLoading(true);
     try {
-      const [settingsRes, sourcesRes, categoriesRes, logsRes] = await Promise.all([
+      const [settingsRes, sourcesRes, categoriesRes] = await Promise.all([
         getAutoNewsSettingsAction(),
         getNewsSourcesAction(),
         getCategoryKeywordsAction(),
-        getAutoNewsLogsAction(1, 15),
       ]);
 
       if (settingsRes.success && settingsRes.settings) {
@@ -149,10 +534,6 @@ export default function AutoNewsPage() {
       }
       if (categoriesRes.success) {
         setCategories(categoriesRes.categories);
-      }
-      if (logsRes.success) {
-        setLogs(logsRes.items);
-        setLogPagination(logsRes.pagination);
       }
     } catch {
       toast.error("Failed to load data");
@@ -165,13 +546,15 @@ export default function AutoNewsPage() {
     loadData();
   }, []);
 
-  // Handle ESC key and scroll lock when Add Portal modal is open
+  // Handle ESC key and scroll lock when Add Portal or Link Section modal is open
   useEffect(() => {
-    if (!isAddingSource) return;
+    if (!isAddingSource && !activePortalForSection) return;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && !isPending) {
         setIsAddingSource(false);
+        setActivePortalForSection(null);
+        setEditingSectionId(null);
       }
     }
 
@@ -183,7 +566,7 @@ export default function AutoNewsPage() {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isAddingSource, isPending]);
+  }, [isAddingSource, activePortalForSection, isPending]);
 
   // Save Settings Handler
   async function handleSaveSettings() {
@@ -191,6 +574,7 @@ export default function AutoNewsPage() {
       const res = await updateAutoNewsSettingsAction({
         enabled: settings.enabled,
         daily_limit: Number(settings.daily_limit),
+        category_daily_limit: Number(settings.category_daily_limit ?? 0),
         default_status: settings.default_status,
         generate_image: settings.generate_image,
         image_provider: settings.image_provider,
@@ -231,6 +615,58 @@ export default function AutoNewsPage() {
     } else {
       toast.error(res.message);
     }
+  }
+
+  // Drag and drop sensors for news source priority reordering
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = sources.findIndex((s) => s.id === active.id);
+    const newIndex = sources.findIndex((s) => s.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const newSources = arrayMove(sources, oldIndex, newIndex);
+    setSources(newSources);
+
+    startTransition(async () => {
+      const res = await reorderNewsSourcesAction(newSources.map((s) => s.id));
+      if (!res.success) {
+        toast.error(res.message || "Failed to update source priority");
+        loadData();
+      } else {
+        toast.success(`Priority updated: ${newSources[0].name} is now #1 (Top Priority)`);
+      }
+    });
+  }
+
+  function handleMoveSource(index: number, direction: -1 | 1) {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= sources.length) return;
+
+    const newSources = arrayMove(sources, index, newIndex);
+    setSources(newSources);
+
+    startTransition(async () => {
+      const res = await reorderNewsSourcesAction(newSources.map((s) => s.id));
+      if (!res.success) {
+        toast.error(res.message || "Failed to update source priority");
+        loadData();
+      } else {
+        toast.success(`Priority updated: ${newSources[0].name} is now #1 (Top Priority)`);
+      }
+    });
   }
 
   // Auto-detect RSS Feed for News Portal
@@ -362,55 +798,250 @@ export default function AutoNewsPage() {
           };
         })
       );
+      if (editingSectionId === sectionId) {
+        handleCancelEditSection();
+      }
     } else {
       toast.error(res.message);
     }
   }
 
-  // Add Section to Portal
-  async function handleAddSection(e: React.FormEvent) {
+  // Start editing a section
+  function handleStartEditSection(section: NewsSourceSectionItem) {
+    setEditingSectionId(section.id);
+    setNewSection({
+      name: section.name,
+      section_url: section.section_url,
+      feed_type: section.feed_type,
+      category_id: section.category_id ? String(section.category_id) : "",
+      filter_mode: section.filter_mode,
+      status: section.status || "active",
+    });
+  }
+
+  // Cancel edit mode and reset form
+  function handleCancelEditSection() {
+    setEditingSectionId(null);
+    setNewSection({
+      name: "",
+      section_url: activePortalForSection?.website_url
+        ? `${activePortalForSection.website_url.replace(/\/+$/, "")}/section/`
+        : "",
+      feed_type: activePortalForSection?.has_rss ? "rss" : "scraper",
+      category_id: "",
+      filter_mode: "none",
+      status: "active",
+    });
+  }
+
+  // Open section modal (optionally in edit mode)
+  function handleOpenSectionModal(source: NewsSourceItem, editSection?: NewsSourceSectionItem) {
+    setActivePortalForSection(source);
+    if (editSection) {
+      setEditingSectionId(editSection.id);
+      setNewSection({
+        name: editSection.name,
+        section_url: editSection.section_url,
+        feed_type: editSection.feed_type,
+        category_id: editSection.category_id ? String(editSection.category_id) : "",
+        filter_mode: editSection.filter_mode,
+        status: editSection.status || "active",
+      });
+    } else {
+      setEditingSectionId(null);
+      setNewSection({
+        name: "",
+        section_url: source.website_url ? `${source.website_url.replace(/\/+$/, "")}/section/` : "",
+        feed_type: source.has_rss ? "rss" : "scraper",
+        category_id: "",
+        filter_mode: "none",
+        status: "active",
+      });
+    }
+  }
+
+  // Save (Add or Update) Section to Portal
+  async function handleSaveSection(e: React.FormEvent) {
     e.preventDefault();
     if (!activePortalForSection) return;
-    if (!newSection.name || !newSection.section_url) {
+    if (!newSection.name.trim() || !newSection.section_url.trim()) {
       toast.error("Please enter section name and URL");
       return;
     }
 
     startTransition(async () => {
-      const res = await createNewsSourceSectionAction(activePortalForSection.id, {
-        name: newSection.name,
-        section_url: newSection.section_url,
-        feed_type: newSection.feed_type,
-        category_id: newSection.category_id ? Number(newSection.category_id) : null,
-        filter_mode: newSection.filter_mode,
-        status: "active",
-      });
+      if (editingSectionId) {
+        const res = await updateNewsSourceSectionAction(activePortalForSection.id, editingSectionId, {
+          name: newSection.name.trim(),
+          section_url: newSection.section_url.trim(),
+          feed_type: newSection.feed_type,
+          category_id: newSection.category_id ? Number(newSection.category_id) : null,
+          filter_mode: newSection.filter_mode,
+          status: newSection.status,
+        });
 
-      if (res.success && res.section) {
+        if (res.success && res.section) {
+          toast.success(res.message);
+          const updated = res.section;
+          setSources((prev) =>
+            prev.map((s) => {
+              if (s.id !== activePortalForSection.id) return s;
+              return {
+                ...s,
+                sections: (s.sections || []).map((sec) => (sec.id === editingSectionId ? updated : sec)),
+              };
+            })
+          );
+          handleCancelEditSection();
+        } else {
+          toast.error(res.message || "Failed to update section");
+        }
+      } else {
+        const res = await createNewsSourceSectionAction(activePortalForSection.id, {
+          name: newSection.name.trim(),
+          section_url: newSection.section_url.trim(),
+          feed_type: newSection.feed_type,
+          category_id: newSection.category_id ? Number(newSection.category_id) : null,
+          filter_mode: newSection.filter_mode,
+          status: "active",
+        });
+
+        if (res.success && res.section) {
+          toast.success(res.message);
+          const added = res.section;
+          setSources((prev) =>
+            prev.map((s) => {
+              if (s.id !== activePortalForSection.id) return s;
+              return {
+                ...s,
+                sections: [...(s.sections || []), added],
+              };
+            })
+          );
+          setExpandedSources((prev) => ({ ...prev, [activePortalForSection.id]: true }));
+          // Reset form to add another section without closing modal
+          setNewSection({
+            name: "",
+            section_url: activePortalForSection.website_url
+              ? `${activePortalForSection.website_url.replace(/\/+$/, "")}/section/`
+              : "",
+            feed_type: activePortalForSection.has_rss ? "rss" : "scraper",
+            category_id: "",
+            filter_mode: "none",
+            status: "active",
+          });
+        } else {
+          toast.error(res.message || "Failed to add section");
+        }
+      }
+    });
+  }
+
+  // Trigger AI Auto-Detection of Portal Categories
+  async function handleRunAiDetection() {
+    if (!activePortalForSection) return;
+    setIsDetectingAi(true);
+    try {
+      const res = await aiDetectPortalSectionsAction(activePortalForSection.id);
+      if (res.success && res.categories.length > 0) {
+        setAiDetectedList(
+          res.categories.map((c) => ({
+            ...c,
+            selected: !c.already_linked && c.matched_category_id !== null,
+          }))
+        );
+        toast.success(`Discovered ${res.total_detected} sections and mapped with AI`);
+      } else {
+        toast.error(res.message || "No categories discovered for this portal");
+      }
+    } catch {
+      toast.error("Failed to run AI category detection");
+    } finally {
+      setIsDetectingAi(false);
+    }
+  }
+
+  // Toggle select in AI detected list
+  function toggleAiDetectedItem(index: number) {
+    setAiDetectedList((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, selected: !item.selected } : item))
+    );
+  }
+
+  // Change mapped category for AI detected item
+  function changeAiDetectedCategory(index: number, categoryId: string) {
+    setAiDetectedList((prev) =>
+      prev.map((item, i) => {
+        if (i !== index) return item;
+        const catNum = categoryId ? Number(categoryId) : null;
+        const matched = categories.find((c) => c.id === catNum);
+        return {
+          ...item,
+          matched_category_id: catNum,
+          matched_category_title: matched?.title || null,
+          selected: catNum !== null,
+        };
+      })
+    );
+  }
+
+  // Change filter mode for AI detected item
+  function changeAiDetectedFilterMode(index: number, mode: "none" | "keyword") {
+    setAiDetectedList((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, filter_mode: mode } : item))
+    );
+  }
+
+  // Batch Save Selected AI Detected Sections
+  async function handleBatchSaveAiSections() {
+    if (!activePortalForSection) return;
+    const selected = aiDetectedList.filter((item) => item.selected);
+    if (selected.length === 0) {
+      toast.error("Please select at least one section to import");
+      return;
+    }
+
+    const missingUrl = selected.find((item) => !item.section_url || !item.section_url.trim().startsWith("http"));
+    if (missingUrl) {
+      toast.error(`"${missingUrl.external_name}" is missing a valid section URL`);
+      return;
+    }
+
+    setIsBatchSaving(true);
+    try {
+      const payload = selected.map((s) => ({
+        name: s.external_name,
+        section_url: s.section_url,
+        feed_type: s.feed_type,
+        category_id: s.matched_category_id,
+        filter_mode: s.filter_mode,
+        status: "active" as const,
+      }));
+
+      const res = await batchSaveNewsSourceSectionsAction(activePortalForSection.id, payload);
+      if (res.success && res.sections) {
         toast.success(res.message);
-        const added = res.section;
+        const imported = res.sections;
         setSources((prev) =>
           prev.map((s) => {
             if (s.id !== activePortalForSection.id) return s;
+            const existingMap = new Map((s.sections || []).map((sec) => [sec.section_url, sec]));
+            imported.forEach((sec) => existingMap.set(sec.section_url, sec));
             return {
               ...s,
-              sections: [...(s.sections || []), added],
+              sections: Array.from(existingMap.values()),
             };
           })
         );
-        setExpandedSources((prev) => ({ ...prev, [activePortalForSection.id]: true }));
-        setActivePortalForSection(null);
-        setNewSection({
-          name: "",
-          section_url: "",
-          feed_type: "scraper",
-          category_id: "",
-          filter_mode: "none",
-        });
+        setAiDetectedList([]);
       } else {
-        toast.error(res.message);
+        toast.error(res.message || "Failed to import sections");
       }
-    });
+    } catch {
+      toast.error("Failed to save sections");
+    } finally {
+      setIsBatchSaving(false);
+    }
   }
 
   // Add Keyword to Category
@@ -460,6 +1091,54 @@ export default function AutoNewsPage() {
         toast.error(res.message);
       }
     });
+  }
+
+  // Generate 6-10 pure Bangla keywords for a single category using AI
+  async function handleGenerateAiKeywords(categoryId: number) {
+    setGeneratingCatId(categoryId);
+    try {
+      const res = await generateCategoryKeywordsAction(categoryId, false);
+      if (res.success && res.keywords && res.keywords.length > 0) {
+        setCategories((prev) =>
+          prev.map((cat) => {
+            if (cat.id === categoryId) {
+              return { ...cat, match_keywords: res.keywords };
+            }
+            return cat;
+          })
+        );
+        toast.success(res.message || `${res.keywords.length} tags generated successfully`);
+      } else {
+        toast.error(res.message || "Failed to generate AI keywords");
+      }
+    } catch {
+      toast.error("Server error, could not generate keywords");
+    } finally {
+      setGeneratingCatId(null);
+    }
+  }
+
+  // Bulk generate 6-10 pure Bangla keywords for all categories sequentially
+  async function handleGenerateAllAiKeywords() {
+    if (categories.length === 0) return;
+    setIsGeneratingAll(true);
+    let successCount = 0;
+    try {
+      for (const cat of categories) {
+        const res = await generateCategoryKeywordsAction(cat.id, true);
+        if (res.success && res.keywords) {
+          successCount++;
+          setCategories((prev) =>
+            prev.map((c) => (c.id === cat.id ? { ...c, match_keywords: res.keywords } : c))
+          );
+        }
+      }
+      toast.success(`${successCount}/${categories.length} categories updated with AI tags successfully`);
+    } catch {
+      toast.error("Failed to generate AI tags for some categories");
+    } finally {
+      setIsGeneratingAll(false);
+    }
   }
 
   // Manual Trigger Handler
@@ -671,16 +1350,12 @@ export default function AutoNewsPage() {
           <Tag className="w-4 h-4" /> Category & Keyword Mapping
         </button>
 
-        <button
-          onClick={() => setActiveTab("logs")}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
-            activeTab === "logs"
-              ? "border-indigo-600 text-indigo-600"
-              : "border-transparent text-slate-600 hover:text-slate-900"
-          }`}
+        <Link
+          href="/admin/reports/auto-news-logs"
+          className="flex items-center gap-1.5 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-indigo-600 transition-colors whitespace-nowrap ml-auto"
         >
-          <History className="w-4 h-4" /> History & Fetching Logs
-        </button>
+          <History className="w-4 h-4" /> View Logs in Reports &rarr;
+        </Link>
       </div>
 
       {/* TAB 1: GENERAL SETTINGS */}
@@ -710,24 +1385,55 @@ export default function AutoNewsPage() {
                 />
               </div>
 
-              {/* Daily Limit Input */}
-              <div className="space-y-1.5">
-                <Label htmlFor="daily_limit" className="text-xs font-semibold text-slate-700">
-                  Daily Target Post Quota
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="daily_limit"
-                    type="number"
-                    min={1}
-                    max={100}
-                    value={settings.daily_limit}
-                    onChange={(e) => setSettings({ ...settings, daily_limit: Number(e.target.value) })}
-                    className="font-bold text-base"
-                  />
-                  <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">posts / day</span>
+              {/* Daily Limit & Category Quota Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Daily Limit Input */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="daily_limit" className="text-xs font-semibold text-slate-700">
+                    Daily Total Post Quota (দৈনিক মোট পোস্ট কোটা)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="daily_limit"
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={settings.daily_limit}
+                      onChange={(e) => setSettings({ ...settings, daily_limit: Number(e.target.value) })}
+                      className="font-bold text-base"
+                    />
+                    <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">posts / day</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">Typically 15 to 20 articles per day is optimal</p>
                 </div>
-                <p className="text-[11px] text-slate-400">Typically 15 to 20 articles per day is optimal</p>
+
+                {/* Category Max Limit Input */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="category_daily_limit" className="text-xs font-semibold text-slate-700 flex items-center justify-between">
+                    <span>Category Max Limit (ক্যাটাগরি ভিত্তিক দৈনিক সীমা)</span>
+                    <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded">
+                      {settings.category_daily_limit && settings.category_daily_limit > 0 ? "Manual Cap" : "Auto 2x Base"}
+                    </span>
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="category_daily_limit"
+                      type="number"
+                      min={0}
+                      max={50}
+                      value={settings.category_daily_limit ?? 0}
+                      onChange={(e) => setSettings({ ...settings, category_daily_limit: Number(e.target.value) })}
+                      className="font-bold text-base"
+                    />
+                    <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">max / category</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500">
+                    {settings.category_daily_limit && settings.category_daily_limit > 0
+                      ? `ম্যানুয়ালি নির্ধারিত: সর্বোচ্চ ${settings.category_daily_limit}টি পোস্ট`
+                      : `অটো হিসাব: বেস ${settings.base_category_share ?? 2} + বাফার ${settings.base_category_share ?? 2} = সর্বোচ্চ ${settings.calculated_category_limit ?? 4}টি`}
+                    {" (০ রাখলে অটো হিসাব কার্যকর থাকবে)"}
+                  </p>
+                </div>
               </div>
 
               {/* Default Post Status */}
@@ -785,6 +1491,74 @@ export default function AutoNewsPage() {
                   className="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer"
                 />
               </div>
+
+              {/* Category Post Distribution & Quota Balance Card */}
+              {settings.categories_distribution && settings.categories_distribution.length > 0 && (
+                <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                        Today&apos;s Category Quota Balance (আজকের ক্যাটাগরি ভারসাম্য)
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        ক্যাটাগরি ক্যাপ পূর্ণ হলে ({settings.calculated_category_limit ?? 4}টি) নতুন খবর এলে অন্যান্য ক্যাটাগরি অগ্রাধিকার পাবে
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold px-2 py-0.5 bg-white border border-slate-200 rounded-md text-slate-700 w-fit">
+                      Max Cap: {settings.calculated_category_limit ?? 4} / category
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
+                    {settings.categories_distribution.map((cat) => {
+                      const isFull = cat.count >= cat.max_limit;
+                      const percent = Math.min(100, Math.round((cat.count / (cat.max_limit || 1)) * 100));
+
+                      return (
+                        <div
+                          key={cat.id}
+                          className={`p-2.5 rounded-lg border text-xs transition-all ${
+                            isFull
+                              ? "bg-rose-50/70 border-rose-200 text-rose-950"
+                              : cat.count > 0
+                              ? "bg-white border-slate-200 text-slate-800"
+                              : "bg-white/60 border-dashed border-slate-200 text-slate-500"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1 font-semibold">
+                            <span className="truncate" title={cat.title}>
+                              {cat.title}
+                            </span>
+                            <span
+                              className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
+                                isFull
+                                  ? "bg-rose-100 text-rose-800"
+                                  : cat.count > 0
+                                  ? "bg-indigo-100 text-indigo-800"
+                                  : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              {cat.count} / {cat.max_limit}
+                            </span>
+                          </div>
+                          <div className="mt-2 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                isFull ? "bg-rose-500" : cat.count > 0 ? "bg-indigo-600" : "bg-transparent"
+                              }`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                          <div className="mt-1 flex items-center justify-between text-[10px] text-slate-400">
+                            <span>{isFull ? "ক্যাপ পূর্ণ (Full)" : `${cat.max_limit - cat.count} স্লট বাকি`}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -803,25 +1577,19 @@ export default function AutoNewsPage() {
                 <Label htmlFor="openrouter_key" className="text-xs font-semibold text-slate-700">
                   OpenRouter API Key *
                 </Label>
-                <div className="relative">
+                <div>
                   <Input
                     id="openrouter_key"
-                    type={showApiKey ? "text" : "password"}
+                    type="password"
+                    autoComplete="new-password"
                     placeholder="sk-or-v1-..."
                     value={settings.openrouter_api_key || ""}
                     onChange={(e) => setSettings({ ...settings, openrouter_api_key: e.target.value })}
-                    className="font-mono text-xs pr-10"
+                    className="font-mono text-xs"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
-                  >
-                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Enter your OpenRouter API key (sk-or-v1-...) here.
+                  Enter your OpenRouter API key (sk-or-v1-...). For security, the key remains hidden and cannot be viewed.
                 </p>
               </div>
 
@@ -897,157 +1665,689 @@ export default function AutoNewsPage() {
             </Button>
           </div>
 
-          {/* Add Section to Portal Modal/Card */}
-          {activePortalForSection && (
-            <Card className="border-indigo-300 bg-indigo-50/30 shadow-md animate-in fade-in duration-200">
-              <CardContent className="p-4 sm:p-5">
-                <form onSubmit={handleAddSection} className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-indigo-100 pb-2.5">
-                    <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-950 flex items-center gap-1.5">
-                        <ListPlus className="w-4 h-4 text-indigo-600" />
-                        <span>{activePortalForSection.name}</span> — Link New Category Section
-                      </h3>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Map a specific section page or feed of this portal to a category on your site
-                      </p>
+          {/* Link Category Section Modal */}
+          {activePortalForSection && (() => {
+            const currentModalPortal =
+              sources.find((s) => s.id === activePortalForSection.id) || activePortalForSection;
+            const portalSections = currentModalPortal.sections || [];
+
+            return (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
+                  onClick={() => {
+                    if (!isPending) {
+                      setActivePortalForSection(null);
+                      handleCancelEditSection();
+                    }
+                  }}
+                  aria-hidden="true"
+                />
+
+                {/* Modal Box */}
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="link-section-title"
+                  className="relative w-full max-w-4xl lg:max-w-5xl rounded-2xl bg-white shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 max-h-[92vh] flex flex-col z-10 overflow-hidden"
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between border-b border-slate-200 px-5 sm:px-6 py-4 bg-slate-50/70 shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="rounded-xl bg-indigo-100 p-2 text-indigo-700 shrink-0">
+                        <Layers className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 id="link-section-title" className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                            {currentModalPortal.name} — Category Sections & Feeds
+                          </h3>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            {portalSections.length} Linked
+                          </span>
+                        </div>
+                      </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setActivePortalForSection(null)}
-                      className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-white"
+                      onClick={() => {
+                        setActivePortalForSection(null);
+                        handleCancelEditSection();
+                      }}
+                      disabled={isPending}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors shrink-0"
+                      aria-label="Close modal"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  {/* Filter Mode Selector */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-800">Collection Filter Policy *</Label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div
-                        onClick={() => setNewSection({ ...newSection, filter_mode: "none" })}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                          newSection.filter_mode === "none"
-                            ? "border-purple-600 bg-purple-50/60 text-purple-900 shadow-xs"
-                            : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 font-bold text-xs">
-                          <span
-                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                              newSection.filter_mode === "none" ? "border-purple-600 bg-purple-600" : "border-slate-300"
-                            }`}
+                  {/* Modal Scrollable Body */}
+                  <div className="overflow-y-auto flex-1 p-5 sm:p-6 space-y-6">
+                    {/* TOP SECTION: Existing Linked Sections */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+                          <Tag className="w-3.5 h-3.5 text-indigo-600" />
+                          Already Linked Sections ({portalSections.length})
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={handleRunAiDetection}
+                            disabled={isDetectingAi || isPending}
+                            className="h-7 text-xs bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 shadow-2xs"
+                            title="Auto-scan portal navigation and map categories with AI"
                           >
-                            {newSection.filter_mode === "none" && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
-                          </span>
-                          Category Page (No Filter — Direct Ingestion)
+                            {isDetectingAi ? (
+                              <>
+                                <RefreshCw className="w-3 h-3 animate-spin" /> Scanning with AI...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-3 h-3 text-amber-300" /> AI Auto-Detect & Map
+                              </>
+                            )}
+                          </Button>
+                          {editingSectionId && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={handleCancelEditSection}
+                              className="h-7 text-xs border-dashed text-slate-600 hover:text-slate-900"
+                            >
+                              <Plus className="w-3.5 h-3.5 mr-1" /> Switch to Add New Section
+                            </Button>
+                          )}
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          All news from this section page will be directly posted to your selected category.
-                        </p>
                       </div>
 
-                      <div
-                        onClick={() => setNewSection({ ...newSection, filter_mode: "keyword" })}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                          newSection.filter_mode === "keyword"
-                            ? "border-amber-600 bg-amber-50/60 text-amber-900 shadow-xs"
-                            : "border-slate-200 bg-white hover:border-slate-300"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 font-bold text-xs">
-                          <span
-                            className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
-                              newSection.filter_mode === "keyword" ? "border-amber-600 bg-amber-600" : "border-slate-300"
+                      {/* AI DISCOVERED CATEGORIES REVIEW PANEL */}
+                      {aiDetectedList.length > 0 && (
+                        <div className="rounded-xl border border-indigo-200 bg-indigo-50/40 p-3.5 sm:p-4 space-y-3 animate-in fade-in zoom-in-95">
+                          <div className="flex items-center justify-between gap-2 flex-wrap border-b border-indigo-100 pb-2.5">
+                            <div className="flex items-center gap-2">
+                              <span className="p-1 rounded-lg bg-indigo-600 text-white">
+                                <Sparkles className="w-3.5 h-3.5" />
+                              </span>
+                              <span className="font-bold text-xs sm:text-sm text-slate-900">
+                                AI Discovered Category Mappings ({aiDetectedList.length})
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAiDetectedList((prev) =>
+                                    prev.map((item) => ({ ...item, selected: !item.already_linked && item.matched_category_id !== null }))
+                                  )
+                                }
+                                className="text-[11px] font-semibold text-indigo-700 hover:underline cursor-pointer"
+                              >
+                                Select All
+                              </button>
+                              <span className="text-slate-300">|</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAiDetectedList((prev) =>
+                                    prev.map((item) => ({ ...item, selected: false }))
+                                  )
+                                }
+                                className="text-[11px] font-semibold text-slate-500 hover:underline cursor-pointer"
+                              >
+                                Unselect All
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setAiDetectedList([])}
+                                className="p-1 rounded hover:bg-slate-200/60 text-slate-400 hover:text-slate-700 ml-1 cursor-pointer"
+                                title="Dismiss AI suggestions"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden shadow-2xs">
+                            <div className="overflow-x-auto max-h-[280px]">
+                              <table className="w-full text-left text-xs">
+                                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 text-[10px] uppercase font-semibold sticky top-0 z-10">
+                                  <tr>
+                                    <th className="p-2.5 pl-3 w-8 text-center">Import</th>
+                                    <th className="p-2.5">Portal Section</th>
+                                    <th className="p-2.5">Mapped Shikkhapath Category</th>
+                                    <th className="p-2.5">Policy</th>
+                                    <th className="p-2.5">Confidence</th>
+                                    <th className="p-2.5 pr-3 text-right">Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-slate-700">
+                                  {aiDetectedList.map((item, idx) => (
+                                    <tr
+                                      key={idx}
+                                      className={`transition-colors ${
+                                        item.selected
+                                          ? "bg-indigo-50/60"
+                                          : item.already_linked
+                                          ? "bg-slate-50/50 opacity-60"
+                                          : "hover:bg-slate-50/50"
+                                      }`}
+                                    >
+                                      <td className="p-2.5 pl-3 text-center">
+                                        <input
+                                          type="checkbox"
+                                          checked={item.selected}
+                                          disabled={item.already_linked}
+                                          onChange={() => toggleAiDetectedItem(idx)}
+                                          className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 cursor-pointer disabled:opacity-40"
+                                        />
+                                      </td>
+                                      <td className="p-2.5 font-bold text-slate-900">
+                                        <div>{item.external_name}</div>
+                                        <a
+                                          href={item.section_url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-indigo-600 font-normal truncate max-w-[200px]"
+                                          title={item.section_url}
+                                        >
+                                          <span className="truncate">{item.section_url.replace(/^https?:\/\//, "")}</span>
+                                          <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                                        </a>
+                                      </td>
+                                      <td className="p-2.5 min-w-[170px]">
+                                        <select
+                                          value={item.matched_category_id !== null ? String(item.matched_category_id) : ""}
+                                          onChange={(e) => changeAiDetectedCategory(idx, e.target.value)}
+                                          className="w-full text-xs rounded-md border border-slate-300 bg-white p-1.5 h-8 font-medium text-slate-800"
+                                        >
+                                          <option value="">No Match (Skip)</option>
+                                          {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                              {cat.title}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </td>
+                                      <td className="p-2.5">
+                                        <select
+                                          value={item.filter_mode}
+                                          onChange={(e) =>
+                                            changeAiDetectedFilterMode(idx, e.target.value as "none" | "keyword")
+                                          }
+                                          className="text-[11px] rounded-md border border-slate-300 bg-white p-1 h-8 text-slate-700"
+                                        >
+                                          <option value="none">Direct Ingestion</option>
+                                          <option value="keyword">Keyword Filter</option>
+                                        </select>
+                                      </td>
+                                      <td className="p-2.5">
+                                        {item.confidence === "high" ? (
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                            High
+                                          </span>
+                                        ) : item.confidence === "medium" ? (
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">
+                                            Medium
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-600">
+                                            Low / None
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5 pr-3 text-right whitespace-nowrap">
+                                        {item.already_linked ? (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-500">
+                                            Already Linked
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700">
+                                            New Section
+                                          </span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2 pt-1 flex-wrap">
+                            <span className="text-xs text-slate-600 font-medium">
+                              {aiDetectedList.filter((i) => i.selected).length} sections selected for import
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setAiDetectedList([])}
+                                disabled={isBatchSaving}
+                                className="text-xs h-8 px-3"
+                              >
+                                Discard
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={handleBatchSaveAiSections}
+                                disabled={isBatchSaving || aiDetectedList.filter((i) => i.selected).length === 0}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 px-4 gap-1.5 shadow-xs"
+                              >
+                                {isBatchSaving ? (
+                                  <>
+                                    <RefreshCw className="w-3 h-3 animate-spin" /> Importing...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-3 h-3" /> Save Mapped Sections (
+                                    {aiDetectedList.filter((i) => i.selected).length})
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {portalSections.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-6 text-center">
+                          <div className="mx-auto w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-2">
+                            <Layers className="w-5 h-5" />
+                          </div>
+                          <p className="text-xs font-semibold text-slate-700">No category sections linked yet</p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Use the form below to link your first category section or RSS feed for {currentModalPortal.name}.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+                          <div className="overflow-x-auto max-h-[260px]">
+                            <table className="w-full text-left text-xs">
+                              <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 text-[10px] uppercase font-semibold sticky top-0 z-10">
+                                <tr>
+                                  <th className="p-2.5 pl-3.5">Section Name</th>
+                                  <th className="p-2.5">Target Category</th>
+                                  <th className="p-2.5">Filter Policy</th>
+                                  <th className="p-2.5">Feed Type</th>
+                                  <th className="p-2.5">Page / Feed URL</th>
+                                  <th className="p-2.5 text-center">Status</th>
+                                  <th className="p-2.5 text-right pr-3.5">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100 text-slate-700 bg-white">
+                                {portalSections.map((sec) => {
+                                  const isBeingEdited = editingSectionId === sec.id;
+                                  return (
+                                    <tr
+                                      key={sec.id}
+                                      className={`transition-colors ${
+                                        isBeingEdited
+                                          ? "bg-indigo-50/90 font-medium"
+                                          : "hover:bg-slate-50/80"
+                                      }`}
+                                    >
+                                      <td className="p-2.5 pl-3.5 font-bold text-slate-900">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span>{sec.name}</span>
+                                          {isBeingEdited && (
+                                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-600 text-white">
+                                              Editing Now
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td className="p-2.5">
+                                        {sec.category ? (
+                                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                            {sec.category.title}
+                                          </span>
+                                        ) : (
+                                          <span className="text-slate-400 italic text-[11px]">General</span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5">
+                                        {sec.filter_mode === "none" ? (
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                            Direct Ingestion
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                                            Keyword Filter
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5">
+                                        {sec.feed_type === "rss" ? (
+                                          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
+                                            <Rss className="w-3 h-3" /> RSS
+                                          </span>
+                                        ) : (
+                                          <span className="inline-flex items-center gap-1 text-[11px] text-blue-700 font-semibold">
+                                            <Globe className="w-3 h-3" /> Scraper
+                                          </span>
+                                        )}
+                                      </td>
+                                      <td className="p-2.5 max-w-[200px] truncate">
+                                        <a
+                                          href={sec.section_url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-1 text-slate-500 hover:text-indigo-600 truncate max-w-full"
+                                          title={sec.section_url}
+                                        >
+                                          <span className="truncate">{sec.section_url.replace(/^https?:\/\//, "")}</span>
+                                          <ExternalLink className="w-3 h-3 shrink-0" />
+                                        </a>
+                                      </td>
+                                      <td className="p-2.5 text-center">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleToggleSection(currentModalPortal.id, sec.id)}
+                                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
+                                            sec.status === "active"
+                                              ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                          }`}
+                                          title="Click to toggle status"
+                                        >
+                                          {sec.status === "active" ? "Active" : "Inactive"}
+                                        </button>
+                                      </td>
+                                      <td className="p-2.5 text-right pr-3.5 whitespace-nowrap">
+                                        <div className="inline-flex items-center gap-1">
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleStartEditSection(sec)}
+                                            className={`h-7 px-2 text-xs gap-1 ${
+                                              isBeingEdited
+                                                ? "bg-indigo-600 text-white hover:bg-indigo-700"
+                                                : "text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
+                                            }`}
+                                            title="Edit this section"
+                                          >
+                                            <Pencil className="w-3 h-3" />
+                                            <span>Edit</span>
+                                          </Button>
+                                          <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => handleDeleteSection(currentModalPortal.id, sec.id)}
+                                            className="h-7 px-2 text-xs text-rose-600 hover:text-rose-800 hover:bg-rose-50"
+                                            title="Delete this section"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </Button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* BOTTOM SECTION: Add New Entry / Edit Section Form */}
+                    <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className={`p-1.5 rounded-lg ${
+                              editingSectionId
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-indigo-100 text-indigo-700"
                             }`}
                           >
-                            {newSection.filter_mode === "keyword" && <span className="w-1.5 h-1.5 bg-white rounded-full" />}
-                          </span>
-                          General Feed / Homepage (Keyword Filter)
+                            {editingSectionId ? <Pencil className="w-4 h-4" /> : <ListPlus className="w-4 h-4" />}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                              {editingSectionId ? "Edit Category Section" : "Add New Category Section Entry"}
+                            </h4>
+                          </div>
                         </div>
-                        <p className="text-[11px] text-slate-500 mt-1">
-                          News from this feed will be filtered and mapped matching your category keywords.
-                        </p>
+                        {editingSectionId && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={handleCancelEditSection}
+                            className="h-7 text-xs text-slate-600 hover:text-slate-900"
+                          >
+                            Cancel Edit
+                          </Button>
+                        )}
                       </div>
+
+                      <form onSubmit={handleSaveSection} className="space-y-4">
+                        {/* Filter Mode Selector */}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold text-slate-700">Collection Filter Policy *</Label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div
+                              onClick={() => setNewSection({ ...newSection, filter_mode: "none" })}
+                              className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                                newSection.filter_mode === "none"
+                                  ? "border-purple-600 bg-purple-50/60 text-purple-900 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 font-bold text-xs">
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                                    newSection.filter_mode === "none"
+                                      ? "border-purple-600 bg-purple-600"
+                                      : "border-slate-300"
+                                  }`}
+                                >
+                                  {newSection.filter_mode === "none" && (
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                                  )}
+                                </span>
+                                Category Page (Direct Ingestion)
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-1">
+                                All news from this section page will be directly posted to your selected category.
+                              </p>
+                            </div>
+
+                            <div
+                              onClick={() => setNewSection({ ...newSection, filter_mode: "keyword" })}
+                              className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                                newSection.filter_mode === "keyword"
+                                  ? "border-amber-600 bg-amber-50/60 text-amber-900 shadow-xs"
+                                  : "border-slate-200 bg-white hover:border-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 font-bold text-xs">
+                                <span
+                                  className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                                    newSection.filter_mode === "keyword"
+                                      ? "border-amber-600 bg-amber-600"
+                                      : "border-slate-300"
+                                  }`}
+                                >
+                                  {newSection.filter_mode === "keyword" && (
+                                    <span className="w-1.5 h-1.5 bg-white rounded-full" />
+                                  )}
+                                </span>
+                                General Feed (Keyword Filter)
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-1">
+                                News from this feed will be filtered and mapped matching your category keywords.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Section Name, Feed Type, Target Category & Optional Status */}
+                        <div
+                          className={`grid grid-cols-1 ${
+                            editingSectionId ? "sm:grid-cols-4" : "sm:grid-cols-3"
+                          } gap-3`}
+                        >
+                          <div className="space-y-1">
+                            <Label className="text-xs font-semibold text-slate-700">Section Name *</Label>
+                            <Input
+                              placeholder="e.g. Admission Test or Jobs"
+                              value={newSection.name}
+                              onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+                              required
+                              className="bg-white text-xs h-9"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs font-semibold text-slate-700">Feed Type *</Label>
+                            <select
+                              value={newSection.feed_type}
+                              onChange={(e) =>
+                                setNewSection({
+                                  ...newSection,
+                                  feed_type: e.target.value as "scraper" | "rss",
+                                })
+                              }
+                              className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2 h-9 font-medium text-slate-800"
+                            >
+                              <option value="scraper">Web Scraper</option>
+                              <option value="rss">RSS Feed</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-1">
+                            <Label className="text-xs font-semibold text-slate-700">
+                              {newSection.filter_mode === "none" ? "Target Category *" : "Mapped Category"}
+                            </Label>
+                            <select
+                              value={newSection.category_id}
+                              onChange={(e) => setNewSection({ ...newSection, category_id: e.target.value })}
+                              required={newSection.filter_mode === "none"}
+                              className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2 h-9 font-medium text-slate-800"
+                            >
+                              <option value="">Select Category...</option>
+                              {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                  {cat.title}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {editingSectionId && (
+                            <div className="space-y-1">
+                              <Label className="text-xs font-semibold text-slate-700">Status *</Label>
+                              <select
+                                value={newSection.status || "active"}
+                                onChange={(e) =>
+                                  setNewSection({
+                                    ...newSection,
+                                    status: e.target.value as "active" | "inactive",
+                                  })
+                                }
+                                className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2 h-9 font-medium text-slate-800"
+                              >
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                              </select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Section URL */}
+                        <div className="space-y-1">
+                          <Label className="text-xs font-semibold text-slate-700">Full Section Page / Feed URL *</Label>
+                          <Input
+                            placeholder="https://example.com/section/..."
+                            type="url"
+                            value={newSection.section_url}
+                            onChange={(e) => setNewSection({ ...newSection, section_url: e.target.value })}
+                            required
+                            className="bg-white text-xs h-9"
+                          />
+                        </div>
+
+                        {/* Form Action Buttons */}
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
+                          {editingSectionId ? (
+                            <>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleCancelEditSection}
+                                disabled={isPending}
+                                className="text-xs h-9 px-4"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                type="submit"
+                                disabled={isPending}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 px-4 gap-1.5"
+                              >
+                                {isPending ? (
+                                  <>
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Updating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" /> Update Section
+                                  </>
+                                )}
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              type="submit"
+                              disabled={isPending}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-9 px-4 gap-1.5"
+                            >
+                              {isPending ? (
+                                <>
+                                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Adding...
+                                </>
+                              ) : (
+                                <>
+                                  <ListPlus className="w-3.5 h-3.5" /> Add Section
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </form>
                     </div>
                   </div>
 
-                  {/* Section Name, Feed Type & Category */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs font-semibold">Section Name *</Label>
-                      <Input
-                        placeholder="e.g. Admission Test or Jobs"
-                        value={newSection.name}
-                        onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
-                        required
-                        className="bg-white text-xs"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs font-semibold">Feed Type *</Label>
-                      <select
-                        value={newSection.feed_type}
-                        onChange={(e) => setNewSection({ ...newSection, feed_type: e.target.value as "scraper" | "rss" })}
-                        className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2 font-medium text-slate-800"
-                      >
-                        <option value="scraper">Web Scraper</option>
-                        <option value="rss">RSS Feed</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs font-semibold">
-                        {newSection.filter_mode === "none" ? "Target Category (Where to post) *" : "Mapped Category (Optional)"}
-                      </Label>
-                      <select
-                        value={newSection.category_id}
-                        onChange={(e) => setNewSection({ ...newSection, category_id: e.target.value })}
-                        required={newSection.filter_mode === "none"}
-                        className="w-full text-xs rounded-lg border border-slate-300 bg-white p-2 font-medium text-slate-800"
-                      >
-                        <option value="">Select Category...</option>
-                        {categories.map((cat) => (
-                          <option key={cat.id} value={cat.id}>
-                            {cat.title}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Section URL */}
-                  <div className="space-y-1">
-                    <Label className="text-xs font-semibold">Full Section Page / Feed URL *</Label>
-                    <Input
-                      placeholder="https://thedailycampus.com/section/admission-test/110"
-                      type="url"
-                      value={newSection.section_url}
-                      onChange={(e) => setNewSection({ ...newSection, section_url: e.target.value })}
-                      required
-                      className="bg-white text-xs"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2">
+                  {/* Modal Footer */}
+                  <div className="border-t border-slate-200 px-5 sm:px-6 py-3 bg-slate-50/70 flex items-center justify-end shrink-0">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setActivePortalForSection(null)}
-                      className="text-xs"
+                      onClick={() => {
+                        setActivePortalForSection(null);
+                        handleCancelEditSection();
+                      }}
+                      disabled={isPending}
+                      className="text-xs h-9 px-5"
                     >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={isPending} className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs">
-                      {isPending ? "Adding..." : "Add Section"}
+                      Close
                     </Button>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Add Portal Modal */}
           {isAddingSource && (
@@ -1272,287 +2572,70 @@ export default function AutoNewsPage() {
             </div>
           )}
 
-          {/* Sources Table: Single Portal Rows with Nested Category Sections */}
-          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
-                  <tr>
-                    <th className="p-3.5 w-10"></th>
-                    <th className="p-3.5">News Portal</th>
-                    <th className="p-3.5">Linked Category Sections</th>
-                    <th className="p-3.5">Type</th>
-                    <th className="p-3.5">Total Fetched</th>
-                    <th className="p-3.5">Status</th>
-                    <th className="p-3.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {sources.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="p-6 text-center text-slate-400">
-                        No news sources found
-                      </td>
-                    </tr>
-                  ) : (
-                    sources.map((source) => {
-                      const isExpanded = !!expandedSources[source.id];
-                      const sectionsCount = source.sections?.length || 0;
-
-                      return (
-                        <div key={source.id} className="contents">
-                          {/* Portal Main Row */}
-                          <tr className={`transition-colors ${isExpanded ? "bg-slate-50/90 font-medium" : "hover:bg-slate-50/70"}`}>
-                            <td className="p-3.5 text-center">
-                              <button
-                                type="button"
-                                onClick={() => toggleExpandSource(source.id)}
-                                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-transform"
-                                title={isExpanded ? "Collapse" : "View category sections"}
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown className="w-4 h-4 text-slate-700" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4 text-slate-500" />
-                                )}
-                              </button>
-                            </td>
-
-                            <td className="p-3.5">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-900 text-xs sm:text-sm">{source.name}</span>
-                              </div>
-                              <a
-                                href={source.website_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-indigo-600 mt-0.5"
-                              >
-                                {source.website_url.replace(/^https?:\/\//, "")}
-                                <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                              </a>
-                            </td>
-
-                            <td className="p-3.5">
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                  {sectionsCount} sections
-                                </span>
-                                {source.sections && source.sections.length > 0 ? (
-                                  source.sections.map((sec) => (
-                                    <span
-                                      key={sec.id}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200"
-                                      title={`Link: ${sec.section_url}`}
-                                    >
-                                      {sec.name}
-                                      {sec.category && (
-                                        <span className="text-slate-400 font-normal">➔ {sec.category.title}</span>
-                                      )}
-                                    </span>
-                                  ))
-                                ) : (
-                                  <span className="text-[11px] text-slate-400 italic">No sections linked</span>
-                                )}
-                              </div>
-                            </td>
-
-                            <td className="p-3.5">
-                              {source.has_rss ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                  <Rss className="w-3 h-3" /> RSS Feed
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                                  <Globe className="w-3 h-3" /> Scraper
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="p-3.5 font-bold text-slate-900">{source.total_fetched || 0} items</td>
-
-                            <td className="p-3.5">
-                              <button
-                                onClick={() => handleToggleSource(source.id)}
-                                className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-colors ${
-                                  source.status === "active"
-                                    ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                }`}
-                              >
-                                {source.status === "active" ? "Active" : "Inactive"}
-                              </button>
-                            </td>
-
-                            <td className="p-3.5 text-right whitespace-nowrap">
-                              <div className="inline-flex items-center gap-1.5">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setActivePortalForSection(source);
-                                    setNewSection({
-                                      name: "",
-                                      section_url: source.website_url ? `${source.website_url}/section/` : "",
-                                      feed_type: source.has_rss ? "rss" : "scraper",
-                                      category_id: "",
-                                      filter_mode: "none",
-                                    });
-                                  }}
-                                  className="h-7 text-[11px] px-2 text-indigo-700 border-indigo-200 hover:bg-indigo-50"
-                                  title="Add new category section to this portal"
-                                >
-                                  <Plus className="w-3.5 h-3.5 mr-1" />
-                                  Link Section
-                                </Button>
-                                <button
-                                  onClick={() => handleDeleteSource(source.id)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
-                                  title="Delete portal"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-
-                          {/* Nested Accordion for Linked Category Sections */}
-                          {isExpanded && (
-                            <tr className="bg-slate-50/50 border-b border-slate-200">
-                              <td colSpan={7} className="p-3 sm:p-4">
-                                <div className="bg-white rounded-lg border border-slate-200 shadow-xs overflow-hidden">
-                                  <div className="px-3.5 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold text-xs text-slate-800">
-                                        {source.name} Category Pages & Feeds ({sectionsCount})
-                                      </span>
-                                    </div>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setActivePortalForSection(source);
-                                        setNewSection({
-                                          name: "",
-                                          section_url: source.website_url ? `${source.website_url}/section/` : "",
-                                          feed_type: source.has_rss ? "rss" : "scraper",
-                                          category_id: "",
-                                          filter_mode: "none",
-                                        });
-                                      }}
-                                      className="h-6 text-[11px] px-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
-                                    >
-                                      <Plus className="w-3 h-3 mr-1" /> Add Section
-                                    </Button>
-                                  </div>
-
-                                  <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-xs">
-                                      <thead className="bg-slate-50/50 text-slate-500 border-b border-slate-100 text-[10px] uppercase font-semibold">
-                                        <tr>
-                                          <th className="p-2.5 pl-4">Section Name</th>
-                                          <th className="p-2.5">Target Category</th>
-                                          <th className="p-2.5">Filter Policy</th>
-                                          <th className="p-2.5">Feed Type</th>
-                                          <th className="p-2.5">Page / Feed Link</th>
-                                          <th className="p-2.5">Fetched</th>
-                                          <th className="p-2.5">Status</th>
-                                          <th className="p-2.5 text-right pr-4">Delete</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody className="divide-y divide-slate-100 text-slate-700">
-                                        {!source.sections || source.sections.length === 0 ? (
-                                          <tr>
-                                            <td colSpan={8} className="p-4 text-center text-slate-400 italic">
-                                              No category sections added yet. Click &apos;Add Section&apos; to add one.
-                                            </td>
-                                          </tr>
-                                        ) : (
-                                          source.sections.map((section) => (
-                                            <tr key={section.id} className="hover:bg-slate-50/70 transition-colors">
-                                              <td className="p-2.5 pl-4 font-bold text-slate-900">{section.name}</td>
-                                              <td className="p-2.5">
-                                                {section.category ? (
-                                                  <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                                    {section.category.title}
-                                                  </span>
-                                                ) : (
-                                                  <span className="text-slate-400 italic">General</span>
-                                                )}
-                                              </td>
-                                              <td className="p-2.5">
-                                                {section.filter_mode === "none" ? (
-                                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
-                                                    No Filter (Direct)
-                                                  </span>
-                                                ) : (
-                                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                                                    Keyword Filter
-                                                  </span>
-                                                )}
-                                              </td>
-                                              <td className="p-2.5">
-                                                {section.feed_type === "rss" ? (
-                                                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
-                                                    <Rss className="w-3 h-3" /> RSS
-                                                  </span>
-                                                ) : (
-                                                  <span className="inline-flex items-center gap-1 text-[11px] text-blue-700 font-medium">
-                                                    <Globe className="w-3 h-3" /> Scraper
-                                                  </span>
-                                                )}
-                                              </td>
-                                              <td className="p-2.5 max-w-[220px] truncate">
-                                                <a
-                                                  href={section.section_url}
-                                                  target="_blank"
-                                                  rel="noreferrer"
-                                                  className="inline-flex items-center gap-1 text-slate-600 hover:text-indigo-600 hover:underline"
-                                                  title={section.section_url}
-                                                >
-                                                  <span className="truncate">{section.section_url.replace(/^https?:\/\//, "")}</span>
-                                                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                                                </a>
-                                              </td>
-                                              <td className="p-2.5 font-semibold text-slate-800">{section.total_fetched || 0} items</td>
-                                              <td className="p-2.5">
-                                                <button
-                                                  onClick={() => handleToggleSection(source.id, section.id)}
-                                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold transition-colors ${
-                                                    section.status === "active"
-                                                      ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                                                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                                                  }`}
-                                                >
-                                                  {section.status === "active" ? "Active" : "Inactive"}
-                                                </button>
-                                              </td>
-                                              <td className="p-2.5 text-right pr-4">
-                                                <button
-                                                  onClick={() => handleDeleteSection(source.id, section.id)}
-                                                  className="p-1 text-slate-400 hover:text-rose-600 transition-colors"
-                                                  title="Delete section"
-                                                >
-                                                  <Trash2 className="w-3.5 h-3.5" />
-                                                </button>
-                                              </td>
-                                            </tr>
-                                          ))
-                                        )}
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
+          {/* Priority Explanation Banner */}
+          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3.5 flex items-start gap-3 text-xs text-indigo-950">
+            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold">Prioritized Aggregation Pipeline</p>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Portals are aggregated in the exact priority order listed below. The source at position <strong className="text-amber-800 font-bold">#1 (Top Priority)</strong> gets first quota preference, its duplicate news topics take precedence over lower sources, and its news is published at the top of the feed. Drag rows by the <GripVertical className="w-3.5 h-3.5 inline mx-0.5 text-slate-500" /> handle or use the <ArrowUp className="w-3 h-3 inline text-slate-600" /> <ArrowDown className="w-3 h-3 inline text-slate-600" /> buttons to adjust priority.
+              </p>
             </div>
+          </div>
+
+          {/* Sources Table: Single Portal Rows with Nested Category Sections & Drag-Drop Reorder */}
+          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={sources.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-slate-700">
+                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
+                      <tr>
+                        <th className="p-3 w-16 text-center" title="Reorder Priority">Priority</th>
+                        <th className="p-3 w-10 text-center"></th>
+                        <th className="p-3.5">News Portal</th>
+                        <th className="p-3.5">Linked Category Sections</th>
+                        <th className="p-3.5">Type</th>
+                        <th className="p-3.5">Total Fetched</th>
+                        <th className="p-3.5">Status</th>
+                        <th className="p-3.5 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    {sources.length === 0 ? (
+                      <tbody className="divide-y divide-slate-100">
+                        <tr>
+                          <td colSpan={8} className="p-6 text-center text-slate-400">
+                            No news sources found
+                          </td>
+                        </tr>
+                      </tbody>
+                    ) : (
+                      sources.map((source, index) => (
+                        <SortableNewsSourceTBody
+                          key={source.id}
+                          source={source}
+                          index={index}
+                          total={sources.length}
+                          isExpanded={!!expandedSources[source.id]}
+                          onToggleExpand={() => toggleExpandSource(source.id)}
+                          onMove={handleMoveSource}
+                          onToggleStatus={() => handleToggleSource(source.id)}
+                          onOpenAddSection={() => handleOpenSectionModal(source)}
+                          onEditSection={(src, sec) => handleOpenSectionModal(src, sec)}
+                          onDeleteSource={() => handleDeleteSource(source.id)}
+                          onDeleteSection={handleDeleteSection}
+                          onToggleSection={handleToggleSection}
+                        />
+                      ))
+                    )}
+                  </table>
+                </div>
+              </SortableContext>
+            </DndContext>
           </Card>
         </div>
       )}
@@ -1560,13 +2643,31 @@ export default function AutoNewsPage() {
       {/* TAB 3: CATEGORY KEYWORDS MAPPING */}
       {activeTab === "categories" && (
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-bold text-slate-900">Category & Keyword Mapping (Keyword Matching Rules)</h2>
               <p className="text-xs text-slate-500">
                 Add relevant tags/keywords to each category. The AI model will match articles to categories based on these tags.
               </p>
             </div>
+            <Button
+              type="button"
+              onClick={handleGenerateAllAiKeywords}
+              disabled={isGeneratingAll || isPending}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs h-8 px-3.5 shadow-sm inline-flex items-center gap-1.5 self-start sm:self-auto font-medium"
+            >
+              {isGeneratingAll ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Generate AI Tags for All
+                </>
+              )}
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 gap-4">
@@ -1632,11 +2733,30 @@ export default function AutoNewsPage() {
                     </div>
                   </div>
 
-                  {/* Save button for this category */}
-                  <div className="flex md:flex-col justify-end">
+                  {/* Actions for this category */}
+                  <div className="flex md:flex-col items-stretch gap-2 justify-end">
+                    <Button
+                      type="button"
+                      onClick={() => handleGenerateAiKeywords(cat.id)}
+                      disabled={generatingCatId === cat.id || isPending || isGeneratingAll}
+                      variant="outline"
+                      className="border-indigo-200 text-indigo-700 bg-indigo-50/60 hover:bg-indigo-100 text-xs h-8 px-2.5 font-medium whitespace-nowrap"
+                    >
+                      {generatingCatId === cat.id ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin text-indigo-600" />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5 mr-1.5 text-indigo-600" />
+                          AI Tags (6-10)
+                        </>
+                      )}
+                    </Button>
                     <Button
                       onClick={() => handleSaveKeywords(cat.id)}
-                      disabled={isPending}
+                      disabled={isPending || generatingCatId === cat.id}
                       className="bg-slate-900 hover:bg-slate-800 text-white text-xs h-8 px-3"
                     >
                       <Save className="w-3.5 h-3.5 mr-1.5" /> Save
@@ -1646,123 +2766,6 @@ export default function AutoNewsPage() {
               </Card>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* TAB 4: FETCH LOGS & HISTORY */}
-      {activeTab === "logs" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">News Ingestion History & Logs</h2>
-              <p className="text-xs text-slate-500">Recent aggregated articles and AI processing status</p>
-            </div>
-            <Button
-              onClick={() => {
-                getAutoNewsLogsAction(1, 15).then((res) => {
-                  if (res.success) setLogs(res.items);
-                });
-              }}
-              variant="outline"
-              className="text-xs"
-            >
-              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Refresh
-            </Button>
-          </div>
-
-          <Card className="border-slate-200 shadow-sm overflow-hidden bg-white">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-semibold text-[11px]">
-                  <tr>
-                    <th className="p-3.5">Date & Time</th>
-                    <th className="p-3.5">Original Article & Source</th>
-                    <th className="p-3.5">AI Rewritten Title</th>
-                    <th className="p-3.5">Category</th>
-                    <th className="p-3.5">Status</th>
-                    <th className="p-3.5 text-right">Link</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {logs.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-6 text-center text-slate-400">
-                        No news articles collected yet
-                      </td>
-                    </tr>
-                  ) : (
-                    logs.map((log) => (
-                      <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
-                        <td className="p-3.5 text-slate-500 whitespace-nowrap">
-                          {new Date(log.created_at).toLocaleString("en-US", {
-                            dateStyle: "short",
-                            timeStyle: "short",
-                          })}
-                        </td>
-                        <td className="p-3.5 max-w-[220px]">
-                          <div className="font-semibold text-slate-900 truncate" title={log.original_title}>
-                            {log.original_title}
-                          </div>
-                          <span className="text-[11px] text-indigo-600 block truncate font-medium">
-                            {log.news_source?.name || "External Portal"}
-                          </span>
-                        </td>
-                        <td className="p-3.5 max-w-[260px]">
-                          {log.news ? (
-                            <Link
-                              href={`/admin/news/${log.news.id}/edit`}
-                              className="font-bold text-slate-900 hover:text-indigo-600 line-clamp-1"
-                              title={log.news.title}
-                            >
-                              {log.news.title}
-                            </Link>
-                          ) : (
-                            <span className="text-slate-400 italic">Not processed</span>
-                          )}
-                          {log.error_message && (
-                            <span className="text-[11px] text-rose-600 line-clamp-1 font-mono mt-0.5">
-                              {log.error_message}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3.5">
-                          {log.assigned_category ? (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800">
-                              {log.assigned_category.title}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400">—</span>
-                          )}
-                        </td>
-                        <td className="p-3.5">
-                          {log.status === "success" ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700">
-                              <CheckCircle2 className="w-3 h-3" /> Success
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-700">
-                              <XCircle className="w-3 h-3" /> Failed
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-3.5 text-right whitespace-nowrap">
-                          <a
-                            href={log.original_url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-slate-400 hover:text-indigo-600 font-medium"
-                            title="View original article"
-                          >
-                            Original <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
         </div>
       )}
     </div>

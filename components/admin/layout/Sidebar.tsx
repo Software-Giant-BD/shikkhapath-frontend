@@ -19,6 +19,7 @@ import {
   University,
   Mail,
   Settings,
+  FileText,
 } from "lucide-react";
 
 type MenuItem = {
@@ -111,6 +112,13 @@ const menuConfig: MenuSection[] = [
         ],
       },
       { title: "Newsletters", icon: Mail, href: "/admin/newsletters/list" },
+      {
+        title: "Reports",
+        icon: FileText,
+        subItems: [
+          { title: "Auto News Logs", href: "/admin/reports/auto-news-logs" },
+        ],
+      },
       { title: "Settings", icon: Settings, href: "/admin/settings" },
     ],
   },
