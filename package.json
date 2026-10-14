@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=2048 next dev -H 0.0.0.0 -p 3092",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3092",
     "lint": "eslint"
   },
   "dependencies": {
