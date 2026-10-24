@@ -160,7 +160,7 @@ export function HeroSection({
               <div className="overflow-hidden rounded-lg bg-slate-100 shadow-inner">
                 <Image
                   src={story.image || "/placeholder-news.jpg"}
-                  alt=""
+                  alt={story.title}
                   width={240}
                   height={160}
                   className="aspect-3/2 w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -266,7 +266,7 @@ export function HeroSection({
                       <Image
                         fill
                         src={item.image || "/placeholder-news.jpg"}
-                        alt=""
+                        alt={item.title}
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </Link>
@@ -287,7 +287,7 @@ export function HeroSection({
                     <Image
                       fill
                       src={topicData.main.image || "/placeholder-news.jpg"}
-                      alt=""
+                      alt={topicData.main.title}
                       className="object-cover group-hover:scale-[1.03] transition-transform duration-700"
                     />
                   </div>
@@ -316,7 +316,7 @@ export function HeroSection({
                       <Image
                         fill
                         src={item.image || "/placeholder-news.jpg"}
-                        alt=""
+                        alt={item.title}
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </Link>
@@ -344,7 +344,7 @@ export function HeroSection({
                 <div className="h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner sm:h-20 sm:w-28">
                   <Image
                     src={story.image || "/placeholder-news.jpg"}
-                    alt=""
+                    alt={story.title}
                     width={150}
                     height={100}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"

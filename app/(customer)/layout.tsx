@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/customer/common/footer-sections";
 import { getMenuCategories } from "@/lib/api/categories";
 import { CanonicalUrl } from "@/components/seo/canonical-url";
 import { getPublicSettings } from "@/lib/api/settings";
+import { Analytics } from "@/components/analytics";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();
@@ -20,6 +21,11 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: settings.favicon_url || "/favicon.png",
       apple: settings.favicon_url || "/favicon.png",
+    },
+    alternates: {
+      types: {
+        "application/rss+xml": "/rss.xml",
+      },
     },
   };
 }
@@ -47,6 +53,11 @@ export default async function CustomerLayout({
   return (
     <>
       <CanonicalUrl />
+      <Analytics
+        gtmId={settings.gtm_id}
+        metaPixelId={settings.meta_pixel_id}
+        googleAnalyticsId={settings.google_analytics_id}
+      />
       <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
         <SiteHeader 
           navLinks={navLinks} 

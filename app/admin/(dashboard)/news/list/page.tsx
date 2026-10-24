@@ -86,20 +86,28 @@ export default async function NewsListPage({
     .filter((c) => c.status === "published")
     .map((c) => ({ id: c.id, title: c.title }));
 
-  const rows = newsItems.map((item) => ({
-    id: item.id,
-    title: item.title,
-    unique_code: item.unique_code,
-    category: item.category?.title || "-",
-    subCategory: item.sub_category?.title || "-",
-    author: item.author_name || "-",
-    status: (item.status === "published"
-      ? "Published"
-      : item.status === "scheduled"
-        ? "Scheduled"
-        : "Draft") as "Published" | "Scheduled" | "Draft",
-    publishAt: formatDateTime(item.publish_at),
-  }));
+  const rows = newsItems.map((item) => {
+    const categorySlug = item.category?.slug || item.category_slug || "news";
+    const viewUrl = `/${categorySlug}/${item.unique_code}`;
+
+    return {
+      id: item.id,
+      title: item.title,
+      unique_code: item.unique_code,
+      viewUrl,
+      category: item.category?.title || "-",
+      subCategory: item.sub_category?.title || "-",
+      author: item.author_name || "-",
+      sourceName: item.source_name?.trim() || "-",
+      sourceUrl: item.source_url?.trim() || "",
+      status: (item.status === "published"
+        ? "Published"
+        : item.status === "scheduled"
+          ? "Scheduled"
+          : "Draft") as "Published" | "Scheduled" | "Draft",
+      publishAt: formatDateTime(item.publish_at),
+    };
+  });
 
   const startItem =
     pagination.total === 0
@@ -155,61 +163,97 @@ export default async function NewsListPage({
           />
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-220 text-left text-sm">
+            <table className="w-full min-w-260 text-left text-sm">
               <thead className="bg-slate-50 text-slate-500 shadow-[0_1px_0_rgba(0,0,0,0.05)]">
                 <tr>
+                  <th className="px-6 py-4 font-semibold w-16">SL</th>
                   <th className="px-6 py-4 font-semibold">Title</th>
                   <th className="px-6 py-4 font-semibold">Unique Code</th>
                   <th className="px-6 py-4 font-semibold">Category</th>
                   <th className="px-6 py-4 font-semibold">Sub-category</th>
                   <th className="px-6 py-4 font-semibold">Author</th>
+                  <th className="px-6 py-4 font-semibold">Source</th>
                   <th className="px-6 py-4 font-semibold">Status</th>
                   <th className="px-6 py-4 font-semibold">Publish At</th>
                   <th className="px-6 py-4 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {rows.map((news) => (
-                  <tr
-                    key={news.id}
-                    className="transition-colors hover:bg-slate-50/70"
-                  >
-                    <td className="max-w-90 px-6 py-4 font-medium text-slate-800">
-                      {news.title}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">/{news.unique_code}</td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {news.category}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {news.subCategory}
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">{news.author}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(news.status)}`}
-                      >
-                        {news.status}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-slate-600">
-                      {news.publishAt}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link href={`/admin/news/${news.id}/edit`}>
-                        <Button variant="secondary" size="sm">
-                          <Pencil size={14} />
-                          Edit
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((news, index) => {
+                  const serialNumber =
+                    (pagination.current_page - 1) * pagination.per_page +
+                    index +
+                    1;
+                  return (
+                    <tr
+                      key={news.id}
+                      className="transition-colors hover:bg-slate-50/70"
+                    >
+                      <td className="px-6 py-4 font-medium text-slate-500">
+                        {serialNumber}
+                      </td>
+                      <td className="max-w-90 px-6 py-4 font-medium text-slate-800">
+                        {news.unique_code ? (
+                          <Link
+                            href={news.viewUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="transition-colors hover:text-indigo-600 hover:underline"
+                          >
+                            {news.title}
+                          </Link>
+                        ) : (
+                          news.title
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">/{news.unique_code}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {news.category}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {news.subCategory}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{news.author}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        {news.sourceUrl && news.sourceName !== "-" ? (
+                          <a
+                            href={news.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-slate-700 hover:text-indigo-600 hover:underline"
+                          >
+                            {news.sourceName}
+                          </a>
+                        ) : (
+                          news.sourceName
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusClass(news.status)}`}
+                        >
+                          {news.status}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-6 py-4 text-slate-600">
+                        {news.publishAt}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link href={`/admin/news/${news.id}/edit`}>
+                          <Button variant="secondary" size="sm">
+                            <Pencil size={14} />
+                            Edit
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
                 {rows.length === 0 ? (
                   <tr>
                     <td
                       className="px-6 py-8 text-center text-slate-500"
-                      colSpan={8}
+                      colSpan={10}
                     >
                       No news found.
                     </td>
