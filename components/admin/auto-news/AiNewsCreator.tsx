@@ -321,7 +321,7 @@ export function AiNewsCreator({
 
                 <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
                   <Link
-                    href={`/news/${resultNews.id}`}
+                    href={`/${resultNews.category?.slug || "news"}/${resultNews.unique_code}`}
                     target="_blank"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                   >
@@ -330,7 +330,7 @@ export function AiNewsCreator({
                   </Link>
 
                   <Link
-                    href={`/admin/news/${resultNews.id}`}
+                    href={`/admin/news/${resultNews.id}/edit`}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
                   >
                     <Pencil className="w-3.5 h-3.5" />
