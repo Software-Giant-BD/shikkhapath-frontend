@@ -5,11 +5,13 @@ import "@/app/globals.css";
 const notoSansBengali = Noto_Sans_Bengali({
   variable: "--font-noto-sans-bengali",
   subsets: ["bengali"],
+  display: "swap",
 });
 
 const notoSerifBengali = Noto_Serif_Bengali({
   variable: "--font-noto-serif-bengali",
   subsets: ["bengali"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

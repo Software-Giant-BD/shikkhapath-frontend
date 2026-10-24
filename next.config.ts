@@ -1,12 +1,19 @@
 /** @type {import('next').NextConfig} */
 
 module.exports = {
+  compress: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "30mb",
     },
+    optimizePackageImports: ["lucide-react"],
   },
   images: {
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {

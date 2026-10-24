@@ -66,7 +66,6 @@ export function HeroSection({
   videoNews,
   advertisements = [],
 }: HeroSectionProps) {
-  console.log(data?.home_left);
 
   const leftStories =
     data?.home_left && data.home_left.length > 0
@@ -195,7 +194,9 @@ export function HeroSection({
                     alt={story.title}
                     width={500}
                     height={300}
-                    priority
+                    priority={i === 0}
+                    fetchPriority={i === 0 ? "high" : "auto"}
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 500px"
                     className="aspect-video w-full object-cover transition-transform duration-1000 group-hover:scale-[1.05]"
                   />
                   <div className="absolute inset-x-0 bottom-0 flex justify-center p-3">

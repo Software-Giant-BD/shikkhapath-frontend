@@ -30,6 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+export const revalidate = 300;
+
 export default async function CustomerLayout({
   children,
 }: Readonly<{
@@ -67,6 +69,7 @@ export default async function CustomerLayout({
         {children}
         <SiteFooter 
           settings={settings}
+          categories={categories}
         />
       </div>
     </>

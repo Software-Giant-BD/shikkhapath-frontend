@@ -167,6 +167,7 @@ export function SiteHeader({
                 width={780}
                 height={130}
                 priority
+                sizes="336px"
                 className="h-[56px] w-auto drop-shadow-sm"
                 onError={() => setLogoSrc("/logo.png")}
               />
@@ -233,6 +234,7 @@ export function SiteHeader({
                 width={780}
                 height={130}
                 priority
+                sizes="180px"
                 className="h-9 w-auto"
                 onError={() => setLogoSrc("/logo.png")}
               />

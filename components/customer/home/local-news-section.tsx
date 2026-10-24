@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useCallback, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Search, Clock, ChevronRight, Loader2 } from "lucide-react";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
@@ -307,12 +308,14 @@ export function LocalNewsSection({
                     className="group flex gap-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-[#036735]/30 dark:hover:border-[#036735]/50 hover:shadow-md p-3 transition-all duration-200"
                   >
                     {item.feature_image_url && (
-                      <div className="w-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 aspect-[4/3]">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="relative w-24 shrink-0 rounded-lg overflow-hidden bg-gray-100 aspect-[4/3]">
+                        <Image
                           src={item.feature_image_url}
                           alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="96px"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       </div>
                     )}

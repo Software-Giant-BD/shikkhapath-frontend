@@ -51,16 +51,18 @@ export async function fetchApi(
   const includeAuth = options?.includeAuth ?? true;
   const token = includeAuth ? await getAdminToken() : undefined;
 
-  // Get client IP from request headers - wrapped in try-catch to avoid build errors during static generation
+  // Only get client IP when authentication/admin is involved to avoid opting public pages out of caching
   let clientIp = undefined;
-  try {
-    const headerList = await headers();
-    const forwardedFor = headerList.get("x-forwarded-for");
-    const realIp = headerList.get("x-real-ip");
-    clientIp = forwardedFor || realIp;
-  } catch (e) {
-    // During static generation (build time), headers() will throw a DynamicServerError.
-    // We catch it here to allow static rendering to proceed.
+  if (includeAuth) {
+    try {
+      const headerList = await headers();
+      const forwardedFor = headerList.get("x-forwarded-for");
+      const realIp = headerList.get("x-real-ip");
+      clientIp = forwardedFor || realIp;
+    } catch (e) {
+      // During static generation (build time), headers() will throw a DynamicServerError.
+      // We catch it here to allow static rendering to proceed.
+    }
   }
 
   let response;

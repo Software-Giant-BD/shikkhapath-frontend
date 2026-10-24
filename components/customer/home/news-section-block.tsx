@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 
 import type { HomePageCategoryNewsSection } from "@/lib/api/home-page-category-news"
 import { SectionHeader } from "@/components/customer/home/section-header"
@@ -82,14 +83,16 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
         {/* Featured story */}
         <article className="group overflow-hidden rounded-xl border border-slate-100 bg-white transition-all hover:shadow-lg">
           <Link href={getNewsUrl(featured)} className="flex flex-col">
-            <div className="relative overflow-hidden">
-              <img
+            <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+              <Image
                 src={getImageUrl(featured.feature_image_url)}
                 alt={featured.title}
-                className="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 800px"
+                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                 loading="lazy"
               />
-              <span className="absolute left-3 top-3 rounded-lg bg-[#c79a1d] px-2.5 py-1 text-xs font-bold text-white shadow-xl">
+              <span className="absolute left-3 top-3 z-10 rounded-lg bg-[#c79a1d] px-2.5 py-1 text-xs font-bold text-white shadow-xl">
                 {sectionData.category.title}
               </span>
             </div>
@@ -112,9 +115,11 @@ export function NewsSectionBlock({ sectionData, compact = false }: Props) {
             <article key={item.id} className="group overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5">
               <Link href={getNewsUrl(item)} className="flex gap-4 p-3">
                 <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-slate-100 shadow-inner">
-                  <img
+                  <Image
                     src={getImageUrl(item.feature_image_url)}
                     alt={item.title}
+                    fill
+                    sizes="128px"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
                   />

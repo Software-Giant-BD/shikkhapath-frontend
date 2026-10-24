@@ -37,7 +37,7 @@ export function MetaPixel({ pixelId }: MetaPixelProps) {
     <>
       <Script
         id="meta-pixel"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
