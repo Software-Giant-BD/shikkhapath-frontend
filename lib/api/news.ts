@@ -107,6 +107,15 @@ function asString(value: unknown, fallback = ""): string {
   return fallback;
 }
 
+function normalizeDateString(value: unknown, fallback = ""): string {
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object" && "date" in value) {
+    const d = (value as { date: unknown }).date;
+    if (typeof d === "string") return d;
+  }
+  return fallback;
+}
+
 function asNumber(value: unknown, fallback = 0): number {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
@@ -172,7 +181,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     feature_image_url:
       asString(item.feature_image_url ?? item.featureImageUrl) || null,
     status: normalizeStatus(item.status),
-    publish_at: asString(item.publish_at ?? null),
+    publish_at: normalizeDateString(item.publish_at),
     tags: Array.isArray(item.tags)
       ? item.tags.map(String)
       : asString(item.tags)
@@ -192,7 +201,7 @@ function normalizeNews(value: unknown): NewsApiModel {
     sub_category: normalizeRelationCategory(item.sub_category ?? null),
     category_slug: asString(item.category_slug ?? null),
     sub_category_slug: asString(item.sub_category_slug ?? null),
-    created_at: asString(item.created_at ?? null),
+    created_at: normalizeDateString(item.created_at),
   };
 }
 
@@ -209,7 +218,7 @@ function normalizeHeroItem(item: any): HeroNewsItem {
     excerpt: asString(item.excerpt),
     feature_image_url:
       asString(item.feature_image_url ?? item.featureImageUrl) || null,
-    publish_at: asString(item.publish_at ?? item.publishAt),
+    publish_at: normalizeDateString(item.publish_at ?? item.publishAt),
     category: normalizeRelationCategory(item.category),
     category_slug: asString(item.category_slug ?? null),
     sub_category_slug: asString(item.sub_category_slug ?? null),

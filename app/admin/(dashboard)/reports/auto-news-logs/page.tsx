@@ -200,7 +200,7 @@ export default function AutoNewsLogsReportPage() {
                             {log.original_title}
                           </div>
                           <span className="text-[11px] text-indigo-600 font-semibold block mt-0.5">
-                            {log.news_source?.name || "External Portal"}
+                            {log.news_source?.name || (log.original_url?.startsWith("manual://") ? "ম্যানুয়াল এডিটর" : "External Portal")}
                           </span>
                         </td>
 
@@ -268,7 +268,7 @@ export default function AutoNewsLogsReportPage() {
 
                         {/* Original Link */}
                         <td className="p-3.5 text-right whitespace-nowrap">
-                          {log.original_url ? (
+                          {log.original_url && !log.original_url.startsWith("manual://") ? (
                             <a
                               href={log.original_url}
                               target="_blank"
@@ -279,7 +279,9 @@ export default function AutoNewsLogsReportPage() {
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           ) : (
-                            "—"
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+                              ম্যানুয়াল
+                            </span>
                           )}
                         </td>
                       </tr>

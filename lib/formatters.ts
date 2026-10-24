@@ -1,7 +1,19 @@
-export function formatBengaliRelativeTime(dateString: string): string {
+export function formatBengaliRelativeTime(dateString?: string | null): string {
+  if (!dateString || typeof dateString !== "string") {
+    return "";
+  }
+
   const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (Number.isNaN(diffInSeconds) || diffInSeconds < 0) {
+    return "এখনই";
+  }
 
   const bengaliNumbers = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
   const toBengaliNumber = (num: number) =>

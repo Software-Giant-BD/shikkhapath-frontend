@@ -631,3 +631,84 @@ export async function batchSaveNewsSourceSectionsAction(
   }
 }
 
+export type GeneratedNewsResult = {
+  id: number;
+  title: string;
+  excerpt: string;
+  unique_code: string;
+  status: string;
+  category?: {
+    id: number;
+    title: string;
+    slug: string;
+  } | null;
+  feature_image_url?: string | null;
+  source_name?: string | null;
+  source_url?: string | null;
+};
+
+export async function generateNewsFromUrlAction(formData: FormData) {
+  try {
+    const res = await fetchApi("/admin/auto-news/generate-from-url", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "লিঙ্ক থেকে সংবাদ তৈরি করতে ব্যর্থ হয়েছে",
+        news: null as GeneratedNewsResult | null,
+      };
+    }
+
+    revalidatePath("/admin/news/list");
+    revalidatePath("/admin/settings/auto-news");
+    return {
+      success: true,
+      message: data?.message || "নিউজ লিঙ্ক থেকে সফলভাবে সংবাদ তৈরি হয়েছে",
+      news: (data?.resources || null) as GeneratedNewsResult | null,
+    };
+  } catch (e: any) {
+    return {
+      success: false,
+      message: e?.message || "সার্ভার সংযোগে সমস্যা হয়েছে",
+      news: null as GeneratedNewsResult | null,
+    };
+  }
+}
+
+export async function generateNewsFromContentAction(formData: FormData) {
+  try {
+    const res = await fetchApi("/admin/auto-news/generate-from-content", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "কনটেন্ট থেকে সংবাদ তৈরি করতে ব্যর্থ হয়েছে",
+        news: null as GeneratedNewsResult | null,
+      };
+    }
+
+    revalidatePath("/admin/news/list");
+    revalidatePath("/admin/settings/auto-news");
+    return {
+      success: true,
+      message: data?.message || "কনটেন্ট থেকে সফলভাবে সংবাদ তৈরি হয়েছে",
+      news: (data?.resources || null) as GeneratedNewsResult | null,
+    };
+  } catch (e: any) {
+    return {
+      success: false,
+      message: e?.message || "সার্ভার সংযোগে সমস্যা হয়েছে",
+      news: null as GeneratedNewsResult | null,
+    };
+  }
+}
+
+

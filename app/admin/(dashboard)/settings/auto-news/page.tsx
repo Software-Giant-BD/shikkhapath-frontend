@@ -84,8 +84,9 @@ import {
   type CategoryWithKeywords,
   type AutoNewsLogItem,
 } from "@/lib/api/admin/auto-news-actions";
+import { AiNewsCreator } from "@/components/admin/auto-news/AiNewsCreator";
 
-type ActiveTab = "settings" | "sources" | "categories";
+type ActiveTab = "creator" | "settings" | "sources" | "categories";
 
 type SortableNewsSourceTBodyProps = {
   source: NewsSourceItem;
@@ -543,6 +544,13 @@ export default function AutoNewsPage() {
 
   useEffect(() => {
     loadData();
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab") as ActiveTab;
+      if (tabParam && ["creator", "settings", "sources", "categories"].includes(tabParam)) {
+        setActiveTab(tabParam);
+      }
+    }
   }, []);
 
   // Handle ESC key and scroll lock when Add Portal or Link Section modal is open
@@ -1327,6 +1335,17 @@ export default function AutoNewsPage() {
         </button>
 
         <button
+          onClick={() => setActiveTab("creator")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === "creator"
+              ? "border-indigo-600 text-indigo-600 bg-indigo-50/50 rounded-t-lg"
+              : "border-transparent text-slate-600 hover:text-slate-900"
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-indigo-600" /> AI News Creator (লিঙ্ক / কনটেন্ট)
+        </button>
+
+        <button
           onClick={() => setActiveTab("sources")}
           className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
             activeTab === "sources"
@@ -1355,6 +1374,17 @@ export default function AutoNewsPage() {
           <History className="w-4 h-4" /> View Logs in Reports &rarr;
         </Link>
       </div>
+
+      {/* TAB 0: AI NEWS CREATOR */}
+      {activeTab === "creator" && (
+        <AiNewsCreator
+          categories={categories}
+          defaultStatus={settings.default_status}
+          onSuccess={() => {
+            loadData();
+          }}
+        />
+      )}
 
       {/* TAB 1: GENERAL SETTINGS */}
       {activeTab === "settings" && (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { List } from "lucide-react";
+import { List, Sparkles } from "lucide-react";
 
 import { NewsForm } from "@/components/admin/news/NewsForm";
 import { Button } from "@/components/admin/ui/button";
@@ -20,6 +20,8 @@ export default async function AddNewsPage() {
         ]}
       />
 
+
+
       <NewsForm
         categoryOptions={categories.map((category) => ({
           id: category.id,
@@ -28,12 +30,20 @@ export default async function AddNewsPage() {
         }))}
         headerTitle="Add News"
         headerAction={(
-          <Link href="/admin/news/list">
-            <Button variant="secondary">
-              <List size={16} />
-              News List
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/admin/settings/auto-news?tab=creator">
+              <Button variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                <Sparkles size={16} />
+                AI News Creator
+              </Button>
+            </Link>
+            <Link href="/admin/news/list">
+              <Button variant="secondary">
+                <List size={16} />
+                News List
+              </Button>
+            </Link>
+          </div>
         )}
       />
     </div>

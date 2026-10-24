@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
@@ -146,12 +146,21 @@ export default async function NewsListPage({
           <div className="flex flex-col gap-3 border-b border-slate-100 p-4 md:flex-row md:items-center md:justify-between md:p-6">
             <h1 className="text-2xl font-bold text-slate-800">News List</h1>
 
-            <Link href="/admin/news/add">
-              <Button>
-                <Plus size={16} />
-                Add News
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/admin/settings/auto-news?tab=creator">
+                <Button variant="outline" className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800">
+                  <Sparkles size={16} />
+                  AI News Creator
+                </Button>
+              </Link>
+
+              <Link href="/admin/news/add">
+                <Button>
+                  <Plus size={16} />
+                  Add News
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <NewsListFilters
