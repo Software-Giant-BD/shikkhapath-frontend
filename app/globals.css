@@ -205,3 +205,159 @@
     animation: float-in 600ms ease-out both;
   }
 }
+
+/* Scoped Rich Text & Article Typography (Only affects elements inside .rich-text-content or .prose) */
+.rich-text-content,
+.prose {
+  color: #222222;
+  font-family: 'Noto Sans Bengali', sans-serif;
+}
+
+.rich-text-content :where(h1, h2, h3, h4, h5, h6):not(.not-prose),
+.prose :where(h1, h2, h3, h4, h5, h6):not(.not-prose) {
+  font-family: 'Noto Serif Bengali', serif;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.015em;
+}
+
+.rich-text-content :where(h1):not(.not-prose),
+.prose :where(h1):not(.not-prose) {
+  font-size: 1.75rem;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.875rem;
+}
+
+.rich-text-content :where(h2):not(.not-prose),
+.prose :where(h2):not(.not-prose) {
+  font-size: 1.45rem;
+  line-height: 1.4;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.rich-text-content :where(h3):not(.not-prose),
+.prose :where(h3):not(.not-prose) {
+  font-size: 1.25rem;
+  line-height: 1.45;
+  margin-top: 1.5rem;
+  margin-bottom: 0.625rem;
+}
+
+.rich-text-content :where(h4):not(.not-prose),
+.prose :where(h4):not(.not-prose) {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.rich-text-content :where(p):not(.not-prose),
+.prose :where(p):not(.not-prose) {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  line-height: 1.9;
+}
+
+.rich-text-content :where(strong, b):not(.not-prose),
+.prose :where(strong, b):not(.not-prose) {
+  font-weight: 700;
+  color: #000000;
+}
+
+.rich-text-content :where(em, i):not(.not-prose),
+.prose :where(em, i):not(.not-prose) {
+  font-style: italic;
+}
+
+.rich-text-content :where(u):not(.not-prose),
+.prose :where(u):not(.not-prose) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.rich-text-content :where(blockquote):not(.not-prose),
+.prose :where(blockquote):not(.not-prose) {
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem 0.75rem 1.25rem;
+  border-left: 4px solid #c79a1d;
+  background-color: rgba(199, 154, 29, 0.05);
+  border-radius: 0 0.5rem 0.5rem 0;
+  color: #334155;
+  font-style: normal;
+}
+
+.rich-text-content :where(blockquote p):not(.not-prose),
+.prose :where(blockquote p):not(.not-prose) {
+  margin-bottom: 0;
+}
+
+.rich-text-content :where(ul):not(.not-prose),
+.prose :where(ul):not(.not-prose) {
+  list-style-type: disc;
+  margin: 1rem 0 1.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.rich-text-content :where(ol):not(.not-prose),
+.prose :where(ol):not(.not-prose) {
+  list-style-type: decimal;
+  margin: 1rem 0 1.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.rich-text-content :where(li):not(.not-prose),
+.prose :where(li):not(.not-prose) {
+  margin-bottom: 0.5rem;
+  line-height: 1.8;
+}
+
+.rich-text-content :where(a):not(.not-prose),
+.prose :where(a):not(.not-prose) {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.rich-text-content :where(a):hover:not(.not-prose),
+.prose :where(a):hover:not(.not-prose) {
+  color: #1d4ed8;
+}
+
+.rich-text-content :where(img):not(.not-prose),
+.prose :where(img):not(.not-prose) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 1.5rem auto;
+  display: block;
+}
+
+.rich-text-content :where(video):not(.not-prose),
+.prose :where(video):not(.not-prose) {
+  max-width: 100%;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0;
+  background: #0f172a;
+}
+
+.rich-text-content .youtube,
+.prose .youtube {
+  position: relative;
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  padding-top: 56.25%;
+}
+
+.rich-text-content .youtube iframe,
+.prose .youtube iframe {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  border: 0;
+}
