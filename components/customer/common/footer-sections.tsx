@@ -148,8 +148,19 @@ export async function SiteFooter({ settings, categories: initialCategories }: { 
 
       {/* Bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-center gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
-          <p>{settings?.footer_text || "© ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।"}</p>
+        <div className="mx-auto flex w-full max-w-screen-2xl flex-col items-center justify-between gap-2 px-3 py-4 text-xs text-slate-500 sm:flex-row sm:px-4 lg:px-5">
+          <p className="text-center sm:text-left">{settings?.footer_text || "© ২০২৬ শিক্ষাপথ। সর্বস্বত্ব সংরক্ষিত।"}</p>
+          <p className="text-center sm:text-right">
+            Developed by{" "}
+            <Link
+              href="https://softwaregiantbd.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-slate-400 transition-colors hover:text-[#c79a1d]"
+            >
+              Software Giant BD
+            </Link>
+          </p>
         </div>
       </div>
     </footer>
