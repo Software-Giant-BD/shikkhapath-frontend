@@ -97,6 +97,7 @@ type SortableNewsSourceTBodyProps = {
   onMove: (index: number, direction: -1 | 1) => void;
   onToggleStatus: () => void;
   onOpenAddSection: () => void;
+  onEditSource?: (source: NewsSourceItem) => void;
   onEditSection?: (source: NewsSourceItem, section: NewsSourceSectionItem) => void;
   onDeleteSource: () => void;
   onDeleteSection: (sourceId: number, sectionId: number) => void;
@@ -112,6 +113,7 @@ function SortableNewsSourceTBody({
   onMove,
   onToggleStatus,
   onOpenAddSection,
+  onEditSource,
   onEditSection,
   onDeleteSource,
   onDeleteSection,
@@ -280,6 +282,16 @@ function SortableNewsSourceTBody({
         {/* Actions */}
         <td className="p-3.5 text-right whitespace-nowrap">
           <div className="inline-flex items-center gap-1.5">
+            {onEditSource && (
+              <button
+                type="button"
+                onClick={() => onEditSource(source)}
+                className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                title="Edit portal website & RSS feed"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            )}
             <Button
               size="sm"
               variant="outline"
@@ -467,6 +479,7 @@ export default function AutoNewsPage() {
   // Sources state
   const [sources, setSources] = useState<NewsSourceItem[]>([]);
   const [isAddingSource, setIsAddingSource] = useState(false);
+  const [editingSourceId, setEditingSourceId] = useState<number | null>(null);
   const [isDetectingRss, setIsDetectingRss] = useState(false);
   const [rssDetectionResult, setRssDetectionResult] = useState<{
     tested: boolean;
@@ -675,6 +688,49 @@ export default function AutoNewsPage() {
     });
   }
 
+  // Open modal to add a new portal
+  function handleOpenAddSource() {
+    setEditingSourceId(null);
+    setNewSource({
+      name: "",
+      website_url: "",
+      has_rss: false,
+      rss_feed_url: "",
+      filter_mode: "none",
+      target_section_name: "",
+      default_category_id: "",
+      status: "active",
+    });
+    setRssDetectionResult(null);
+    setIsAddingSource(true);
+  }
+
+  // Open modal to edit an existing portal
+  function handleStartEditSource(source: NewsSourceItem) {
+    setEditingSourceId(source.id);
+    setNewSource({
+      name: source.name,
+      website_url: source.website_url,
+      has_rss: source.has_rss ?? false,
+      rss_feed_url: source.rss_feed_url || "",
+      filter_mode: (source.filter_mode as "none" | "keyword") || "none",
+      target_section_name: source.target_section_name || "",
+      default_category_id: source.default_category_id || "",
+      status: source.status || "active",
+    });
+    if (source.rss_feed_url) {
+      setRssDetectionResult({
+        tested: true,
+        found: true,
+        feed_url: source.rss_feed_url,
+        message: "Configured RSS Feed",
+      });
+    } else {
+      setRssDetectionResult(null);
+    }
+    setIsAddingSource(true);
+  }
+
   // Auto-detect RSS Feed for News Portal
   async function runDetectRss(urlToTest?: string) {
     const targetUrl = (urlToTest ?? newSource.website_url).trim();
@@ -694,7 +750,7 @@ export default function AutoNewsPage() {
         setNewSource((prev) => ({
           ...prev,
           has_rss: true,
-          rss_feed_url: res.feed_url || "",
+          rss_feed_url: res.feed_url || prev.rss_feed_url || "",
         }));
       } else {
         setRssDetectionResult({
@@ -704,10 +760,10 @@ export default function AutoNewsPage() {
           method: null,
           message: res.message || "No RSS feed found. Content will be gathered via Web Scraper.",
         });
+        // Only clear has_rss if no manual feed_url was entered by admin
         setNewSource((prev) => ({
           ...prev,
-          has_rss: false,
-          rss_feed_url: "",
+          has_rss: Boolean(prev.rss_feed_url?.trim()),
         }));
       }
     } catch {
@@ -722,28 +778,35 @@ export default function AutoNewsPage() {
     }
   }
 
-  // Add Source
+  // Add or Update Source
   async function handleAddSource(e: React.FormEvent) {
     e.preventDefault();
-    if (!newSource.name || !newSource.website_url) {
-      toast.error("Please fill in the name and website URL");
+    if (!newSource.name.trim() || !newSource.website_url.trim()) {
+      toast.error("Please fill in the portal name and website URL");
       return;
     }
 
     startTransition(async () => {
-      const res = await createNewsSourceAction({
-        name: newSource.name,
-        website_url: newSource.website_url,
-        has_rss: newSource.has_rss,
-        rss_feed_url: newSource.rss_feed_url || undefined,
+      const hasRssFeed = Boolean(newSource.rss_feed_url?.trim());
+      const payload = {
+        name: newSource.name.trim(),
+        website_url: newSource.website_url.trim(),
+        has_rss: hasRssFeed,
+        rss_feed_url: hasRssFeed ? newSource.rss_feed_url.trim() : undefined,
         default_category_id: newSource.default_category_id ? Number(newSource.default_category_id) : null,
         filter_mode: newSource.filter_mode,
-        target_section_name: newSource.target_section_name || null,
+        target_section_name: newSource.target_section_name?.trim() || null,
         status: newSource.status,
-      });
+      };
+
+      const res = editingSourceId
+        ? await updateNewsSourceAction(editingSourceId, payload)
+        : await createNewsSourceAction(payload);
+
       if (res.success) {
-        toast.success("New news source added successfully");
+        toast.success(editingSourceId ? "News source updated successfully" : "New news source added successfully");
         setIsAddingSource(false);
+        setEditingSourceId(null);
         setRssDetectionResult(null);
         setNewSource({
           name: "",
@@ -1657,11 +1720,7 @@ export default function AutoNewsPage() {
               </p>
             </div>
             <Button
-              onClick={() => {
-                setIsAddingSource(true);
-                setRssDetectionResult(null);
-                setActivePortalForSection(null);
-              }}
+              onClick={handleOpenAddSource}
               className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium self-start sm:self-auto gap-1.5"
             >
               <Plus className="w-4 h-4" /> Add New Portal
@@ -2375,20 +2434,25 @@ export default function AutoNewsPage() {
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2.5">
                       <div className="rounded-xl bg-indigo-50 p-2 text-indigo-600">
-                        <Globe className="w-4 h-4" />
+                        {editingSourceId ? <Pencil className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                       </div>
                       <div>
                         <h3 id="add-portal-title" className="text-sm font-bold text-slate-900">
-                          Add New News Portal
+                          {editingSourceId ? "Edit News Portal" : "Add New News Portal"}
                         </h3>
                         <p className="text-xs text-slate-500">
-                          Link a news portal to manage its feeds and category sections
+                          {editingSourceId
+                            ? "Update news portal website and RSS feed configuration"
+                            : "Link a news portal to manage its feeds and category sections"}
                         </p>
                       </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setIsAddingSource(false)}
+                      onClick={() => {
+                        setIsAddingSource(false);
+                        setEditingSourceId(null);
+                      }}
                       disabled={isPending}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
                       aria-label="Close modal"
@@ -2413,13 +2477,13 @@ export default function AutoNewsPage() {
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-semibold text-slate-700">Main Website URL *</Label>
-                        {newSource.website_url.trim().length > 4 && !isDetectingRss && !rssDetectionResult?.tested && (
+                        {newSource.website_url.trim().length > 4 && !isDetectingRss && (
                           <button
                             type="button"
                             onClick={() => runDetectRss()}
                             className="text-[11px] text-indigo-600 hover:text-indigo-700 font-medium hover:underline flex items-center gap-1"
                           >
-                            <Sparkles className="w-3 h-3" /> Auto-Detect Feed
+                            <Sparkles className="w-3 h-3 text-amber-500" /> Auto-Detect Feed
                           </button>
                         )}
                       </div>
@@ -2433,7 +2497,12 @@ export default function AutoNewsPage() {
                             if (rssDetectionResult) setRssDetectionResult(null);
                           }}
                           onBlur={() => {
-                            if (newSource.website_url.trim().length > 6 && !rssDetectionResult && !isDetectingRss) {
+                            if (
+                              newSource.website_url.trim().length > 6 &&
+                              !newSource.rss_feed_url?.trim() &&
+                              !rssDetectionResult &&
+                              !isDetectingRss
+                            ) {
                               runDetectRss();
                             }
                           }}
@@ -2448,97 +2517,102 @@ export default function AutoNewsPage() {
                       </div>
                     </div>
 
-                    {/* RSS Auto-Detection Status Card (Automated, no manual URL entry) */}
-                    <div className="space-y-2">
+                    {/* Manual RSS Feed URL with Auto-Detection Integration */}
+                    <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-xs font-semibold text-slate-700">Feed Ingestion Mode</Label>
-                        {rssDetectionResult?.tested && (
+                        <Label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                          <Rss className="w-3.5 h-3.5 text-indigo-600" />
+                          RSS Feed URL (Optional)
+                        </Label>
+                        {newSource.rss_feed_url && (
                           <button
                             type="button"
-                            onClick={() => runDetectRss()}
-                            disabled={isDetectingRss}
-                            className="text-[11px] text-slate-500 hover:text-indigo-600 font-medium flex items-center gap-1"
+                            onClick={() => {
+                              setNewSource((prev) => ({
+                                ...prev,
+                                rss_feed_url: "",
+                                has_rss: false,
+                              }));
+                              setRssDetectionResult(null);
+                            }}
+                            className="text-[10px] text-slate-400 hover:text-rose-600 font-medium"
                           >
-                            <RefreshCw className={`w-3 h-3 ${isDetectingRss ? "animate-spin" : ""}`} /> Re-scan
+                            Clear Feed
                           </button>
                         )}
                       </div>
+                      <Input
+                        placeholder="e.g. https://www.prothomalo.com/stories.rss"
+                        type="url"
+                        value={newSource.rss_feed_url}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNewSource((prev) => ({
+                            ...prev,
+                            rss_feed_url: val,
+                            has_rss: Boolean(val.trim()),
+                          }));
+                          if (val.trim()) {
+                            setRssDetectionResult({
+                              tested: true,
+                              found: true,
+                              feed_url: val.trim(),
+                              message: "Custom RSS feed link set",
+                            });
+                          }
+                        }}
+                        className="bg-white text-xs h-9 font-mono"
+                      />
+                      <p className="text-[11px] text-slate-500">
+                        System scans and detects feeds automatically, or you can paste any custom RSS URL above. Leave empty to use Web Scraper.
+                      </p>
+                    </div>
 
-                      {/* State 1: Scanning in progress */}
+                    {/* Ingestion Mode Summary Card */}
+                    <div className="space-y-2">
                       {isDetectingRss && (
-                        <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3.5 flex items-start gap-3 animate-pulse">
+                        <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 flex items-start gap-2.5 animate-pulse">
                           <RefreshCw className="w-4 h-4 text-indigo-600 animate-spin mt-0.5 shrink-0" />
                           <div>
                             <div className="text-xs font-bold text-indigo-950">Auto-Detecting RSS Feed...</div>
                             <div className="text-[11px] text-indigo-700 mt-0.5">
-                              Scanning HTML alternate tags, WordPress endpoints, and standard paths.
+                              Scanning HTML alternate tags, WordPress endpoints, and standard paths (/stories.rss, /feed).
                             </div>
                           </div>
                         </div>
                       )}
 
-                      {/* State 2: Feed Auto-Detected & Validated */}
-                      {!isDetectingRss && rssDetectionResult?.found && rssDetectionResult.feed_url && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-2">
+                      {!isDetectingRss && newSource.rss_feed_url?.trim() && (
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 space-y-1.5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800">
                               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                              RSS Feed Auto-Detected & Validated
+                              Active RSS Feed
                             </div>
                             <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
-                              Active RSS
+                              RSS Ingestion Mode
                             </span>
                           </div>
-                          <div className="font-mono text-[11px] text-emerald-950 bg-white/90 p-2 rounded-lg border border-emerald-100 truncate select-all">
-                            {rssDetectionResult.feed_url}
-                          </div>
                           <p className="text-[11px] text-emerald-700">
-                            Legitimate XML feed verified. New articles will be collected automatically through this feed.
+                            New articles from this portal will be fetched and processed through this RSS XML feed.
                           </p>
                         </div>
                       )}
 
-                      {/* State 3: Tested and No RSS Feed Found */}
-                      {!isDetectingRss && rssDetectionResult?.tested && !rssDetectionResult.found && (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3.5 space-y-1.5">
+                      {!isDetectingRss && !newSource.rss_feed_url?.trim() && rssDetectionResult?.tested && !rssDetectionResult.found && (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 space-y-1">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
                               <Globe className="w-4 h-4 text-slate-500 shrink-0" />
-                              No RSS Feed Available
+                              Web Scraper Mode
                             </div>
                             <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">
                               Web Scraper
                             </span>
                           </div>
                           <p className="text-[11px] text-slate-600">
-                            No valid RSS/Atom feed was published on this portal. Articles will be automatically aggregated using the Web Scraper engine.
+                            No RSS feed provided. Articles will be scraped from category section pages.
                           </p>
-                        </div>
-                      )}
-
-                      {/* State 4: Idle (not scanned yet) */}
-                      {!isDetectingRss && !rssDetectionResult?.tested && (
-                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-3.5 flex items-center justify-between gap-3">
-                          <div className="flex items-start gap-2.5">
-                            <Rss className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
-                            <div>
-                              <p className="text-xs font-semibold text-slate-800">Auto RSS Discovery</p>
-                              <p className="text-[11px] text-slate-500">
-                                You don't need to provide an RSS URL. The system scans and validates feeds automatically.
-                              </p>
-                            </div>
-                          </div>
-                          {newSource.website_url.trim().length > 3 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => runDetectRss()}
-                              className="h-7 text-[11px] px-2.5 font-medium shrink-0 bg-white hover:bg-slate-50"
-                            >
-                              Scan Feed
-                            </Button>
-                          )}
                         </div>
                       )}
                     </div>
@@ -2548,7 +2622,10 @@ export default function AutoNewsPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setIsAddingSource(false)}
+                      onClick={() => {
+                        setIsAddingSource(false);
+                        setEditingSourceId(null);
+                      }}
                       disabled={isPending}
                       className="text-xs h-9 px-4"
                     >
@@ -2565,7 +2642,8 @@ export default function AutoNewsPage() {
                         </>
                       ) : (
                         <>
-                          <Save className="w-3.5 h-3.5" /> Save Portal
+                          <Save className="w-3.5 h-3.5" />
+                          {editingSourceId ? "Update Portal" : "Save Portal"}
                         </>
                       )}
                     </Button>
@@ -2628,6 +2706,7 @@ export default function AutoNewsPage() {
                           onMove={handleMoveSource}
                           onToggleStatus={() => handleToggleSource(source.id)}
                           onOpenAddSection={() => handleOpenSectionModal(source)}
+                          onEditSource={(src) => handleStartEditSource(src)}
                           onEditSection={(src, sec) => handleOpenSectionModal(src, sec)}
                           onDeleteSource={() => handleDeleteSource(source.id)}
                           onDeleteSection={handleDeleteSection}
