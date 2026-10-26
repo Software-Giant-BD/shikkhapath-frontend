@@ -108,6 +108,16 @@ const defaultValues: NewsFormValues = {
 };
 
 
+function getCurrentDateTimeLocal() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
 function toDateTimeLocal(value: string) {
   if (!value) return "";
   const normalized = value.replace(" ", "T");
@@ -117,7 +127,13 @@ function toDateTimeLocal(value: string) {
 function buildInitialFormValues(
   initialValues?: NewsFormInitialValues,
 ): NewsFormValues {
-  if (!initialValues) return defaultValues;
+  const currentPublishAt = getCurrentDateTimeLocal();
+  if (!initialValues) {
+    return {
+      ...defaultValues,
+      publish_at: currentPublishAt,
+    };
+  }
 
   return {
     ...defaultValues,
@@ -134,7 +150,9 @@ function buildInitialFormValues(
           .split(",")
           .map((t) => t.trim())
           .filter(Boolean),
-    publish_at: toDateTimeLocal(initialValues.publish_at ?? ""),
+    publish_at: initialValues.publish_at
+      ? toDateTimeLocal(initialValues.publish_at)
+      : currentPublishAt,
   };
 }
 
