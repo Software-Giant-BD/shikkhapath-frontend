@@ -460,6 +460,9 @@ export default function AutoNewsPage() {
   const [settings, setSettings] = useState<AutoNewsSettings>({
     enabled: true,
     daily_limit: 20,
+    morning_limit: 10,
+    effective_limit: 10,
+    is_before_noon: false,
     calculated_category_limit: 4,
     base_category_share: 2,
     active_categories_count: 12,
@@ -1293,8 +1296,16 @@ export default function AutoNewsPage() {
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                 Today&apos;s Post Quota
               </span>
-              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 text-slate-700">
-                {settings.daily_limit} Max
+              <span
+                className={`px-2 py-0.5 text-[11px] font-semibold rounded-full ${
+                  settings.is_before_noon
+                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                    : "bg-blue-50 text-blue-700 border border-blue-200"
+                }`}
+              >
+                {settings.is_before_noon
+                  ? `১২টা পূর্ব কোটা: ${settings.morning_limit ?? Math.ceil(settings.daily_limit / 2)}`
+                  : "১২টা পরবর্তী কোটা"}
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -1309,6 +1320,11 @@ export default function AutoNewsPage() {
                   width: `${Math.min(100, Math.round((settings.today_processed / (settings.daily_limit || 1)) * 100))}%`,
                 }}
               />
+            </div>
+            {/* 12 PM Split breakdown */}
+            <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
+              <span>দুপুর ১২টা পর্যন্ত: <strong className="text-slate-700">{settings.morning_limit ?? Math.ceil(settings.daily_limit / 2)}টি</strong></span>
+              <span>১২টার পর: <strong className="text-slate-700">{Math.max(0, settings.daily_limit - (settings.morning_limit ?? Math.ceil(settings.daily_limit / 2)))}টি</strong></span>
             </div>
           </CardContent>
         </Card>
@@ -1495,7 +1511,9 @@ export default function AutoNewsPage() {
                     />
                     <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">posts / day</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">Typically 15 to 20 articles per day is optimal</p>
+                  <p className="text-[11px] text-indigo-600 font-medium">
+                    দুপুর ১২টা পর্যন্ত ৫০% ({Math.ceil((Number(settings.daily_limit) || 20) / 2)}টি) এবং ১২টার পর বাকি ৫০% স্বয়ংক্রিয়ভাবে কার্যকর হবে।
+                  </p>
                 </div>
 
                 {/* Auto Calculated Category Cap Card */}

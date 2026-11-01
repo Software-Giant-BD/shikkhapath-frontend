@@ -14,6 +14,10 @@ export type CategoryDistributionItem = {
 export type AutoNewsSettings = {
   enabled: boolean;
   daily_limit: number;
+  morning_limit?: number;
+  effective_limit?: number;
+  remaining_quota?: number;
+  is_before_noon?: boolean;
   category_daily_limit?: number;
   calculated_category_limit?: number;
   base_category_share?: number;
