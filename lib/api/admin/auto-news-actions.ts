@@ -715,4 +715,59 @@ export async function generateNewsFromContentAction(formData: FormData) {
   }
 }
 
+export type FacebookShareLogItem = {
+  id: number;
+  news_id: number | null;
+  news: {
+    id: number;
+    title: string;
+    unique_code: string;
+    status: string;
+  } | null;
+  platform: string;
+  post_status: "success" | "failed" | "pending";
+  comment_status: "success" | "failed" | "pending" | "not_required";
+  status: "pending" | "posted" | "failed";
+  external_post_id: string | null;
+  external_comment_id: string | null;
+  error_message: string | null;
+  metadata: Record<string, any> | null;
+  posted_at: string | null;
+  commented_at: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export async function getFacebookShareLogsAction(page = 1, perPage = 15, status?: string) {
+  try {
+    const statusParam = status && status !== "all" ? `&status=${encodeURIComponent(status)}` : "";
+    const res = await fetchApi(`/admin/facebook-share/logs?page=${page}&per_page=${perPage}${statusParam}`, {
+      method: "GET",
+      cache: "no-store",
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { success: false, message: data?.message || "Failed to fetch Facebook share logs", items: [], pagination: null };
+    }
+
+    const items = Array.isArray(data.resources)
+      ? data.resources
+      : (data.resources?.items || []);
+    const pagination = data.pagination || data.resources?.pagination;
+
+    return {
+      success: true,
+      items: items as FacebookShareLogItem[],
+      pagination: {
+        total: Number(pagination?.total || items.length || 0),
+        current_page: Number(pagination?.current_page || 1),
+        last_page: Number(pagination?.last_page || 1),
+      },
+    };
+  } catch {
+    return { success: false, message: "Server connection failed", items: [], pagination: null };
+  }
+}
+
 

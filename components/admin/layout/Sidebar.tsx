@@ -117,6 +117,7 @@ const menuConfig: MenuSection[] = [
         icon: FileText,
         subItems: [
           { title: "Auto News Logs", href: "/admin/reports/auto-news-logs" },
+          { title: "Facebook Share", href: "/admin/reports/facebook-share" },
         ],
       },
       { title: "Settings", icon: Settings, href: "/admin/settings" },
