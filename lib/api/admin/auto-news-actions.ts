@@ -770,4 +770,59 @@ export async function getFacebookShareLogsAction(page = 1, perPage = 15, status?
   }
 }
 
+export async function retryFacebookShareAction(shareId: number) {
+  try {
+    const res = await fetchApi(`/admin/facebook-share/${shareId}/retry`, {
+      method: "POST",
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "পোস্টটি পুনরায় শেয়ার করতে সমস্যা হয়েছে",
+        item: null as FacebookShareLogItem | null,
+      };
+    }
+
+    revalidatePath("/admin/reports/facebook-share");
+
+    return {
+      success: true,
+      message: data?.message || "ফেসবুক শেয়ার সফলভাবে সম্পন্ন হয়েছে",
+      item: (data?.resources || null) as FacebookShareLogItem | null,
+    };
+  } catch {
+    return { success: false, message: "সার্ভার সংযোগে সমস্যা হয়েছে", item: null as FacebookShareLogItem | null };
+  }
+}
+
+export async function retryAllFailedFacebookSharesAction() {
+  try {
+    const res = await fetchApi("/admin/facebook-share/retry-all-failed", {
+      method: "POST",
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "ব্যর্থ পোস্টগুলো পুনরায় কিউতে পাঠাতে সমস্যা হয়েছে",
+        count: 0,
+      };
+    }
+
+    revalidatePath("/admin/reports/facebook-share");
+
+    return {
+      success: true,
+      message: data?.message || "ব্যর্থ পোস্টগুলো পুনরায় কিউতে পাঠানো হয়েছে",
+      count: Number(data?.resources?.count || 0),
+    };
+  } catch {
+    return { success: false, message: "সার্ভার সংযোগে সমস্যা হয়েছে", count: 0 };
+  }
+}
+
+
 

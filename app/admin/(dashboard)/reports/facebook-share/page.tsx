@@ -9,17 +9,21 @@ import {
   XCircle,
   ExternalLink,
   RefreshCw,
+  RotateCcw,
   ChevronLeft,
   ChevronRight,
   Filter,
   MessageSquareText,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import {
   getFacebookShareLogsAction,
+  retryFacebookShareAction,
+  retryAllFailedFacebookSharesAction,
   type FacebookShareLogItem,
 } from "@/lib/api/admin/auto-news-actions";
 
@@ -70,6 +74,8 @@ export default function FacebookShareReportPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [retryingId, setRetryingId] = useState<number | null>(null);
+  const [isRetryingAll, setIsRetryingAll] = useState(false);
 
   async function fetchLogs(targetPage = page, targetStatus = statusFilter) {
     setIsLoading(true);
@@ -94,6 +100,55 @@ export default function FacebookShareReportPage() {
     setPage(1);
   };
 
+  const handleRetrySingle = async (shareId: number) => {
+    setRetryingId(shareId);
+    try {
+      const res = await retryFacebookShareAction(shareId);
+      if (res.success) {
+        toast.success(res.message);
+        if (res.item) {
+          setLogs((prev) => prev.map((item) => (item.id === shareId ? res.item! : item)));
+        } else {
+          fetchLogs();
+        }
+      } else {
+        toast.error(res.message);
+        fetchLogs();
+      }
+    } catch {
+      toast.error("পুনরায় চেষ্টা করতে সমস্যা হয়েছে");
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
+  const handleRetryAll = async () => {
+    if (!window.confirm("আপনি কি সকল ব্যর্থ ফেসবুক পোস্ট পুনরায় কিউতে পাঠাতে চান?")) {
+      return;
+    }
+    setIsRetryingAll(true);
+    try {
+      const res = await retryAllFailedFacebookSharesAction();
+      if (res.success) {
+        toast.success(res.message);
+        fetchLogs();
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("সার্ভার সংযোগে সমস্যা হয়েছে");
+    } finally {
+      setIsRetryingAll(false);
+    }
+  };
+
+  const canRetry = (log: FacebookShareLogItem) => {
+    if (!log.news) return false;
+    if (log.status === "failed" || log.post_status === "failed") return true;
+    if (log.status === "posted" && !log.external_comment_id && log.comment_status !== "not_required") return true;
+    return false;
+  };
+
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-5 lg:px-6">
       <PageHeader
@@ -104,16 +159,28 @@ export default function FacebookShareReportPage() {
           { label: "Facebook Share" },
         ]}
         action={
-          <Button
-            onClick={() => fetchLogs()}
-            variant="outline"
-            size="sm"
-            disabled={isLoading || isPending}
-            className="text-xs h-8 gap-1.5"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleRetryAll}
+              variant="outline"
+              size="sm"
+              disabled={isRetryingAll || isLoading || isPending}
+              className="text-xs h-8 gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${isRetryingAll ? "animate-spin" : ""}`} />
+              {isRetryingAll ? "Retrying All..." : "Retry All Failed"}
+            </Button>
+            <Button
+              onClick={() => fetchLogs()}
+              variant="outline"
+              size="sm"
+              disabled={isLoading || isPending || isRetryingAll}
+              className="text-xs h-8 gap-1.5"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
         }
       />
 
@@ -171,20 +238,21 @@ export default function FacebookShareReportPage() {
                   <th className="p-3.5 whitespace-nowrap">Comment</th>
                   <th className="p-3.5 whitespace-nowrap">Status</th>
                   <th className="p-3.5 min-w-[200px]">Reason / Error</th>
-                  <th className="p-3.5 text-right whitespace-nowrap">Links</th>
+                  <th className="p-3.5 text-center whitespace-nowrap">Link</th>
+                  <th className="p-3.5 text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-500" />
                       Loading Facebook share report...
                     </td>
                   </tr>
                 ) : logs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                       No share log found for the selected filter.
                     </td>
@@ -261,7 +329,7 @@ export default function FacebookShareReportPage() {
                         )}
                       </td>
 
-                      <td className="p-3.5 text-right whitespace-nowrap">
+                      <td className="p-3.5 text-center whitespace-nowrap">
                         {log.external_post_id ? (
                           <a
                             href={`https://facebook.com/${log.external_post_id}`}
@@ -274,6 +342,24 @@ export default function FacebookShareReportPage() {
                           </a>
                         ) : (
                           <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">N/A</span>
+                        )}
+                      </td>
+
+                      <td className="p-3.5 text-right whitespace-nowrap">
+                        {canRetry(log) ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRetrySingle(log.id)}
+                            disabled={retryingId === log.id || isRetryingAll}
+                            className="h-7 px-2.5 text-[11px] font-semibold gap-1 text-slate-700 hover:text-indigo-600 hover:border-indigo-200"
+                            title={log.status === "failed" ? "Retry sharing post to Facebook" : "Retry adding Facebook comment"}
+                          >
+                            <RotateCcw className={`w-3 h-3 ${retryingId === log.id ? "animate-spin text-indigo-600" : ""}`} />
+                            {retryingId === log.id ? "Retrying..." : "Retry"}
+                          </Button>
+                        ) : (
+                          <span className="text-[11px] text-slate-300 select-none">—</span>
                         )}
                       </td>
                     </tr>
