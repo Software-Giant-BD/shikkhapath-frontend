@@ -31,6 +31,9 @@ import {
   ArrowDown,
   Crown,
   Pencil,
+  AlertTriangle,
+  Clock,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -77,12 +80,14 @@ import {
   generateCategoryKeywordsAction,
   getAutoNewsLogsAction,
   triggerAutoNewsAction,
+  reviveDormantCategoriesAction,
   type AutoNewsSettings,
   type NewsSourceItem,
   type NewsSourceSectionItem,
   type AiDetectedCategoryItem,
   type CategoryWithKeywords,
   type AutoNewsLogItem,
+  type DormantCategoryItem,
 } from "@/lib/api/admin/auto-news-actions";
 import { AiNewsCreator } from "@/components/admin/auto-news/AiNewsCreator";
 
@@ -467,6 +472,10 @@ export default function AutoNewsPage() {
     base_category_share: 2,
     active_categories_count: 12,
     categories_distribution: [],
+    dormant_enabled: true,
+    dormant_threshold_days: 5,
+    dormant_limit_per_category: 1,
+    dormant_categories: [],
     default_status: "published",
     generate_image: true,
     image_provider: "pollinations",
@@ -531,6 +540,9 @@ export default function AutoNewsPage() {
   // Manual Trigger state
   const [isTriggering, setIsTriggering] = useState(false);
   const [triggerLimit, setTriggerLimit] = useState<number>(1);
+
+  // Dormant Reviver state
+  const [isRevivingDormant, setIsRevivingDormant] = useState(false);
 
   // Load Initial Data
   async function loadData() {
@@ -604,6 +616,9 @@ export default function AutoNewsPage() {
         openrouter_model: settings.openrouter_model,
         gemini_api_key: settings.gemini_api_key,
         gemini_model: settings.gemini_model,
+        dormant_enabled: settings.dormant_enabled,
+        dormant_threshold_days: Number(settings.dormant_threshold_days || 5),
+        dormant_limit_per_category: Number(settings.dormant_limit_per_category || 1),
       });
 
       if (res.success) {
@@ -612,6 +627,29 @@ export default function AutoNewsPage() {
         toast.error(res.message);
       }
     });
+  }
+
+  // Revive Dormant Categories Handler
+  async function handleReviveDormant() {
+    setIsRevivingDormant(true);
+    try {
+      toast.info("সুপ্ত ক্যাটাগরিগুলোর জন্য নিউজ খোঁজা ও AI রিরাইটিং শুরু হয়েছে...");
+      const res = await reviveDormantCategoriesAction(
+        settings.dormant_threshold_days || 5,
+        settings.dormant_limit_per_category || 1,
+        true
+      );
+      if (res.success) {
+        toast.success(res.message);
+        await loadData();
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("পুনরুদ্ধার প্রক্রিয়া ব্যর্থ হয়েছে।");
+    } finally {
+      setIsRevivingDormant(false);
+    }
   }
 
   // Toggle Source Status
@@ -1659,6 +1697,135 @@ export default function AutoNewsPage() {
                   </div>
                 </div>
               )}
+
+              {/* Dormant Categories Watcher (সুপ্ত ক্যাটাগরি স্বয়ংক্রিয় পুনরুদ্ধার) */}
+              <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/40 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-600" />
+                      Dormant Categories Watcher (সুপ্ত ক্যাটাগরি পুনরুদ্ধার)
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      বিগত {settings.dormant_threshold_days ?? 5} দিন ধরে কোনো পোস্ট না হওয়া ক্যাটাগরিতে স্বয়ংক্রিয়ভাবে খবর পোস্ট হবে (প্রতিদিন ভোর ০৬:৩০ টায়)
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleReviveDormant}
+                      disabled={isRevivingDormant || isPending}
+                      className="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium shadow-none gap-1.5 cursor-pointer"
+                    >
+                      {isRevivingDormant ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          পুনরুদ্ধার চলছে...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5" />
+                          Revive Starving Now
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Settings Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 border-t border-amber-200/60">
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-amber-100">
+                    <div>
+                      <Label htmlFor="dormant_toggle" className="text-xs font-semibold text-slate-800 cursor-pointer">
+                        স্বয়ংক্রিয় পুনরুদ্ধার
+                      </Label>
+                      <p className="text-[10px] text-slate-500">ক্রনে প্রতিদিন একবার চেক হবে</p>
+                    </div>
+                    <input
+                      id="dormant_toggle"
+                      type="checkbox"
+                      checked={settings.dormant_enabled ?? true}
+                      onChange={(e) => setSettings({ ...settings, dormant_enabled: e.target.checked })}
+                      className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="p-2 rounded-lg bg-white border border-amber-100 flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="dormant_days" className="text-xs font-semibold text-slate-800">
+                        সুপ্ত ক্যাটাগরি সীমা
+                      </Label>
+                      <p className="text-[10px] text-slate-500">কতদিন খবর না থাকলে সুপ্ত</p>
+                    </div>
+                    <select
+                      id="dormant_days"
+                      value={settings.dormant_threshold_days ?? 5}
+                      onChange={(e) => setSettings({ ...settings, dormant_threshold_days: Number(e.target.value) })}
+                      className="h-7 text-xs border border-slate-200 rounded px-2 bg-slate-50 font-medium text-slate-800"
+                    >
+                      <option value={3}>৩ দিন</option>
+                      <option value={5}>৫ দিন (ডিফল্ট)</option>
+                      <option value={7}>৭ দিন</option>
+                      <option value={10}>১০ দিন</option>
+                    </select>
+                  </div>
+
+                  <div className="p-2 rounded-lg bg-white border border-amber-100 flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="dormant_limit" className="text-xs font-semibold text-slate-800">
+                        পোস্ট লিমিট / ক্যাটাগরি
+                      </Label>
+                      <p className="text-[10px] text-slate-500">প্রতি ক্যাটাগরিতে খবর সংখ্যা</p>
+                    </div>
+                    <select
+                      id="dormant_limit"
+                      value={settings.dormant_limit_per_category ?? 1}
+                      onChange={(e) => setSettings({ ...settings, dormant_limit_per_category: Number(e.target.value) })}
+                      className="h-7 text-xs border border-slate-200 rounded px-2 bg-slate-50 font-medium text-slate-800"
+                    >
+                      <option value={1}>১টি খবর</option>
+                      <option value={2}>২টি খবর</option>
+                      <option value={3}>৩টি খবর</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Starving / Dormant Categories List */}
+                {settings.dormant_categories && settings.dormant_categories.length > 0 ? (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium">
+                      <span>বর্তমানে {settings.dormant_categories.length}টি ক্যাটাগরিতে {settings.dormant_threshold_days ?? 5}+ দিন ধরে পোস্ট নেই:</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                      {settings.dormant_categories.map((dCat) => (
+                        <div
+                          key={dCat.id}
+                          className="p-2.5 rounded-lg border border-amber-200 bg-white shadow-xs text-xs space-y-1"
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-semibold text-slate-800 truncate" title={dCat.title}>
+                              {dCat.title}
+                            </span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 shrink-0">
+                              {dCat.days_since_last_post >= 999 ? "পোস্ট নেই" : `${dCat.days_since_last_post} দিন`}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 flex items-center justify-between">
+                            <span>সর্বশেষ: {dCat.last_news_human}</span>
+                            <span>মোট: {dCat.total_posts}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>সকল সক্রিয় ক্যাটাগরিতে বিগত {settings.dormant_threshold_days ?? 5} দিনের মধ্যে খবর পোস্ট হয়েছে। কোনো সুপ্ত ক্যাটাগরি নেই।</span>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 

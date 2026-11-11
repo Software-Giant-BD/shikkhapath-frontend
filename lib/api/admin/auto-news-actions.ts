@@ -11,6 +11,16 @@ export type CategoryDistributionItem = {
   max_limit: number;
 };
 
+export type DormantCategoryItem = {
+  id: number;
+  title: string;
+  slug: string;
+  last_news_at: string | null;
+  last_news_human: string;
+  days_since_last_post: number;
+  total_posts: number;
+};
+
 export type AutoNewsSettings = {
   enabled: boolean;
   daily_limit: number;
@@ -23,6 +33,10 @@ export type AutoNewsSettings = {
   base_category_share?: number;
   active_categories_count?: number;
   categories_distribution?: CategoryDistributionItem[];
+  dormant_enabled?: boolean;
+  dormant_threshold_days?: number;
+  dormant_limit_per_category?: number;
+  dormant_categories?: DormantCategoryItem[];
   default_status: "published" | "draft";
   generate_image: boolean;
   image_provider: string;
@@ -454,6 +468,37 @@ export async function triggerAutoNewsAction(limit?: number) {
     revalidatePath("/admin/settings/auto-news");
     revalidatePath("/admin/news");
     return { success: true, message: data?.message || "Auto-news processed", result: data.resources };
+  } catch {
+    return { success: false, message: "Server connection failed", result: null };
+  }
+}
+
+export async function reviveDormantCategoriesAction(days?: number, limitPerCategory?: number, sync = true) {
+  try {
+    const res = await fetchApi("/admin/auto-news/revive-dormant", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        days,
+        limit_per_category: limitPerCategory,
+        sync,
+      }),
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { success: false, message: data?.message || "Failed to revive dormant categories", result: null };
+    }
+
+    revalidatePath("/admin/settings/auto-news");
+    revalidatePath("/admin/reports/auto-news-logs");
+    revalidatePath("/admin/news");
+
+    return {
+      success: true,
+      message: data?.message || "সুপ্ত ক্যাটাগরি পুনরুদ্ধার সফল হয়েছে!",
+      result: data.resources,
+    };
   } catch {
     return { success: false, message: "Server connection failed", result: null };
   }
