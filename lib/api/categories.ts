@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 
 import { extractPagination, fetchApi, rethrowNextErrors, type BasePagination } from "./common";
 
@@ -273,7 +274,7 @@ export async function getCategoryById(
   }
 }
 
-export async function getMenuCategories(): Promise<CategoryApiModel[]> {
+export const getMenuCategories = cache(async (): Promise<CategoryApiModel[]> => {
   try {
     const response = await fetchApi(
       "/menu-categories",
@@ -295,7 +296,7 @@ export async function getMenuCategories(): Promise<CategoryApiModel[]> {
     console.error("Failed to fetch menu categories:", error);
     return [];
   }
-}
+});
 
 export async function getAllCategories(): Promise<CategoryApiModel[]> {
   try {

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 
 import { extractPagination, fetchApi, type BasePagination } from "./common";
 
@@ -525,110 +526,123 @@ export async function getLocalNews(params: {
   }
 }
 
+const resolveAnyPathInternal = cache(
+  async (
+    pathString: string,
+    page: number = 1,
+  ): Promise<
+    | { contentType: "news_details"; data: any }
+    | { contentType: "category_page"; data: CategoryPageResponse }
+    | null
+  > => {
+    try {
+      const response = await fetchApi(
+        `/resolve-path/${pathString}?page=${page}`,
+        {
+          next: {
+            revalidate: 60,
+          },
+        },
+        { includeAuth: false },
+      );
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) return null;
+
+      const resources = payload?.resources || payload;
+      const contentType = resources?.content_type;
+
+      if (contentType === "news_details") {
+        const main_news = resources?.main_news;
+        const item = extractOne(main_news);
+        if (!item) return null;
+
+        return {
+          contentType: "news_details",
+          data: {
+            main_news: normalizeNews(item),
+            category_news: resources?.category_news,
+            category_hierarchy: resources?.category_hierarchy,
+            popular_news: Array.isArray(resources?.popular_news)
+              ? resources.popular_news.map(normalizeHeroItem)
+              : [],
+          },
+        };
+      }
+
+      if (contentType === "category_page") {
+        const data: CategoryPageResponse = {
+          category: {
+            id: asString(resources.category?.id),
+            title: asString(resources.category?.title),
+            slug: asString(resources.category?.slug),
+            meta_title: asString(resources.category?.meta_title) || null,
+            meta_description:
+              asString(resources.category?.meta_description) || null,
+            meta_keywords: asString(resources.category?.meta_keywords) || null,
+          },
+          sub_categories: Array.isArray(resources.sub_categories)
+            ? resources.sub_categories.map((c: any) => ({
+                id: asString(c.id),
+                title: asString(c.title),
+                slug: asString(c.slug),
+              }))
+            : [],
+          popular_news: Array.isArray(resources.popular_news)
+            ? resources.popular_news.map(normalizeHeroItem)
+            : [],
+          latest_news: Array.isArray(resources.latest_news)
+            ? resources.latest_news.map(normalizeHeroItem)
+            : [],
+          selective_news: Array.isArray(resources.selective_news)
+            ? resources.selective_news.map(normalizeHeroItem)
+            : [],
+          paginated_news: Array.isArray(resources.paginated_news)
+            ? resources.paginated_news.map(normalizeHeroItem)
+            : [],
+          category_hierarchy: resources.category_hierarchy || [],
+          meta: {
+            current_page: asNumber(resources.meta?.current_page),
+            last_page: asNumber(resources.meta?.last_page),
+            per_page: asNumber(resources.meta?.per_page),
+            total: asNumber(resources.meta?.total),
+          },
+        };
+
+        const slug = pathString.split("/").filter(Boolean).pop() || pathString;
+        if (slug === "video" && data.paginated_news.length === 0) {
+          const vNews = await getVideoNews();
+          if (vNews && vNews.length > 0) {
+            data.paginated_news = vNews;
+            if (data.latest_news.length === 0) data.latest_news = vNews;
+            if (data.popular_news.length === 0)
+              data.popular_news = vNews.slice(0, 5);
+            data.meta.total = vNews.length;
+            data.meta.per_page = vNews.length;
+            data.meta.last_page = 1;
+          }
+        }
+
+        return {
+          contentType: "category_page",
+          data,
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error(`Failed to resolve path for ${pathString}:`, error);
+      return null;
+    }
+  },
+);
+
 export async function resolveAnyPath(
   path: string | string[],
   page: number = 1,
-): Promise<
-  | { contentType: "news_details"; data: any }
-  | { contentType: "category_page"; data: CategoryPageResponse }
-  | null
-> {
-  try {
-    const pathString = Array.isArray(path) ? path.join("/") : path;
-    const response = await fetchApi(
-      `/resolve-path/${pathString}?page=${page}`,
-      undefined,
-      { includeAuth: false },
-    );
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok) return null;
-
-    const resources = payload?.resources || payload;
-    const contentType = resources?.content_type;
-
-    if (contentType === "news_details") {
-      const main_news = resources?.main_news;
-      const item = extractOne(main_news);
-      if (!item) return null;
-
-      return {
-        contentType: "news_details",
-        data: {
-          main_news: normalizeNews(item),
-          category_news: resources?.category_news,
-          category_hierarchy: resources?.category_hierarchy,
-          popular_news: Array.isArray(resources?.popular_news)
-            ? resources.popular_news.map(normalizeHeroItem)
-            : [],
-        },
-      };
-    }
-
-    if (contentType === "category_page") {
-      const data: CategoryPageResponse = {
-        category: {
-          id: asString(resources.category?.id),
-          title: asString(resources.category?.title),
-          slug: asString(resources.category?.slug),
-          meta_title: asString(resources.category?.meta_title) || null,
-          meta_description:
-            asString(resources.category?.meta_description) || null,
-          meta_keywords: asString(resources.category?.meta_keywords) || null,
-        },
-        sub_categories: Array.isArray(resources.sub_categories)
-          ? resources.sub_categories.map((c: any) => ({
-              id: asString(c.id),
-              title: asString(c.title),
-              slug: asString(c.slug),
-            }))
-          : [],
-        popular_news: Array.isArray(resources.popular_news)
-          ? resources.popular_news.map(normalizeHeroItem)
-          : [],
-        latest_news: Array.isArray(resources.latest_news)
-          ? resources.latest_news.map(normalizeHeroItem)
-          : [],
-        selective_news: Array.isArray(resources.selective_news)
-          ? resources.selective_news.map(normalizeHeroItem)
-          : [],
-        paginated_news: Array.isArray(resources.paginated_news)
-          ? resources.paginated_news.map(normalizeHeroItem)
-          : [],
-        category_hierarchy: resources.category_hierarchy || [],
-        meta: {
-          current_page: asNumber(resources.meta?.current_page),
-          last_page: asNumber(resources.meta?.last_page),
-          per_page: asNumber(resources.meta?.per_page),
-          total: asNumber(resources.meta?.total),
-        },
-      };
-
-      const slug = Array.isArray(path) ? path[path.length - 1] : path;
-      if (slug === "video" && data.paginated_news.length === 0) {
-        const vNews = await getVideoNews();
-        if (vNews && vNews.length > 0) {
-          data.paginated_news = vNews;
-          if (data.latest_news.length === 0) data.latest_news = vNews;
-          if (data.popular_news.length === 0)
-            data.popular_news = vNews.slice(0, 5);
-          data.meta.total = vNews.length;
-          data.meta.per_page = vNews.length;
-          data.meta.last_page = 1;
-        }
-      }
-
-      return {
-        contentType: "category_page",
-        data,
-      };
-    }
-
-    return null;
-  } catch (error) {
-    console.error(`Failed to resolve path for ${path}:`, error);
-    return null;
-  }
+) {
+  const pathString = Array.isArray(path) ? path.join("/") : path;
+  return resolveAnyPathInternal(pathString, page);
 }
 
 export type CategoryPageResponse = {

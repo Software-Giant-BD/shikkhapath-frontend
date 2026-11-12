@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { fetchApi, extractPagination } from "./common";
 
 export type Advertisement = {
@@ -51,40 +52,44 @@ export async function getAdvertisements(params?: {
   };
 }
 
+const getCustomerAdvertisementsInternal = cache(
+  async (category?: string, placement?: string) => {
+    const searchParams = new URLSearchParams();
+    if (category) searchParams.set("category", category);
+    if (placement) searchParams.set("placement", placement);
+
+    const query = searchParams.toString();
+    const endpoint = query ? `/advertisements?${query}` : "/advertisements";
+
+    const response = await fetchApi(
+      endpoint,
+      {
+        next: {
+          revalidate: 300,
+          tags: ["advertisements"],
+        },
+      },
+      { includeAuth: false },
+    );
+
+    if (!response.ok) {
+      return { items: [] };
+    }
+
+    const data = await response.json().catch(() => null);
+    const items = Array.isArray(data?.resources) ? data.resources : [];
+
+    return {
+      items: items as Advertisement[],
+    };
+  },
+);
+
 export async function getCustomerAdvertisements(params?: {
   category?: string;
   placement?: string;
 }) {
-  const searchParams = new URLSearchParams();
-  if (params?.category) searchParams.set("category", params.category);
-  if (params?.placement) searchParams.set("placement", params.placement);
-
-  const response = await fetchApi(
-    `/advertisements?${searchParams.toString()}`,
-    {
-      next: {
-        revalidate: 300,
-        tags: ["advertisements"],
-      },
-    },
-    { includeAuth: false },
-  );
-
-  if (!response.ok) {
-    return { items: [] };
-  }
-
-  const data = await response.json();
-  const items = Array.isArray(data.resources) ? data.resources : [];
-
-  if (items.length === 0 && typeof window === "undefined") {
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    fetch(`${APP_URL}/api/revalidate?tag=advertisements`).catch(() => {});
-  }
-
-  return {
-    items: items as Advertisement[],
-  };
+  return getCustomerAdvertisementsInternal(params?.category, params?.placement);
 }
 
 export async function getAdvertisement(id: number | string) {

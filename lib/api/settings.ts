@@ -1,7 +1,8 @@
 import "server-only";
+import { cache } from "react";
 import { fetchApi } from "./common";
 
-export async function getPublicSettings() {
+export const getPublicSettings = cache(async () => {
   try {
     const response = await fetchApi(
       "/settings",
@@ -19,4 +20,4 @@ export async function getPublicSettings() {
     console.error("Failed to fetch public settings:", error);
     return {};
   }
-}
+});
