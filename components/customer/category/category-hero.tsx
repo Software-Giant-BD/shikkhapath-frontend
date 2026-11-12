@@ -54,37 +54,39 @@ export function CategoryHero({ news }: Props) {
 
         <div className="grid gap-6 sm:grid-cols-2">
           {news.slice(3, 5).map((item) => (
-            <article key={item.id} className="group flex flex-col gap-3">
+            <article key={item.id} className="group">
               <Link
                 href={getNewsUrl(item)}
-                className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100"
+                className="flex flex-col gap-3"
               >
-                <Image
-                  fill
-                  src={
-                    item.youtube_thumbnail_url ||
-                    item.feature_image_url ||
-                    "/No_Image_Available.jpg"
-                  }
-                  alt={item.title}
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                {item.type === "video" && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
-                      <Play className="h-4 w-4 fill-red-600 text-red-600 ml-0.5" />
+                <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 ring-1 ring-slate-100">
+                  <Image
+                    fill
+                    src={
+                      item.youtube_thumbnail_url ||
+                      item.feature_image_url ||
+                      "/No_Image_Available.jpg"
+                    }
+                    alt={item.title}
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {item.type === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                        <Play className="h-4 w-4 fill-red-600 text-red-600 ml-0.5" />
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-bold leading-snug line-clamp-2 group-hover:text-[#c00000] transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-[10px] font-bold text-slate-400">
+                    {formatBengaliRelativeTime(item.publish_at)}
+                  </p>
+                </div>
               </Link>
-              <div>
-                <h3 className="text-[15px] font-bold leading-snug line-clamp-2 group-hover:text-[#c00000] transition-colors">
-                  {item.title}
-                </h3>
-                <p className="mt-1 text-[10px] font-bold text-slate-400">
-                  {formatBengaliRelativeTime(item.publish_at)}
-                </p>
-              </div>
             </article>
           ))}
         </div>
@@ -93,49 +95,51 @@ export function CategoryHero({ news }: Props) {
       {/* Right List Area */}
       <div className="flex flex-col gap-6">
         {secondary && (
-          <article className="group flex flex-col gap-4 border-b border-slate-100 pb-6">
+          <article className="group border-b border-slate-100 pb-6">
             <Link
               href={getNewsUrl(secondary)}
-              className="relative aspect-video overflow-hidden rounded-xl"
+              className="flex flex-col gap-4"
             >
-              <Image
-                fill
-                src={
-                  secondary.youtube_thumbnail_url ||
-                  secondary.feature_image_url ||
-                  "/No_Image_Available.jpg"
-                }
-                alt={secondary.title}
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              {secondary.type === "video" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
-                    <Play className="h-5 w-5 fill-red-600 text-red-600 ml-0.5" />
+              <div className="relative aspect-video overflow-hidden rounded-xl">
+                <Image
+                  fill
+                  src={
+                    secondary.youtube_thumbnail_url ||
+                    secondary.feature_image_url ||
+                    "/No_Image_Available.jpg"
+                  }
+                  alt={secondary.title}
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                {secondary.type === "video" && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg transition-transform group-hover:scale-110">
+                      <Play className="h-5 w-5 fill-red-600 text-red-600 ml-0.5" />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold leading-tight group-hover:text-[#c00000] transition-colors">
+                  {secondary.title}
+                </h3>
+                <p className="text-[13px] leading-relaxed text-slate-500 line-clamp-2">
+                  {secondary.excerpt}
+                </p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {formatBengaliRelativeTime(secondary.publish_at)}
+                </p>
+              </div>
             </Link>
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold leading-tight group-hover:text-[#c00000] transition-colors">
-                {secondary.title}
-              </h3>
-              <p className="text-[13px] leading-relaxed text-slate-500 line-clamp-2">
-                {secondary.excerpt}
-              </p>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                {formatBengaliRelativeTime(secondary.publish_at)}
-              </p>
-            </div>
           </article>
         )}
 
         <div className="flex flex-col gap-4">
           {news.slice(2, 3).map((item) => (
-            <article key={item.id} className="group flex gap-3 items-center">
+            <article key={item.id} className="group">
               <Link
-                href={getNewsUrl(secondary)}
-                className="relative aspect-video overflow-hidden rounded-xl"
+                href={getNewsUrl(item)}
+                className="flex gap-3 items-center"
               >
                 <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
                   <Image
@@ -149,15 +153,15 @@ export function CategoryHero({ news }: Props) {
                     className="object-cover"
                   />
                 </div>
+                <div>
+                  <h4 className="text-[13px] font-bold leading-tight line-clamp-2 group-hover:text-[#c00000]">
+                    {item.title}
+                  </h4>
+                  <p className="mt-1 text-[10px] font-bold text-slate-400">
+                    {formatBengaliRelativeTime(item.publish_at)}
+                  </p>
+                </div>
               </Link>
-              <div>
-                <h4 className="text-[13px] font-bold leading-tight line-clamp-2 group-hover:text-[#c00000]">
-                  {item.title}
-                </h4>
-                <p className="mt-1 text-[10px] font-bold text-slate-400">
-                  {formatBengaliRelativeTime(item.publish_at)}
-                </p>
-              </div>
             </article>
           ))}
         </div>

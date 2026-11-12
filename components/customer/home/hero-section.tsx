@@ -259,21 +259,23 @@ export function HeroSection({
               {/* Left Column */}
               <div className="flex flex-col gap-4">
                 {topicData.left.map((item, i) => (
-                  <article key={i} className="group flex flex-col gap-2">
+                  <article key={i} className="group">
                     <Link
                       href={getNewsUrl(item)}
-                      className="relative aspect-video overflow-hidden rounded-lg"
+                      className="flex flex-col gap-2"
                     >
-                      <Image
-                        fill
-                        src={item.image || "/placeholder-news.jpg"}
-                        alt={item.title}
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <div className="relative aspect-video overflow-hidden rounded-lg">
+                        <Image
+                          fill
+                          src={item.image || "/placeholder-news.jpg"}
+                          alt={item.title}
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
+                        {item.title}
+                      </h4>
                     </Link>
-                    <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
-                      {item.title}
-                    </h4>
                   </article>
                 ))}
               </div>
@@ -309,21 +311,23 @@ export function HeroSection({
               {/* Right Column */}
               <div className="flex flex-col gap-4">
                 {topicData.right.map((item, i) => (
-                  <article key={i} className="group flex flex-col gap-2">
+                  <article key={i} className="group">
                     <Link
                       href={getNewsUrl(item)}
-                      className="relative aspect-video overflow-hidden rounded-lg"
+                      className="flex flex-col gap-2"
                     >
-                      <Image
-                        fill
-                        src={item.image || "/placeholder-news.jpg"}
-                        alt={item.title}
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <div className="relative aspect-video overflow-hidden rounded-lg">
+                        <Image
+                          fill
+                          src={item.image || "/placeholder-news.jpg"}
+                          alt={item.title}
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
+                        {item.title}
+                      </h4>
                     </Link>
-                    <h4 className="text-[12.5px] font-bold leading-tight line-clamp-2 group-hover:text-red-600 transition-colors uppercase">
-                      {item.title}
-                    </h4>
                   </article>
                 ))}
               </div>
