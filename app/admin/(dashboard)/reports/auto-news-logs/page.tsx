@@ -9,16 +9,20 @@ import {
   XCircle,
   ExternalLink,
   RefreshCw,
+  RotateCcw,
   ChevronLeft,
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
 import {
   getAutoNewsLogsAction,
+  retryAutoNewsLogAction,
+  retryAllFailedAutoNewsAction,
   type AutoNewsLogItem,
 } from "@/lib/api/admin/auto-news-actions";
 
@@ -41,6 +45,16 @@ export default function AutoNewsLogsReportPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [retryingId, setRetryingId] = useState<number | null>(null);
+  const [isRetryingAll, setIsRetryingAll] = useState(false);
+
+  const isOlderThan5Days = (dateStr?: string | null) => {
+    if (!dateStr) return false;
+    const created = new Date(dateStr).getTime();
+    const now = new Date().getTime();
+    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+    return diffDays > 5;
+  };
 
   async function fetchLogs(targetPage = page, targetStatus = statusFilter) {
     setIsLoading(true);
@@ -69,6 +83,48 @@ export default function AutoNewsLogsReportPage() {
     setPage(1);
   };
 
+  const handleRetrySingle = async (logId: number) => {
+    setRetryingId(logId);
+    try {
+      const res = await retryAutoNewsLogAction(logId);
+      if (res.success) {
+        toast.success(res.message);
+        if (res.item) {
+          setLogs((prev) => prev.map((item) => (item.id === logId ? res.item! : item)));
+        } else {
+          fetchLogs();
+        }
+      } else {
+        toast.error(res.message);
+        fetchLogs();
+      }
+    } catch {
+      toast.error("সংবাদটি পুনরায় চেষ্টা করতে সমস্যা হয়েছে");
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
+  const handleRetryAll = async () => {
+    if (!window.confirm("আপনি কি গত ৫ দিনের সকল ব্যর্থ সংবাদ পুনরায় তৈরির জন্য কিউতে পাঠাতে চান?")) {
+      return;
+    }
+    setIsRetryingAll(true);
+    try {
+      const res = await retryAllFailedAutoNewsAction();
+      if (res.success) {
+        toast.success(res.message);
+        fetchLogs();
+      } else {
+        toast.error(res.message);
+      }
+    } catch {
+      toast.error("সার্ভার সংযোগে সমস্যা হয়েছে");
+    } finally {
+      setIsRetryingAll(false);
+    }
+  };
+
   return (
     <div className="w-full space-y-6 px-3 py-4 md:px-5 lg:px-6">
       {/* Header */}
@@ -81,6 +137,16 @@ export default function AutoNewsLogsReportPage() {
         ]}
         action={
           <div className="flex items-center gap-2">
+            <Button
+              onClick={handleRetryAll}
+              variant="outline"
+              size="sm"
+              disabled={isRetryingAll || isLoading || isPending}
+              className="text-xs h-8 gap-1.5 border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+            >
+              <RotateCcw className={`w-3.5 h-3.5 ${isRetryingAll ? "animate-spin" : ""}`} />
+              {isRetryingAll ? "Retrying All..." : "Retry All Failed"}
+            </Button>
             <Link href="/admin/settings/auto-news">
               <Button variant="outline" size="sm" className="text-xs h-8">
                 Settings & Sources
@@ -90,7 +156,7 @@ export default function AutoNewsLogsReportPage() {
               onClick={() => fetchLogs()}
               variant="outline"
               size="sm"
-              disabled={isLoading || isPending}
+              disabled={isLoading || isPending || isRetryingAll}
               className="text-xs h-8 gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
@@ -158,20 +224,21 @@ export default function AutoNewsLogsReportPage() {
                   <th className="p-3.5 whitespace-nowrap">Category</th>
                   <th className="p-3.5 whitespace-nowrap">Status</th>
                   <th className="p-3.5 min-w-[200px]">Reason / Message</th>
-                  <th className="p-3.5 text-right whitespace-nowrap">Source</th>
+                  <th className="p-3.5 text-center whitespace-nowrap">Source</th>
+                  <th className="p-3.5 text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {isLoading ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-500" />
                       Loading logs...
                     </td>
                   </tr>
                 ) : logs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400">
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
                       <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                       No logs found for the selected filter.
                     </td>
@@ -267,7 +334,7 @@ export default function AutoNewsLogsReportPage() {
                         </td>
 
                         {/* Original Link */}
-                        <td className="p-3.5 text-right whitespace-nowrap">
+                        <td className="p-3.5 text-center whitespace-nowrap">
                           {log.original_url && !log.original_url.startsWith("manual://") ? (
                             <a
                               href={log.original_url}
@@ -282,6 +349,51 @@ export default function AutoNewsLogsReportPage() {
                             <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
                               ম্যানুয়াল
                             </span>
+                          )}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="p-3.5 text-right whitespace-nowrap">
+                          {isFailed ? (
+                            (() => {
+                              const expired = isOlderThan5Days(log.created_at || log.fetched_at);
+                              const isManual = !log.original_url || log.original_url.startsWith("manual://");
+
+                              if (expired) {
+                                return (
+                                  <span
+                                    className="inline-flex items-center text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded cursor-not-allowed select-none font-medium"
+                                    title="৫ দিনের বেশি পুরাতন হওয়ায় আর পোস্ট করা সম্ভব নয়"
+                                  >
+                                    Expired (&gt;5d)
+                                  </span>
+                                );
+                              }
+
+                              if (isManual) {
+                                return (
+                                  <span className="text-[11px] text-slate-400 select-none" title="ম্যানুয়াল এডিটর সংবাদ">
+                                    —
+                                  </span>
+                                );
+                              }
+
+                              return (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRetrySingle(log.id)}
+                                  disabled={retryingId === log.id || isRetryingAll}
+                                  className="h-7 px-2.5 text-[11px] font-semibold gap-1 text-slate-700 hover:text-indigo-600 hover:border-indigo-200"
+                                  title="Retry processing this failed news"
+                                >
+                                  <RotateCcw className={`w-3 h-3 ${retryingId === log.id ? "animate-spin text-indigo-600" : ""}`} />
+                                  {retryingId === log.id ? "Retrying..." : "Retry"}
+                                </Button>
+                              );
+                            })()
+                          ) : (
+                            <span className="text-[11px] text-slate-300 select-none">—</span>
                           )}
                         </td>
                       </tr>

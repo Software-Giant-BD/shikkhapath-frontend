@@ -869,5 +869,60 @@ export async function retryAllFailedFacebookSharesAction() {
   }
 }
 
+export async function retryAutoNewsLogAction(logId: number) {
+  try {
+    const res = await fetchApi(`/admin/auto-news/logs/${logId}/retry`, {
+      method: "POST",
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "সংবাদটি পুনরায় তৈরি করতে সমস্যা হয়েছে",
+        item: null as AutoNewsLogItem | null,
+      };
+    }
+
+    revalidatePath("/admin/reports/auto-news-logs");
+
+    return {
+      success: true,
+      message: data?.message || "সংবাদটি সফলভাবে তৈরি ও প্রকাশিত হয়েছে",
+      item: (data?.resources || null) as AutoNewsLogItem | null,
+    };
+  } catch {
+    return { success: false, message: "সার্ভার সংযোগে সমস্যা হয়েছে", item: null as AutoNewsLogItem | null };
+  }
+}
+
+export async function retryAllFailedAutoNewsAction() {
+  try {
+    const res = await fetchApi("/admin/auto-news/logs/retry-all-failed", {
+      method: "POST",
+    });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        success: false,
+        message: data?.message || "ব্যর্থ সংবাদগুলো পুনরায় কিউতে পাঠাতে সমস্যা হয়েছে",
+        count: 0,
+      };
+    }
+
+    revalidatePath("/admin/reports/auto-news-logs");
+
+    return {
+      success: true,
+      message: data?.message || "ব্যর্থ সংবাদগুলো পুনরায় কিউতে পাঠানো হয়েছে",
+      count: Number(data?.resources?.count || 0),
+    };
+  } catch {
+    return { success: false, message: "সার্ভার সংযোগে সমস্যা হয়েছে", count: 0 };
+  }
+}
+
+
 
 
