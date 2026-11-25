@@ -1,5 +1,6 @@
 import { NewsArticleContent } from "@/components/customer/news/news-article-content";
 import { NewsSidebar } from "@/components/customer/news/news-sidebar";
+import { NewsViewTracker } from "@/components/customer/news/news-view-tracker";
 import { AdBanner } from "@/components/customer/home/ad-banner";
 import { getMenuCategories } from "@/lib/api/categories";
 import {
@@ -112,6 +113,7 @@ export async function NewsDetailsView({
 
   return (
     <>
+      <NewsViewTracker newsId={news_details.main_news.id} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticleSchema) }}
