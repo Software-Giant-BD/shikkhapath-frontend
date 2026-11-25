@@ -125,7 +125,7 @@ export default async function Home() {
   };
 
   return (
-    <>
+    <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -143,8 +143,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
       />
 
-      <main className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-5">
-        {/* Hidden H1 for SEO */}
+      {/* Hidden H1 for SEO */}
         <h1 className="sr-only">
           {SITE_NAME} | শিক্ষা, ক্যাম্পাস ও জাতীয় সংবাদ
         </h1>
@@ -213,6 +212,5 @@ export default async function Home() {
 
         <NewsletterSection />
       </main>
-    </>
   );
 }

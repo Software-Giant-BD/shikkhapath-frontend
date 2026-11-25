@@ -6,10 +6,8 @@ export function FinalCtaSection() {
   return null;
 }
 
-export async function SiteFooter({ settings, categories: initialCategories }: { settings?: any; categories?: any[] }) {
-  const categories = initialCategories && initialCategories.length > 0 
-    ? initialCategories 
-    : await getMenuCategories();
+export function SiteFooter({ settings, categories: initialCategories = [] }: { settings?: any; categories?: any[] }) {
+  const categories = initialCategories;
 
   // Create dynamic category links from the API
   const dynamicCategories = categories

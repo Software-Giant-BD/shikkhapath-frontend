@@ -4,6 +4,7 @@ import { Pencil, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import { Card, CardContent } from "@/components/admin/ui/card";
 import { PageHeader } from "@/components/admin/ui/page-header";
+import { AdminPagination } from "@/components/admin/ui/pagination";
 import { NewsListFilters } from "@/components/admin/news/NewsListFilters";
 import { getNewsList } from "@/lib/api/news";
 import { getCategories } from "@/lib/api/categories";
@@ -116,10 +117,6 @@ export default async function NewsListPage({
   const endItem = Math.min(
     pagination.current_page * pagination.per_page,
     pagination.total,
-  );
-  const pageLinks = Array.from(
-    { length: pagination.last_page },
-    (_, idx) => idx + 1,
   );
   const getPageHref = (pageNumber: number) => {
     const query = new URLSearchParams();
@@ -277,47 +274,11 @@ export default async function NewsListPage({
               Showing {startItem}-{endItem} of {pagination.total}
             </p>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href={getPageHref(Math.max(1, pagination.current_page - 1))}
-                aria-disabled={pagination.current_page <= 1}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.current_page <= 1
-                    ? "pointer-events-none bg-slate-100 text-slate-400"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                Prev
-              </Link>
-
-              {pageLinks.map((pageNumber) => (
-                <Link
-                  key={pageNumber}
-                  href={getPageHref(pageNumber)}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                    pageNumber === pagination.current_page
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {pageNumber}
-                </Link>
-              ))}
-
-              <Link
-                href={getPageHref(
-                  Math.min(pagination.last_page, pagination.current_page + 1),
-                )}
-                aria-disabled={pagination.current_page >= pagination.last_page}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  pagination.current_page >= pagination.last_page
-                    ? "pointer-events-none bg-slate-100 text-slate-400"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}
-              >
-                Next
-              </Link>
-            </div>
+            <AdminPagination
+              currentPage={pagination.current_page}
+              totalPages={pagination.last_page}
+              getPageHref={getPageHref}
+            />
           </div>
         </CardContent>
       </Card>
